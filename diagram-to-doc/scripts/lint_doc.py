@@ -1,18 +1,18 @@
 #!/usr/bin/env python3
-"""lint_doc.py — phát hiện câu chữ mơ hồ / không kiểm chứng được trong tài liệu (VI + EN).
+"""lint_doc.py — flag vague / unverifiable wording in documents (English + Vietnamese).
 
 Usage:
     python lint_doc.py <file.md> [--format md|json] [--fail-on high|medium|never]
                        [--terms terms.json] [--disable R04,R07]
 
 Design notes:
-- Chỉ dựa trên regex + từ điển, không gọi LLM: chạy được mọi nơi, deterministic, rẻ.
-  Cái giá là recall/precision có giới hạn — linter là lưới an toàn, không thay review thủ công.
-- Bỏ qua: fenced code block, inline code, chuỗi trong ngoặc kép (thường là UI copy / trích dẫn
-  nguyên văn), nội dung trong [CẦN XÁC NHẬN: ...]/[TO CONFIRM: ...], vùng giữa
-  <!-- lint-disable --> và <!-- lint-enable -->, và mục "Open Questions"/"Câu hỏi mở".
-- Severity phụ thuộc ngữ cảnh: cùng một từ mơ hồ là `high` trong câu requirement
-  (có ID hoặc modal bắt buộc) nhưng chỉ `medium` trong văn mô tả.
+- Regex + dictionaries only, no LLM call: runs anywhere, deterministic, cheap. The price is
+  limited recall/precision — the linter is a safety net, not a replacement for human review.
+- Skipped: fenced code blocks, inline code, double-quoted strings (usually UI copy or verbatim
+  quotes), the contents of [TO CONFIRM: ...] / [CẦN XÁC NHẬN: ...], regions between
+  <!-- lint-disable --> and <!-- lint-enable -->, and "Open Questions" / "Câu hỏi mở" sections.
+- Severity depends on context: the same vague term is `high` in a requirement sentence
+  (has an ID or a mandatory modal) but only `medium` in descriptive prose.
 """
 from __future__ import annotations
 
@@ -27,9 +27,9 @@ from typing import Iterable
 
 SEVERITY_ORDER: dict[str, int] = {"high": 3, "medium": 2, "low": 1, "info": 0}
 
-# ID có thể có hậu tố phân cấp: AC-001.1, AC-001.2 là hai ID khác nhau.
+# IDs may carry hierarchical suffixes: AC-001.1 and AC-001.2 are two different IDs.
 ID_RE = re.compile(r"\b(?:BR|FR|NFR|US|AC|UC|DR|REQ|AS|OQ|SR|TC)-\d{1,4}(?:\.\d+)*\b")
-# Định nghĩa ID = ID đứng đầu dòng (sau ký tự markdown), không phải tham chiếu giữa câu.
+# An ID *definition* is an ID at the start of a line (after markdown markers), not a mid-sentence reference.
 ID_DEF_RE = re.compile(
     r"^\s*(?:[-*+]\s+|#{1,6}\s+|\|\s*)?(?:\*\*|__)?\s*"
     r"((?:BR|FR|NFR|US|AC|UC|DR|REQ|SR|TC)-\d{1,4}(?:\.\d+)*)\b"
@@ -43,8 +43,8 @@ MANDATORY_MODAL_RE = re.compile(
 class Term:
     pattern: str
     suggestion: str
-    exclude: tuple[str, ...] = ()  # cụm chứa term nhưng không mơ hồ (vd "tốt nghiệp")
-    strong: bool = True  # False = từ hay dùng hợp lệ (nhiều, đầy đủ...) → tối đa medium
+    exclude: tuple[str, ...] = ()  # phrases containing the term that are not vague (e.g. "tốt nghiệp", "at most")
+    strong: bool = True  # False = term often used legitimately ("many", "nhiều", "đầy đủ") → at most medium
 
 
 @dataclass
@@ -63,17 +63,17 @@ def _t(words: Iterable[str], suggestion: str, exclude: tuple[str, ...] = (), str
     return [Term(w, suggestion, exclude, strong) for w in words]
 
 
-TIME = "Nêu ngưỡng thời gian đo được, vd '≤ 2 giây (p95) ở 100 RPS'."
-USAB = "Thay bằng tiêu chí đo được (số bước, task success rate) hoặc bỏ."
-RULE = "Nêu quy tắc cụ thể xác định thế nào là 'phù hợp'."
-QTY = "Thay bằng con số hoặc danh sách đầy đủ."
-APPROX = "Nêu giá trị + dung sai (±) hoặc min/max."
-COND = "Nêu điều kiện kích hoạt cụ thể."
-METRIC = "Thay bằng chỉ số đo được (uptime %, error rate, throughput...)."
-COMPLETE = "Liệt kê chính xác các trường/thông tin."
+TIME = "State a measurable time threshold, e.g. '≤ 2 s (p95) at 100 RPS'."
+USAB = "Replace with a measurable criterion (number of steps, task success rate) or remove."
+RULE = "State the concrete rule that defines what 'appropriate' means."
+QTY = "Replace with a number or the complete list."
+APPROX = "Give the value with a tolerance (±) or min/max."
+COND = "State the exact triggering condition."
+METRIC = "Replace with a measurable metric (uptime %, error rate, throughput...)."
+COMPLETE = "List the exact fields/information."
 
 VAGUE_TERMS: list[Term] = [
-    # --- Tiếng Việt ---
+    # --- Vietnamese ---
     *_t(["nhanh chóng", "nhanh", "ngay lập tức", "tức thì", "kịp thời", "sớm nhất có thể"], TIME),
     Term("liền", TIME, ("liền mạch", "liền kề", "liên tiếp", "liền nhau")),
     *_t(["dễ dàng", "dễ dùng", "dễ sử dụng", "thân thiện", "trực quan", "đơn giản"], USAB),
@@ -137,12 +137,12 @@ INLINE_CODE_RE = re.compile(r"`[^`\n]*`")
 
 
 def _mask(text: str, pattern: re.Pattern[str]) -> str:
-    """Thay vùng match bằng khoảng trắng để giữ nguyên vị trí cột."""
+    """Replace matches with spaces so column positions are preserved."""
     return pattern.sub(lambda m: " " * len(m.group(0)), text)
 
 
 def prepare_lines(raw: str) -> list[tuple[int, str, str]]:
-    """Trả về (line_no, original, masked) cho các dòng cần lint."""
+    """Return (line_no, original, masked) for the lines to lint."""
     out: list[tuple[int, str, str]] = []
     in_fence = False
     disabled = False
@@ -212,18 +212,18 @@ def lint_text(
     for ln, orig, masked in lines:
         req = is_requirement_line(masked)
         low = masked.lower()
-        taken: list[tuple[int, int]] = []  # tránh báo trùng (vd "nhanh" trong "nhanh chóng")
+        taken: list[tuple[int, int]] = []  # avoid double-reporting (e.g. "nhanh" inside "nhanh chóng", "quick" inside "quickly")
 
         for m in PLACEHOLDER_RE.finditer(masked):
-            add(ln, m.start(), "R01", "high", m.group(0), "Placeholder chưa giải quyết.",
-                "Chuyển vào Open Questions (owner + hạn) hoặc điền giá trị.", orig)
+            add(ln, m.start(), "R01", "high", m.group(0), "Unresolved placeholder.",
+                "Move it to Open Questions (with an owner) or fill in the value.", orig)
         for m in OPEN_LIST_RE.finditer(masked):
             add(ln, m.start(), "R02", "high" if req else "medium", m.group(0),
-                "Danh sách mở ('v.v.'/'etc.') — không kiểm thử được phạm vi.",
-                "Liệt kê đầy đủ, hoặc chỉ ra nguồn cấu hình của danh sách.", orig)
+                "Open-ended list ('etc.'/'v.v.') — the scope cannot be tested.",
+                "List every item, or point to the configuration source of the list.", orig)
         for m in AND_OR_RE.finditer(masked):
-            add(ln, m.start(), "R03", "high", m.group(0), "'và/hoặc' có hai cách hiểu.",
-                "Tách thành hai câu hoặc viết 'ít nhất một trong các ...'.", orig)
+            add(ln, m.start(), "R03", "high", m.group(0), "'and/or' has two readings.",
+                "Split into two sentences, or write 'at least one of ...'.", orig)
 
         for term, rx in vague_compiled:
             for m in rx.finditer(masked):
@@ -233,37 +233,37 @@ def lint_text(
                 if _excluded(low, s, e, term.exclude):
                     continue
                 if COMPARATIVE_RE.match(masked, s):
-                    continue  # để R06 xử lý
+                    continue  # handled by R06
                 taken.append((s, e))
                 add(ln, s, "R04", "high" if (req and term.strong) else "medium", m.group(0),
-                    f"Từ mơ hồ '{m.group(0)}'" + (" trong câu requirement." if req else "."),
+                    f"Vague term '{m.group(0)}'" + (" in a requirement sentence." if req else "."),
                     term.suggestion, orig)
 
         if req:
             for m in WEAK_MODAL_RE.finditer(masked):
                 add(ln, m.start(), "R05", "medium", m.group(0),
-                    "Modal không xác định mức bắt buộc trong câu requirement.",
-                    "Dùng phải / không được / nên / được phép (RFC 2119).", orig)
+                    "Modal does not state the obligation level in a requirement sentence.",
+                    "Use MUST / MUST NOT / SHOULD / MAY (RFC 2119) — VI: phải / không được / nên / được phép.", orig)
 
         for m in COMPARATIVE_RE.finditer(masked):
             if not re.search(r"\d", masked):
-                add(ln, m.start(), "R06", "medium", m.group(0), "So sánh không có mốc (baseline).",
-                    "Nêu giá trị trước/sau, vd 'từ 8 s xuống ≤ 4 s'.", orig)
+                add(ln, m.start(), "R06", "medium", m.group(0), "Comparison without a baseline.",
+                    "State before/after values, e.g. 'from 8 s to ≤ 4 s'.", orig)
 
         for m in PRONOUN_START_RE.finditer(masked):
-            add(ln, m.start(1), "R07", "low", m.group(1), "Đại từ đầu câu có thể không rõ chỉ cái gì.",
-                "Lặp lại danh từ cụ thể.", orig)
+            add(ln, m.start(1), "R07", "low", m.group(1), "Sentence-initial pronoun may have an unclear referent.",
+                "Repeat the specific noun.", orig)
 
         if req:
             for m in PASSIVE_RE.finditer(masked):
                 tail = masked[m.end(): m.end() + 60]
                 if not PASSIVE_AGENT_RE.search(tail):
-                    add(ln, m.start(), "R08", "low", m.group(0), "Câu bị động thiếu chủ thể thực hiện.",
-                        "Nêu rõ actor/service thực hiện hành động.", orig)
+                    add(ln, m.start(), "R08", "low", m.group(0), "Passive sentence without an actor.",
+                        "Name the actor/service that performs the action.", orig)
 
-    # R09: ID định nghĩa trùng
-    # Ngữ cảnh = header của bảng chứa dòng (hoặc "body" ngoài bảng). Cùng một ID xuất hiện đầu
-    # dòng trong *hai bảng khác nhau* (bảng định nghĩa + ma trận truy vết) là hợp lệ.
+    # R09: duplicate ID definitions
+    # Context = header of the table holding the line (or "body" outside tables). The same ID at the
+    # start of a line in *two different tables* (definition table + traceability matrix) is fine.
     raw_lines = raw.splitlines()
     ctx_of: dict[int, str] = {}
     cur_ctx = "body"
@@ -282,19 +282,19 @@ def lint_text(
         m = ID_DEF_RE.match(orig)
         if m:
             defs[m.group(1) + "@" + ctx_of.get(ln, "body")].append(ln)
-    # Bảng ánh xạ/truy vết/changelog liệt kê lại ID cũ là hợp lệ, không phải định nghĩa trùng.
+    # Mapping/traceability/changelog tables legitimately repeat IDs; they are not duplicate definitions.
     mapping_hdr = re.compile(r"truy vết|traceab|mapping|ánh xạ|đối chiếu|changelog|thay đổi|v\d+\.\d+|\bcũ\b|\bold\b", re.I)
     for key, lns in defs.items():
         rid, ctx = key.split("@", 1)
         if ctx.startswith("table:") and mapping_hdr.search(ctx):
             continue
         if len(lns) > 1:
-            add(lns[1], 0, "R09", "high", rid, f"ID {rid} được định nghĩa {len(lns)} lần (dòng {lns}).",
-                "Mỗi requirement một ID duy nhất; không tái sử dụng ID.", "")
+            add(lns[1], 0, "R09", "high", rid, f"ID {rid} is defined {len(lns)} times (lines {lns}).",
+                "One unique ID per requirement; never reuse IDs.", "")
 
-    # R10: thuật ngữ không nhất quán
+    # R10: inconsistent terminology
     full = "\n".join(masked for _, _, masked in lines).lower()
-    # thuật ngữ ghép cố định không phải là cách gọi actor ("user story", "user journey")
+    # fixed compounds are not names for the actor ("user story", "user journey")
     full = re.sub(r"\buser\s+(?:stor(?:y|ies)|journey|flow|persona)s?\b", " ", full)
     for group in groups:
         counts = {
@@ -307,8 +307,8 @@ def lint_text(
                 0,
             )
             add(first_line, 0, "R10", "medium", " / ".join(used),
-                f"Một khái niệm dùng nhiều tên: {used}.",
-                "Chọn một thuật ngữ, khai báo trong Glossary, dùng nhất quán.", "")
+                f"One concept, several names: {used}.",
+                "Pick one term, define it in the Glossary, use it consistently.", "")
 
     findings.sort(key=lambda f: (f.line, f.col))
     return findings
@@ -324,9 +324,9 @@ def render_md(path: str, findings: list[Finding]) -> str:
     out = [f"## lint_doc: {path}", "",
            f"high={s['high']} medium={s['medium']} low={s['low']} total={len(findings)}", ""]
     if not findings:
-        out.append("Không có finding.")
+        out.append("No findings.")
         return "\n".join(out)
-    out += ["| Dòng | Rule | Mức | Match | Vấn đề | Gợi ý |", "|---|---|---|---|---|---|"]
+    out += ["| Line | Rule | Severity | Match | Issue | Suggestion |", "|---|---|---|---|---|---|"]
     for f in findings:
         out.append(f"| {f.line} | {f.rule} | {f.severity} | `{f.match}` | {f.message} | {f.suggestion} |")
     return "\n".join(out)
@@ -337,8 +337,8 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("file")
     ap.add_argument("--format", choices=["md", "json"], default="md")
     ap.add_argument("--fail-on", choices=["high", "medium", "never"], default="never")
-    ap.add_argument("--terms", help="JSON: list các nhóm từ đồng nghĩa, vd [[\"user\",\"người dùng\"]]")
-    ap.add_argument("--disable", default="", help="Danh sách rule tắt, vd R07,R08")
+    ap.add_argument("--terms", help="JSON: list of synonym groups, e.g. [[\"user\",\"customer\"]]")
+    ap.add_argument("--disable", default="", help="Comma-separated rules to disable, e.g. R07,R08")
     args = ap.parse_args(argv)
 
     raw = Path(args.file).read_text(encoding="utf-8")

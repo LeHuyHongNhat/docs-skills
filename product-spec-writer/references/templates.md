@@ -1,12 +1,12 @@
-# Templates đặc tả sản phẩm
+# Product specification templates
 
-Mục lục: [BRD](#brd) · [PRD](#prd) · [SRS](#srs) · [User story](#user-story) · [Use case](#use-case) · [Metric definition](#metric)
+Contents: [BRD](#brd) · [PRD](#prd) · [SRS](#srs) · [User story](#user-story) · [Use case](#use-case) · [Metric definition](#metric)
 
-Quy ước chung cho mọi template:
-- Header metadata ở đầu: tên tài liệu, phiên bản, ngày (ISO 8601), tác giả/owner, trạng thái (`Draft` / `In review` / `Approved`).
-- Mục không áp dụng: giữ heading và ghi "Không áp dụng — <lý do>" thay vì xóa, để người review biết đã cân nhắc.
-- Bảng thay cho đoạn văn khi dữ liệu có ≥ 3 thuộc tính lặp lại.
-- Mục Open Questions và Assumptions luôn có ở cuối (trừ khi rỗng — khi đó ghi "Không có").
+Common conventions for every template:
+- Metadata header at the top: document name, version, date (ISO 8601), author/owner, status (`Draft` / `In review` / `Approved`).
+- Section does not apply: keep the heading and write "Not applicable — <reason>" instead of deleting it, so the reviewer knows it was considered.
+- Use a table instead of a paragraph when the data has ≥ 3 repeating attributes.
+- The Open Questions and Assumptions sections always appear at the end (if empty, write "None").
 
 ---
 
@@ -14,38 +14,38 @@ Quy ước chung cho mọi template:
 ## BRD — Business Requirements Document
 
 ```markdown
-# BRD: <Tên dự án>
-| Phiên bản | Ngày | Owner | Trạng thái |
+# BRD: <Project name>
+| Version | Date | Owner | Status |
 |---|---|---|---|
 
-## 1. Bối cảnh & vấn đề kinh doanh
-<Hiện trạng, nỗi đau, bằng chứng định lượng nếu có (số liệu, nguồn).>
+## 1. Context & business problem
+<Current state, pain points, quantitative evidence if available (figures, source).>
 
-## 2. Mục tiêu kinh doanh
-| ID | Mục tiêu | Chỉ số đo | Baseline | Target | Thời hạn |
+## 2. Business objectives
+| ID | Objective | Measure | Baseline | Target | Deadline |
 |---|---|---|---|---|---|
 | BO-001 | | | | | |
 
-## 3. Phạm vi
-### 3.1 Trong phạm vi
-### 3.2 Ngoài phạm vi
+## 3. Scope
+### 3.1 In scope
+### 3.2 Out of scope
 
 ## 4. Stakeholders
-| Vai trò | Tên/Bộ phận | Quan tâm chính | Mức ảnh hưởng (Cao/TB/Thấp) |
+| Role | Name/Department | Main interest | Influence (High/Medium/Low) |
 
-## 5. Yêu cầu nghiệp vụ
-| ID | Yêu cầu | Lý do / mục tiêu liên quan (BO-xxx) | Độ ưu tiên (MoSCoW) |
+## 5. Business requirements
+| ID | Requirement | Rationale / related objective (BO-xxx) | Priority (MoSCoW) |
 | BR-001 | | | Must |
 
-## 6. Quy trình nghiệp vụ (As-is / To-be)
-<Mô tả bước + diagram Mermaid nếu có.>
+## 6. Business process (As-is / To-be)
+<Step description + Mermaid diagram if available.>
 
-## 7. Ràng buộc (pháp lý, ngân sách, thời gian, công nghệ)
-## 8. Rủi ro
-| ID | Rủi ro | Xác suất | Ảnh hưởng | Giảm thiểu |
+## 7. Constraints (legal, budget, schedule, technology)
+## 8. Risks
+| ID | Risk | Likelihood | Impact | Mitigation |
 ## 9. Assumptions
 ## 10. Open Questions
-| ID | Câu hỏi | Ảnh hưởng nếu chưa trả lời | Người trả lời |
+| ID | Question | Impact if unanswered | Answered by |
 ```
 
 ---
@@ -54,50 +54,50 @@ Quy ước chung cho mọi template:
 ## PRD — Product Requirements Document
 
 ```markdown
-# PRD: <Tên tính năng>
-| Phiên bản | Ngày | PM/PO | Trạng thái |
+# PRD: <Feature name>
+| Version | Date | PM/PO | Status |
 
-## 1. Tóm tắt
-<3–5 câu: vấn đề, đối tượng, giải pháp, kết quả mong đợi.>
+## 1. Summary
+<3–5 sentences: problem, audience, solution, expected outcome.>
 
-## 2. Vấn đề & bằng chứng
-## 3. Mục tiêu & chỉ số thành công
-| Metric | Định nghĩa (tham chiếu metric spec nếu có) | Baseline | Target | Cách đo |
+## 2. Problem & evidence
+## 3. Goals & success metrics
+| Metric | Definition (reference the metric spec if any) | Baseline | Target | How measured |
 ### Non-goals
 
-## 4. Đối tượng người dùng & persona
-## 5. Phạm vi
-### Trong phạm vi (release này)
-### Ngoài phạm vi
+## 4. Target users & personas
+## 5. Scope
+### In scope (this release)
+### Out of scope
 
 ## 6. Business rules
-| ID | Quy tắc | Nguồn |
+| ID | Rule | Source |
 
 ## 7. User stories & Acceptance Criteria
-### US-001: <tên ngắn>
-**Là** <vai trò>, **tôi muốn** <hành động>, **để** <giá trị>.
-Độ ưu tiên: Must | Liên quan: BR-xxx
+### US-001: <short name>
+**As a** <role>, **I want** <action>, **so that** <value>.
+Priority: Must | Related: BR-xxx
 **Acceptance Criteria**
 - AC-001.1 — Given … When … Then …
-- AC-001.2 — (nhánh lỗi)
-- AC-001.3 — (biên ngưỡng)
+- AC-001.2 — (error branch)
+- AC-001.3 — (threshold boundary)
 
-## 8. Functional requirements (bổ sung ngoài user story, nếu cần)
+## 8. Functional requirements (in addition to user stories, if needed)
 ## 9. Non-functional requirements
-| ID | Loại (performance/security/availability/usability/compliance) | Yêu cầu đo được | Điều kiện đo |
+| ID | Type (performance/security/availability/usability/compliance) | Measurable requirement | Measurement condition |
 
-## 10. UX / luồng màn hình
-<Liên kết design; mô tả trạng thái rỗng, loading, lỗi.>
+## 10. UX / screen flow
+<Link to design; describe empty, loading and error states.>
 
 ## 11. Analytics / tracking
 | Event | Trigger | Properties |
 
-## 12. Dependencies & rủi ro
+## 12. Dependencies & risks
 ## 13. Release plan / rollout
 ## 14. Assumptions
 ## 15. Open Questions
-## 16. Phê duyệt (chỉ khi tài liệu gửi duyệt)
-| Vai trò | Họ tên | Quyết định | Ngày |
+## 16. Approval (only when the document is submitted for approval)
+| Role | Full name | Decision | Date |
 |---|---|---|---|
 ```
 
@@ -107,20 +107,20 @@ Quy ước chung cho mọi template:
 ## SRS / FRD — Software Requirements Specification
 
 ```markdown
-# SRS: <Hệ thống/Module>
-## 1. Giới thiệu
-### 1.1 Mục đích  ### 1.2 Phạm vi  ### 1.3 Định nghĩa & từ viết tắt  ### 1.4 Tài liệu tham chiếu
-### 1.5 Quy ước: phải = MUST, không được = MUST NOT, nên = SHOULD, được phép = MAY
-## 2. Mô tả tổng quan
-### 2.1 Bối cảnh hệ thống (context diagram)  ### 2.2 Actors  ### 2.3 Ràng buộc  ### 2.4 Giả định & phụ thuộc
-## 3. Yêu cầu chức năng
-### 3.x <Nhóm chức năng>
-| ID | Yêu cầu (EARS) | Ưu tiên | Nguồn | Tiêu chí kiểm chứng |
-## 4. Yêu cầu dữ liệu
-| Thực thể | Trường | Kiểu | Bắt buộc | Ràng buộc/validation | Ví dụ |
-## 5. Yêu cầu giao tiếp (UI/API/hệ thống ngoài)
-## 6. Yêu cầu phi chức năng
-## 7. Ma trận truy vết (Traceability)
+# SRS: <System/Module>
+## 1. Introduction
+### 1.1 Purpose  ### 1.2 Scope  ### 1.3 Definitions & abbreviations  ### 1.4 References
+### 1.5 Conventions: MUST, MUST NOT, SHOULD, MAY per RFC 2119 (Vietnamese documents: phải = MUST, không được = MUST NOT, nên = SHOULD, được phép = MAY)
+## 2. Overall description
+### 2.1 System context (context diagram)  ### 2.2 Actors  ### 2.3 Constraints  ### 2.4 Assumptions & dependencies
+## 3. Functional requirements
+### 3.x <Function group>
+| ID | Requirement (EARS) | Priority | Source | Verification criteria |
+## 4. Data requirements
+| Entity | Field | Type | Required | Constraint/validation | Example |
+## 5. Interface requirements (UI/API/external systems)
+## 6. Non-functional requirements
+## 7. Traceability matrix
 | BR | FR | AC/Test |
 ## 8. Open Questions
 ```
@@ -131,30 +131,30 @@ Quy ước chung cho mọi template:
 ## User story + Acceptance Criteria
 
 ```markdown
-### US-<id>: <tên ngắn, động từ + đối tượng>
-**Là** <vai trò cụ thể>, **tôi muốn** <mục đích hành động>, **để** <giá trị kinh doanh/người dùng>.
+### US-<id>: <short name, verb + object>
+**As a** <specific role>, **I want** <intended action>, **so that** <business/user value>.
 
-- Độ ưu tiên: <Must/Should/Could>  · Story point: <nếu có>  · Liên quan: <BR/FR/Design link>
-- Điều kiện tiên quyết: <...>
+- Priority: <Must/Should/Could>  · Story points: <if any>  · Related: <BR/FR/Design link>
+- Preconditions: <...>
 
 **Acceptance Criteria**
 | ID | Given | When | Then |
 |---|---|---|---|
 | AC-<id>.1 | | | |
 
-**Ngoài phạm vi story này:** <...>
-**Definition of Done bổ sung:** <tracking event, log, tài liệu...>
+**Out of scope for this story:** <...>
+**Additional Definition of Done:** <tracking event, logs, documentation...>
 ```
 
-Kiểm INVEST: Independent, Negotiable, Valuable, Estimable, Small, Testable. Story lớn hơn 1 sprint → tách theo luồng (happy/lỗi), theo rule, hoặc theo loại dữ liệu.
+INVEST check: Independent, Negotiable, Valuable, Estimable, Small, Testable. A story larger than 1 sprint → split by flow (happy/error), by rule, or by data type.
 
-Danh sách nhánh AC thường bị bỏ sót (xét từng mục xem có áp dụng không):
-- Dữ liệu rỗng / không tồn tại / định dạng sai
-- Đúng ngưỡng, dưới ngưỡng, trên ngưỡng (mọi số trong rule)
-- Hết hạn / timeout / mất kết nối giữa chừng
-- Thao tác lặp (double submit, retry), đồng thời (2 thiết bị)
-- Quyền: actor không đủ quyền
-- Trạng thái trước đó không hợp lệ (vd hủy đơn đã giao)
+AC branches that are often missed (check each one for applicability):
+- Empty / non-existent / malformed data
+- At the threshold, below it, above it (every number in a rule)
+- Expiry / timeout / connection lost midway
+- Repeated actions (double submit, retry), concurrency (2 devices)
+- Permissions: actor lacks sufficient permission
+- Invalid prior state (e.g. cancelling an order that has already been delivered)
 
 ---
 
@@ -162,65 +162,65 @@ Danh sách nhánh AC thường bị bỏ sót (xét từng mục xem có áp d�
 ## Use case specification
 
 ```markdown
-### UC-<id>: <Tên use case>
-| Thuộc tính | Nội dung |
+### UC-<id>: <Use case name>
+| Attribute | Content |
 |---|---|
-| Actor chính | |
-| Actor phụ / hệ thống ngoài | |
-| Mục tiêu | |
+| Primary actor | |
+| Secondary actors / external systems | |
+| Goal | |
 | Trigger | |
-| Tiền điều kiện | |
-| Hậu điều kiện (thành công) | |
-| Hậu điều kiện (thất bại) | |
+| Preconditions | |
+| Postconditions (success) | |
+| Postconditions (failure) | |
 
-**Luồng chính**
-1. <Actor> <hành động>.
-2. Hệ thống <phản hồi>.
+**Main flow**
+1. <Actor> <action>.
+2. The system <response>.
 
-**Luồng thay thế**
-- A1 (tại bước 2): <điều kiện> → <các bước> → quay lại bước <n> / kết thúc.
+**Alternative flows**
+- A1 (at step 2): <condition> → <steps> → return to step <n> / end.
 
-**Luồng ngoại lệ**
-- E1 (tại bước 3): <lỗi> → <xử lý> → kết thúc với hậu điều kiện thất bại.
+**Exception flows**
+- E1 (at step 3): <error> → <handling> → end with the failure postcondition.
 
-**Business rules áp dụng:** BR-xxx
+**Applicable business rules:** BR-xxx
 ```
 
-Mỗi bước một hành động của một chủ thể. Luồng thay thế/ngoại lệ luôn ghi rõ phân nhánh ở bước nào và quay về đâu.
+One step = one action by one actor. Alternative/exception flows always state at which step they branch and where they return.
 
 ---
 
 <a id="metric"></a>
-## Metric / KPI definition (cho DA, PM)
+## Metric / KPI definition (for DA, PM)
 
-Mỗi metric một bảng. Mục tiêu: hai analyst tính độc lập ra cùng một con số.
+One table per metric. Goal: two analysts computing it independently get the same number.
 
 ```markdown
-### <Tên metric> (`metric_key`)
-| Thuộc tính | Định nghĩa |
+### <Metric name> (`metric_key`)
+| Attribute | Definition |
 |---|---|
-| Mô tả nghiệp vụ | Metric trả lời câu hỏi gì |
-| Công thức | Tử số / mẫu số, viết tường minh |
-| Đơn vị & định dạng | %, VND, số người; số chữ số thập phân |
-| Grain | Theo ngày / tuần ISO / tháng dương lịch; theo user / account / device |
-| Múi giờ | vd Asia/Ho_Chi_Minh |
-| Nguồn dữ liệu | Bảng/event cụ thể, cột |
-| Bộ lọc (include) | |
-| Loại trừ (exclude) | Test account, nhân viên nội bộ, bot, giao dịch hoàn tiền... |
-| Định nghĩa "active"/"chuyển đổi" | Event nào, điều kiện nào |
-| Xử lý dữ liệu đến muộn | Cửa sổ tính lại (vd tính lại D-3) |
+| Business description | What question the metric answers |
+| Formula | Numerator / denominator, written out explicitly |
+| Unit & format | %, VND, number of people; number of decimal places |
+| Grain | By day / ISO week / calendar month; by user / account / device |
+| Time zone | e.g. Asia/Ho_Chi_Minh |
+| Data source | Specific table/event, columns |
+| Filters (include) | |
+| Exclusions (exclude) | Test accounts, internal staff, bots, refunded transactions... |
+| Definition of "active"/"conversion" | Which event, which condition |
+| Late-arriving data handling | Recompute window (e.g. recompute D-3) |
 | Owner | |
-| SQL/pseudo-code tham chiếu | |
-| Ví dụ tính tay | Bộ dữ liệu nhỏ + kết quả |
-| Cạm bẫy diễn giải | vd retention cohort nhỏ dao động mạnh |
+| Reference SQL/pseudo-code | |
+| Worked example | Small dataset + result |
+| Interpretation pitfalls | e.g. small-cohort retention fluctuates heavily |
 ```
 
-Retention có ba biến thể hay bị gọi chung một tên — định nghĩa tách bạch, chốt một biến thể chuẩn, đặt tên riêng cho hai biến thể còn lại nếu vẫn cần dùng:
+Retention has three variants that are often called by the same name — define them separately, settle on one standard variant, and give the other two their own names if they are still needed:
 
-| Biến thể | User được tính "giữ chân ở DN" khi | Ghi chú |
+| Variant | A user counts as "retained at DN" when | Notes |
 |---|---|---|
-| Classic / bounded (đúng ngày N) | active đúng ngày D0+N | thấp nhất, dao động theo thứ trong tuần |
-| Window (trong cửa sổ D1..DN) | active ít nhất một ngày trong D0+1 … D0+N | cao hơn classic |
-| Unbounded / rolling (từ ngày N trở đi) | active vào bất kỳ ngày nào ≥ D0+N (tính đến hôm nay) | cao nhất, thay đổi khi dữ liệu mới về |
+| Classic / bounded (exactly day N) | active exactly on day D0+N | lowest, fluctuates by day of week |
+| Window (within window D1..DN) | active on at least one day in D0+1 … D0+N | higher than classic |
+| Unbounded / rolling (from day N onward) | active on any day ≥ D0+N (up to today) | highest, changes as new data arrives |
 
-Các điểm hay gây hiểu khác nhau, phải chốt rõ: ngày bắt đầu cohort (D0) tính theo sự kiện nào; "trong 7 ngày" là D7 đúng ngày thứ 7 hay bất kỳ ngày nào từ D1–D7 (rolling vs. bounded/unbounded retention); user ẩn danh và đã đăng nhập có gộp không; đếm distinct theo id nào.
+Points that are often understood differently and must be settled explicitly: which event defines the cohort start date (D0); whether "within 7 days" means D7 exactly on day 7 or any day from D1–D7 (rolling vs. bounded/unbounded retention); whether anonymous and logged-in users are merged; which id distinct counts are based on.

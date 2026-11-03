@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
-"""zoom_tiles.py — cắt ảnh diagram thành các ô có overlap và phóng to, để đọc chữ nhỏ chính xác.
+"""zoom_tiles.py — cut a diagram image into overlapping, upscaled tiles so small text can be read accurately.
 
 Usage:
     python zoom_tiles.py diagram.png --out tiles/ [--grid 2x2] [--scale 2.0] [--overlap 0.12]
 
 Design notes:
-- Model vision đọc sai chữ nhỏ (số tiền, ngưỡng, mã lỗi) trên ảnh lớn bị downscale. Nhìn từng ô
-  phóng to giảm lỗi đọc mà không cần OCR engine.
-- Overlap giữa các ô để nhãn nằm trên đường cắt vẫn đọc trọn vẹn ở ít nhất một ô.
+- Vision models misread small text (amounts, thresholds, error codes) on large, downscaled images.
+  Looking at upscaled tiles reduces misreads without needing an OCR engine.
+- Tiles overlap so a label sitting on a cut line is fully visible in at least one tile.
 """
 from __future__ import annotations
 
@@ -42,7 +42,7 @@ def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("image")
     ap.add_argument("--out", default="tiles")
-    ap.add_argument("--grid", default="2x2", help="cột x hàng, vd 3x2")
+    ap.add_argument("--grid", default="2x2", help="columns x rows, e.g. 3x2")
     ap.add_argument("--scale", type=float, default=2.0)
     ap.add_argument("--overlap", type=float, default=0.12)
     a = ap.parse_args(argv)

@@ -1,76 +1,76 @@
 ---
 name: doc-clarity-review
-description: Review và viết lại tài liệu sản phẩm/kỹ thuật có sẵn cho chặt chẽ, rõ ràng, không mơ hồ, dùng từ chuẩn chuyên nghiệp — phát hiện từ mơ hồ, yêu cầu không kiểm thử được, số liệu/thuật ngữ mâu thuẫn, biên ngưỡng không rõ, thiếu actor/điều kiện/xử lý lỗi, requirement gộp nhiều ý, ID trùng, placeholder TBD; xuất báo cáo finding có mức độ + đề xuất câu viết lại, và bản tài liệu đã sửa. Dùng skill này khi người dùng đưa một PRD, SRS, BRD, user story, spec, README, release note, email yêu cầu... và nói "review giúp", "soát lỗi tài liệu", "viết lại cho chuyên nghiệp/chặt chẽ", "chỗ nào mơ hồ", "chuẩn hóa câu chữ", "polish this spec", "is this requirement testable", kể cả khi họ chỉ dán một đoạn văn và hỏi "viết vậy ổn chưa". Không dùng để viết tài liệu mới từ đầu (dùng product-spec-writer / codebase-doc-writer / diagram-to-doc).
+description: 'Review and rewrite an existing product/technical document so it is precise, unambiguous and professionally worded — detects vague terms, untestable requirements, conflicting numbers/terms, unclear threshold boundaries, missing actor/condition/error handling, compound requirements, duplicate IDs and TBD placeholders; outputs a findings report with severity and rewrite proposals, plus the revised document. Use this skill when the user provides a PRD, SRS, BRD, user story, spec, README, release note, requirements email and says "polish this spec", "is this requirement testable", "review giúp", "soát lỗi tài liệu", "viết lại cho chuyên nghiệp", "chỗ nào mơ hồ", "chuẩn hóa câu chữ", or asks to make it professional/tight, find what is ambiguous or standardise the wording — even when they only paste a paragraph and ask "is this OK?" ("viết vậy ổn chưa"). Do NOT use it to write a new document from scratch (use product-spec-writer / codebase-doc-writer / diagram-to-doc instead).'
 ---
 
 # Doc Clarity Review
 
-Mục tiêu: sau review, hai người đọc độc lập (dev và QA) hiểu tài liệu **giống hệt nhau**, và mọi chỗ tác giả *chưa quyết* được đưa ra ánh sáng thành câu hỏi — thay vì bị reviewer lặng lẽ quyết thay.
+Goal: after the review, two independent readers (a dev and a QA) understand the document **in exactly the same way**, and every point the author has *not yet decided* is surfaced as a question — instead of being silently decided by the reviewer.
 
-## Quy trình
+## Workflow
 
-### 1. Đọc trọn và nắm ý định
+### 1. Read in full and grasp intent
 
-Đọc toàn bộ tài liệu trước khi bắt lỗi. Xác định: loại tài liệu, người đọc đích, ngôn ngữ, thuật ngữ chủ đạo. Một câu "mơ hồ" trong vision statement có thể chấp nhận được; cùng câu đó trong acceptance criteria thì không. Mức nghiêm trọng phụ thuộc vị trí.
+Read the whole document before flagging anything. Identify: document type, target reader, language, dominant terminology. A "vague" sentence in a vision statement may be acceptable; the same sentence in acceptance criteria is not. Severity depends on location.
 
-Đọc `references/review-rubric.md` (taxonomy lỗi + định nghĩa severity + format báo cáo) và `references/writing-standards.md` (chuẩn câu chữ).
+Read `references/review-rubric.md` (error taxonomy + severity definitions + report format) and `references/writing-standards.md` (wording standards).
 
-### 2. Quét tự động bằng linter
+### 2. Automated scan with the linter
 
 ```bash
 python <skill-dir>/scripts/lint_doc.py <input.md> --format json > /tmp/lint.json
 ```
-Input không phải Markdown (docx, pdf, text dán vào chat) → lưu nội dung thành `.md` trước. Linter bắt nhanh lớp lỗi bề mặt (từ mơ hồ, TBD, "v.v.", "và/hoặc", ID trùng, thuật ngữ lệch). Nó **không** bắt được lớp lỗi ngữ nghĩa — phần quan trọng hơn, làm ở bước 3. Không chép nguyên output linter thành báo cáo: lọc false positive (vd "đơn giản" là tên gói cước) và gộp finding cùng gốc.
+Input is not Markdown (docx, pdf, text pasted into chat) → save the content as `.md` first. The linter quickly catches the surface layer of issues (vague terms, TBD, "etc."/"v.v.", "and/or"/"và/hoặc", duplicate IDs, inconsistent terms). It does **not** catch the semantic layer — the more important part, done in step 3. Do not copy the linter output verbatim into the report: filter false positives (e.g. "Simple" / "đơn giản" used as the name of a pricing plan) and merge findings that share a root cause.
 
-### 3. Review ngữ nghĩa (thủ công)
+### 3. Semantic review (manual)
 
-Đi qua từng requirement/đoạn và hỏi:
-- **Hai cách hiểu?** Nếu dev A và dev B code theo câu này, kết quả có khác nhau không?
-- **Kiểm thử được?** QA viết được test pass/fail từ câu này không? Ngưỡng nằm ở đâu?
-- **Biên ngưỡng**: "trên 50 triệu", "trong 7 ngày", "từ 1/1 đến 31/1" — có bao gồm biên không, tính theo múi giờ nào, ngày làm việc hay ngày lịch?
-- **Mâu thuẫn chéo**: cùng một rule/số liệu ở hai mục khác nhau có khớp không (vd mục 3 nói OTP hết hạn sau 5 phút, AC nói 3 phút). So mọi con số xuất hiện > 1 lần.
-- **Thiếu**: actor nào làm? lỗi/timeout thì sao? dữ liệu rỗng thì sao? quyền không đủ thì sao?
-- **Gộp ý**: một câu chứa nhiều requirement độc lập → tách.
-- **Khẳng định không nguồn**: "giúp tăng 30% conversion" — số liệu từ đâu?
+Go through each requirement/paragraph and ask:
+- **Two interpretations?** If dev A and dev B both code from this sentence, would the results differ?
+- **Testable?** Can QA write a pass/fail test from this sentence? Where is the threshold?
+- **Threshold boundary**: "over 50 million", "within 7 days", "from 1/1 to 31/1" — is the boundary included, which time zone, business days or calendar days?
+- **Cross-section conflict**: does the same rule/number match across two different sections (e.g. section 3 says the OTP expires after 5 minutes, the AC says 3 minutes)? Compare every number that appears > 1 time.
+- **Missing**: which actor does it? What happens on error/timeout? With empty data? With insufficient permissions?
+- **Compound**: one sentence contains several independent requirements → split.
+- **Unsourced claim**: "increases conversion by 30%" — where does the number come from?
 
-### 4. Viết đề xuất sửa — giữ nguyên ý, không bịa
+### 4. Write fix proposals — preserve meaning, invent nothing
 
-Đây là ranh giới quan trọng nhất của reviewer:
-- Sửa **cách diễn đạt** thoải mái (cấu trúc câu, thuật ngữ, modal, tách ý, thêm ID).
-- **Không tự quyết nội dung nghiệp vụ** tác giả chưa quyết. Khi câu "phản hồi nhanh" cần một con số mà tài liệu không có → viết lại thành `phải phản hồi trong ≤ [CẦN XÁC NHẬN: N] giây (p95)` và có thể gợi ý giá trị tham khảo *trong cột ghi chú*, không đưa vào câu requirement.
-- Mâu thuẫn → không chọn bên; nêu cả hai vị trí và đưa vào câu hỏi mở. Trong bản sửa, viết tham số dạng ký hiệu (T, N) + [CẦN XÁC NHẬN] để AC đúng với mọi lựa chọn — không xây AC trên con số reviewer tự chọn.
-- **Vị trí finding = chỗ cần sửa.** Khi hai đoạn mâu thuẫn mà chỉ một đoạn sai/mơ hồ, gắn finding vào đoạn đó và nhắc đoạn kia như ngữ cảnh — đừng đánh dấu đoạn viết đúng là có lỗi.
-- Bản sửa giữ độ dài tương xứng bản gốc (writing-standards §7b): làm rõ cái đã có, không mở rộng phạm vi tài liệu. Đề xuất phạm vi mới (bảo mật, NFR bổ sung) → để ở câu hỏi mở/ghi chú, không chèn vào thân tài liệu.
-- Giữ ngôn ngữ, thuật ngữ đã chọn của tài liệu gốc (trừ khi chính thuật ngữ là vấn đề — khi đó đề xuất một thuật ngữ và áp dụng nhất quán).
+This is the reviewer's most important boundary:
+- Change **the wording** freely (sentence structure, terminology, modals, splitting, adding IDs).
+- **Do not decide business content** the author has not decided. When "responds quickly" needs a number the document does not provide → rewrite it as "must respond within ≤ [TO CONFIRM: N] seconds (p95)" and you may suggest a reference value *in the notes column*, not in the requirement sentence.
+- Conflict → do not pick a side; cite both locations and add an open question. In the revised version, write the parameter as a symbol (T, N) + [TO CONFIRM] so the AC holds for every option — do not build an AC on a number the reviewer chose.
+- **Finding location = the place to fix.** When two passages conflict and only one is wrong/vague, attach the finding to that passage and mention the other as context — do not flag the correctly written passage as defective.
+- The revised version keeps a length proportionate to the original (writing-standards §7b): clarify what is already there, do not expand the document's scope. Proposals for new scope (security, additional NFRs) → put them in open questions/notes, not in the document body.
+- Keep the source document's language and chosen terminology (unless the terminology itself is the problem — then propose one term and apply it consistently). Write the findings report in the language the user writes in. In Vietnamese documents, keep common English technical terms (API, endpoint, user story, acceptance criteria, latency, KPI …) untranslated. Open-item marker: [TO CONFIRM: <specific question>] in English documents, [CẦN XÁC NHẬN: <câu hỏi>] in Vietnamese documents — both are recognised by the linter and highlighted by the renderer; write the marker as plain text, never inside backticks.
 
-### 5. Xuất kết quả
+### 5. Output
 
-Theo format trong `references/review-rubric.md`:
-1. **Tóm tắt**: số finding theo severity, 3 vấn đề ảnh hưởng lớn nhất.
-2. **Bảng finding**: ID · vị trí (mục/dòng/ID requirement) · trích đoạn gốc ngắn · mã lỗi · severity · vì sao là vấn đề · đề xuất viết lại.
-3. **Bản đã sửa** của tài liệu (mặc định khi tài liệu ≤ ~3 trang hoặc người dùng yêu cầu "viết lại"); đánh dấu chỗ thay đổi lớn nếu hữu ích. Với tài liệu dài chỉ xuất bảng finding trừ khi được yêu cầu.
-4. **Câu hỏi mở** cho tác giả/stakeholder.
+Following the format in `references/review-rubric.md`:
+1. **Summary**: number of findings by severity, the 3 highest-impact issues.
+2. **Findings table**: ID · location (section/line/requirement ID) · short original excerpt · error code · severity · why it is a problem · proposed rewrite.
+3. **Revised version** of the document (by default when the document is ≤ ~3 pages or the user asks to "rewrite"); mark major changes if useful. For long documents output only the findings table unless asked.
+4. **Open questions** for the author/stakeholders.
 
-Chạy lại linter trên **bản đã sửa** (không chạy trên báo cáo — báo cáo chứa trích đoạn gốc nên linter sẽ báo lại chính các lỗi đó):
+Re-run the linter on the **revised version** (not on the report — the report contains original excerpts, so the linter would flag those same issues again):
 ```bash
 python <skill-dir>/scripts/lint_doc.py <revised.md>
 ```
-Bản sửa không được còn finding `high` ngoài các vị trí [CẦN XÁC NHẬN] có chủ đích.
+The revised version must have no remaining `high` findings other than intentional [TO CONFIRM] / [CẦN XÁC NHẬN] locations.
 
 
-### Xuất định dạng (bản đã sửa) & kiểm tra thẩm mỹ
+### Export formats (revised document) & visual check
 
-Markdown là nguồn. Khi người dùng cần PDF/DOCX/XLSX (gửi sếp/khách, in, "file Word", "Excel để lọc"), hoặc nói tài liệu sẽ được chia sẻ, đọc `references/visual-style.md` rồi render:
+Markdown is the source. When the user needs PDF/DOCX/XLSX (to send to an approver/client, to print, "a Word file", "Excel for filtering"), or says the document will be shared, read `references/visual-style.md` and then render:
 ```bash
-python <skill-dir>/scripts/render_doc.py <file.md> --to pdf,docx,xlsx --out-dir <thư mục output> --qa
+python <skill-dir>/scripts/render_doc.py <file.md> --to pdf,docx,xlsx --out-dir <output dir> --qa
 ```
-Người dùng nói đọc trên điện thoại/mobile → thêm `--page mobile` (khổ hẹp, bảng thành thẻ); cần cả bản in thì render thêm bản A4. Xem warnings và các ảnh trang trong `qa.preview_pages` (ít nhất trang đầu, trang có bảng lớn nhất, trang có diagram); sửa `.md` rồi render lại nếu bảng tràn, diagram không hiện, chữ lỗi dấu. Không nói định dạng nào là "đã xuất" nếu script báo bỏ qua nó. Người dùng không nhắc định dạng → chỉ giao `.md` và nhắc một dòng rằng có thể xuất PDF/DOCX/XLSX.
+User says they will read it on a phone/mobile → add `--page mobile` (narrow page, tables become cards); if a print version is also needed, render an additional A4 version. Check the warnings and the page images in `qa.preview_pages` (at least the first page, the page with the largest table, the page with a diagram); fix the `.md` and re-render if a table overflows, a diagram does not show, or diacritics are broken. Do not say a format was "exported" if the script reports it skipped it. User does not mention a format → deliver only the `.md` and mention in one line that PDF/DOCX/XLSX export is available.
 
-Nếu tài liệu đã tốt: nói thẳng là tốt, liệt kê ít finding thật sự đáng sửa. Không tạo finding cho đủ số lượng — finding giả làm người dùng mất niềm tin vào cả báo cáo.
+If the document is already good: say plainly that it is good and list the few findings that are genuinely worth fixing. Do not create findings to pad the count — fake findings make the user lose trust in the whole report.
 
-## Tài nguyên
+## Resources
 
-- `references/review-rubric.md` — taxonomy mã lỗi, định nghĩa severity, format báo cáo, ví dụ.
-- `references/writing-standards.md` — chuẩn câu chữ dùng chung.
-- `scripts/render_doc.py` + `assets/` + `references/visual-style.md` — xuất bản đã sửa ra PDF/DOCX, bảng finding ra XLSX.
-- `scripts/lint_doc.py` — linter bề mặt (`--format json` để xử lý tiếp; `--terms` để truyền nhóm từ đồng nghĩa riêng của dự án).
+- `references/review-rubric.md` — error code taxonomy, severity definitions, report format, example.
+- `references/writing-standards.md` — shared wording standards.
+- `scripts/render_doc.py` + `assets/` + `references/visual-style.md` — export the revised document to PDF/DOCX and the findings table to XLSX.
+- `scripts/lint_doc.py` — surface linter (`--format json` for further processing; `--terms` to pass project-specific synonym groups).

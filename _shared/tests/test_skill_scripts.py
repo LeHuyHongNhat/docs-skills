@@ -56,19 +56,19 @@ def test_good_flow_has_no_errors() -> None:
 def test_decision_missing_branch_is_error() -> None:
     inv = {**GOOD_FLOW, "edges": [e for e in GOOD_FLOW["edges"] if e.get("label") != "< 50tr"]}
     errs = levels(cd.run(inv), "ERROR")
-    assert any("chỉ có 1 nhánh" in m for m in errs)
+    assert any("has only 1 outgoing branch" in m for m in errs)
 
 
 def test_unlabeled_decision_branch_is_error() -> None:
     edges = [dict(e) for e in GOOD_FLOW["edges"]]
     edges[2].pop("label")
-    assert any("không có nhãn" in m for m in levels(cd.run({**GOOD_FLOW, "edges": edges}), "ERROR"))
+    assert any("without a condition label" in m for m in levels(cd.run({**GOOD_FLOW, "edges": edges}), "ERROR"))
 
 
 def test_dead_end_and_dangling_edge() -> None:
     inv = {**GOOD_FLOW, "edges": GOOD_FLOW["edges"][:-1] + [{"from": "B", "to": "ZZ"}]}
     errs = levels(cd.run(inv), "ERROR")
-    assert any("không tồn tại" in m for m in errs)
+    assert any("non-existent" in m for m in errs)
 
 
 def test_loop_without_exit_warns() -> None:
@@ -79,12 +79,12 @@ def test_loop_without_exit_warns() -> None:
         "edges": [{"from": "S", "to": "A"}, {"from": "A", "to": "B"}, {"from": "B", "to": "A"}],
     }
     warns = levels(cd.run(inv), "WARN")
-    assert any("không có đường tới end" in m for m in warns)
+    assert any("No path from node" in m for m in warns)
 
 
 def test_unreadable_is_surfaced() -> None:
     inv = {**GOOD_FLOW, "unreadable": ["nhãn cạnh góc phải dưới"]}
-    assert any("không đọc được" in m for m in levels(cd.run(inv), "WARN"))
+    assert any("Unreadable region" in m for m in levels(cd.run(inv), "WARN"))
 
 
 # ---------------- check_diagram: ERD & sequence ----------------
@@ -108,7 +108,7 @@ def test_fk_to_missing_table_and_missing_relationship() -> None:
         {"name": "payments", "attributes": [{"name": "id", "pk": True}, {"name": "order_id", "fk": "orderz.id"}]}]}
     assert any("orderz" in m for m in levels(cd.run(bad), "ERROR"))
     no_rel = {**ERD, "relationships": []}
-    assert any("không có relationship" in m for m in levels(cd.run(no_rel), "WARN"))
+    assert any("no matching relationship" in m for m in levels(cd.run(no_rel), "WARN"))
 
 
 def test_sequence_unknown_participant() -> None:

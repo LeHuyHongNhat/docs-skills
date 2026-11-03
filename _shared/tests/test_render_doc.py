@@ -62,7 +62,7 @@ def test_end_to_end(tmp_path: Path) -> None:
     d = docx.Document(str(tmp_path / "out" / "prd.docx"))
     assert d.inline_shapes and d.tables
     wb = openpyxl.load_workbook(tmp_path / "out" / "prd.xlsx")
-    assert wb.sheetnames[0] == "Mục lục" and len(wb.sheetnames) == 2  # bảng metadata không thành sheet
+    assert wb.sheetnames[0] == "Mục lục" and len(wb.sheetnames) == 2  # Vietnamese doc → Vietnamese labels  # bảng metadata không thành sheet
     assert wb.worksheets[1].freeze_panes == "A2"
     assert (tmp_path / "out" / "prd.pdf").stat().st_size > 5000
 
@@ -85,3 +85,13 @@ def test_sheet_names_keep_identifiers(tmp_path: Path) -> None:
     out = rd.to_xlsx(md, tmp_path / "d.xlsx", "DD", src, rd.Report())
     import openpyxl
     assert openpyxl.load_workbook(out).sheetnames == ["Mục lục", "order_items", "customers"]
+
+
+def test_labels_follow_document_language(tmp_path: Path) -> None:
+    en = "# DD\n## Table `orders`\n| Column | Type |\n|---|---|\n| id | BIGINT |\n"
+    src = tmp_path / "e.md"
+    src.write_text(en, encoding="utf-8")
+    import openpyxl
+    out = rd.to_xlsx(en, tmp_path / "e.xlsx", "DD", src, rd.Report())
+    assert openpyxl.load_workbook(out).sheetnames == ["Index", "orders"]
+    assert rd.doc_lang(en) == "en" and rd.doc_lang("# Tài liệu đặc tả yêu cầu nghiệp vụ") == "vi"

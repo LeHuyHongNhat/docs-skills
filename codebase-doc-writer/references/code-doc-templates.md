@@ -1,50 +1,50 @@
-# Templates tài liệu kỹ thuật từ source code
+# Technical documentation templates from source code
 
-Mục lục: [README](#readme) · [API reference](#api-reference) · [Architecture](#architecture) · [ADR](#adr) · [Runbook](#runbook) · [Module doc](#module)
+Contents: [README](#readme) · [API reference](#api-reference) · [Architecture](#architecture) · [ADR](#adr) · [Runbook](#runbook) · [Module doc](#module)
 
 ---
 
 <a id="readme"></a>
 ## README
 
-Mục tiêu đo được: một dev chưa từng thấy repo chạy được service trên máy trong ≤ 15 phút chỉ bằng README.
+Measurable goal: a developer who has never seen the repo can get the service running on their machine in ≤ 15 minutes using only the README.
 
 ```markdown
-# <tên-service>
-<1–2 câu: service làm gì, cho ai. Không marketing.>
+# <service-name>
+<1–2 sentences: what the service does, for whom. No marketing.>
 
-## Mục lục (khi README > ~150 dòng)
+## Contents (when the README is > ~150 lines)
 
-## Tính năng chính
-- <hành vi cụ thể, động từ + đối tượng>
+## Key features
+- <concrete behaviour, verb + object>
 
-## Yêu cầu hệ thống
-| Thành phần | Phiên bản | Nguồn |
+## System requirements
+| Component | Version | Source |
 |---|---|---|
 | Python | 3.11 | Dockerfile `FROM python:3.11-slim` |
-| Redis | [CẦN XÁC NHẬN] | được dùng tại worker/main.py:8 |
+| Redis | [TO CONFIRM] | used at worker/main.py:8 |
 
-## Cài đặt & chạy local
-1. Clone + cài dependency (lệnh chính xác theo manifest).
-2. Tạo file cấu hình (`cp .env.example .env`) — nếu repo có.
-3. Khởi động dependency (docker compose up -d redis).
-4. Chạy service (lệnh chính xác theo entrypoint/Makefile).
-5. Kiểm tra: `curl http://localhost:<port>/health` → kết quả mong đợi.
+## Install & run locally
+1. Clone + install dependencies (exact command from the manifest).
+2. Create the config file (`cp .env.example .env`) — if the repo has one.
+3. Start dependencies (docker compose up -d redis).
+4. Run the service (exact command from the entrypoint/Makefile).
+5. Check: `curl http://localhost:<port>/health` → expected result.
 
-## Cấu hình
-| Biến | Bắt buộc | Mặc định | Mô tả | Đọc tại |
+## Configuration
+| Variable | Required | Default | Description | Read at |
 |---|---|---|---|---|
 
-## API (tóm tắt) — hoặc link tới API reference
-| Method | Path | Mô tả | Auth |
+## API (summary) — or link to the API reference
+| Method | Path | Description | Auth |
 
-## Chạy test
-## Cấu trúc thư mục
-<cây rút gọn, mỗi thư mục chính một dòng chú thích>
+## Running tests
+## Directory structure
+<condensed tree, one comment line per main directory>
 
-## Deploy (nếu repo có cấu hình deploy)
-## Hạn chế đã biết / nợ kỹ thuật
-## Đóng góp / liên hệ (chỉ khi có thông tin trong repo)
+## Deploy (if the repo has deploy configuration)
+## Known limitations / technical debt
+## Contributing / contact (only when the repo has this information)
 ```
 
 ---
@@ -52,25 +52,25 @@ Mục tiêu đo được: một dev chưa từng thấy repo chạy được ser
 <a id="api-reference"></a>
 ## API reference
 
-Nhóm theo resource. Mỗi endpoint:
+Group by resource. For each endpoint:
 
 ```markdown
-### `POST /api/v1/orders` — Tạo đơn hàng
+### `POST /api/v1/orders` — Create an order
 Handler: `app/routers/orders.py:24` · Auth: Bearer token (header `Authorization`)
 
 **Request body** (`OrderCreate`)
-| Field | Kiểu | Bắt buộc | Ràng buộc | Mô tả |
+| Field | Type | Required | Constraints | Description |
 |---|---|---|---|---|
-| items | array<OrderItem> | Có | 1–50 phần tử (`ORDER_MAX_ITEMS`) | |
+| items | array<OrderItem> | Yes | 1–50 items (`ORDER_MAX_ITEMS`) | |
 
 **Response**
-| Status | Khi nào | Body |
+| Status | When | Body |
 |---|---|---|
-| 201 | Tạo thành công | `OrderOut` |
-| 422 | Body sai schema | lỗi validation của framework |
-| 409 | <điều kiện cụ thể trong code> | `{"detail": "<chuỗi chính xác trong code>"}` |
+| 201 | Created successfully | `OrderOut` |
+| 422 | Body does not match schema | framework validation error |
+| 409 | <exact condition in code> | `{"detail": "<exact string in code>"}` |
 
-**Ví dụ**
+**Example**
 ```bash
 curl -X POST http://localhost:8000/api/v1/orders \
   -H "Authorization: Bearer <token>" -H "Content-Type: application/json" \
@@ -78,33 +78,33 @@ curl -X POST http://localhost:8000/api/v1/orders \
 ```
 ```
 
-Quy tắc: status code và message lỗi lấy đúng từ code (`raise HTTPException(409, "...")`). Không liệt kê status code mà code không trả. Ghi idempotency, pagination, rate limit chỉ khi code có.
+Rule: take status codes and error messages exactly from the code (`raise HTTPException(409, "...")`). Do not list status codes the code does not return. Document idempotency, pagination and rate limits only when the code has them.
 
 ---
 
 <a id="architecture"></a>
-## Architecture overview (arc42 rút gọn + C4 level 1–2)
+## Architecture overview (condensed arc42 + C4 level 1–2)
 
 ```markdown
-# Kiến trúc <hệ thống>
-## 1. Mục đích & phạm vi tài liệu
+# <System> architecture
+## 1. Purpose & scope of this document
 ## 2. Context (C4 L1)
-<Hệ thống, người dùng, hệ thống ngoài. Mermaid flowchart.>
-## 3. Containers / thành phần (C4 L2)
-| Thành phần | Công nghệ | Trách nhiệm | Mã nguồn | Giao tiếp với |
-## 4. Luồng chính (runtime view)
-<1–3 luồng quan trọng nhất, dạng sequence diagram + mô tả từng bước có file:line.>
-## 5. Dữ liệu
-<Store nào, schema chính, ai đọc/ghi.>
-## 6. Cấu hình & triển khai
-## 7. Các quyết định thiết kế quan sát được
-<Quyết định + hệ quả/trade-off. Không phỏng đoán lý do nếu code/commit không nói — ghi "lý do chưa được ghi nhận".>
-## 8. Rủi ro & nợ kỹ thuật
-| Vấn đề | Bằng chứng (file:line) | Ảnh hưởng | Đề xuất |
-## 9. Câu hỏi mở
+<System, users, external systems. Mermaid flowchart.>
+## 3. Containers / components (C4 L2)
+| Component | Technology | Responsibility | Source code | Communicates with |
+## 4. Main flows (runtime view)
+<The 1–3 most important flows, as sequence diagrams + a step-by-step description with file:line.>
+## 5. Data
+<Which stores, main schema, who reads/writes.>
+## 6. Configuration & deployment
+## 7. Observed design decisions
+<Decision + consequence/trade-off. Do not guess the rationale if the code/commits do not state it — write "rationale not recorded".>
+## 8. Risks & technical debt
+| Issue | Evidence (file:line) | Impact | Proposal |
+## 9. Open questions
 ```
 
-Mermaid mẫu:
+Sample Mermaid:
 ```mermaid
 flowchart LR
   client[Client] -->|HTTPS JSON| api[API service<br/>FastAPI<br/>app/]
@@ -116,21 +116,21 @@ flowchart LR
 ---
 
 <a id="adr"></a>
-## ADR (Architecture Decision Record — định dạng Michael Nygard)
+## ADR (Architecture Decision Record — Michael Nygard format)
 
 ```markdown
-# ADR-<NNN>: <Quyết định, dạng mệnh đề>
-- Trạng thái: Proposed | Accepted | Superseded by ADR-xxx
-- Ngày: YYYY-MM-DD · Người quyết định: <...>
+# ADR-<NNN>: <Decision, stated as a clause>
+- Status: Proposed | Accepted | Superseded by ADR-xxx
+- Date: YYYY-MM-DD · Decided by: <...>
 
-## Bối cảnh
-<Lực tác động: yêu cầu, ràng buộc, số liệu.>
-## Các phương án đã cân nhắc
-| Phương án | Ưu | Nhược | Chi phí/rủi ro |
-## Quyết định
-<Chọn gì, phạm vi áp dụng.>
-## Hệ quả
-<Tốt, xấu, việc cần làm tiếp, khi nào cần xem lại.>
+## Context
+<Forces at play: requirements, constraints, figures.>
+## Options considered
+| Option | Pros | Cons | Cost/risk |
+## Decision
+<What was chosen, scope of application.>
+## Consequences
+<Good, bad, follow-up work, when to revisit.>
 ```
 
 ---
@@ -140,22 +140,22 @@ flowchart LR
 
 ```markdown
 # Runbook: <service>
-## Thông tin nhanh
-| Mục | Giá trị |
+## Quick facts
+| Item | Value |
 |---|---|
-| Owner / on-call | [CẦN XÁC NHẬN] |
+| Owner / on-call | [TO CONFIRM] |
 | Health check | `GET /health` → 200 `{"status":"ok"}` (app/main.py:15) |
-| Log | <nơi xem log> |
-| Dashboard | [CẦN XÁC NHẬN] |
+| Logs | <where to view logs> |
+| Dashboard | [TO CONFIRM] |
 
-## Khởi động / dừng / restart
-## Sự cố thường gặp
-### <Triệu chứng quan sát được>
-- Nguyên nhân khả dĩ: <...> (căn cứ: file:line)
-- Kiểm tra: <lệnh chính xác>
-- Xử lý: <bước cụ thể, có thể đảo ngược?>
-- Escalate khi: <điều kiện>
-## Thao tác rủi ro (cần 2 người xác nhận)
+## Start / stop / restart
+## Common incidents
+### <Observable symptom>
+- Likely cause: <...> (evidence: file:line)
+- Check: <exact command>
+- Fix: <concrete steps; reversible?>
+- Escalate when: <condition>
+## Risky operations (require confirmation by 2 people)
 ```
 
 ---
@@ -165,12 +165,12 @@ flowchart LR
 
 ```markdown
 # Module `<path>`
-## Trách nhiệm (1 đoạn)
+## Responsibility (1 paragraph)
 ## Public interface
-| Hàm/Class | Chữ ký | Mô tả | Lỗi ném ra |
-## Phụ thuộc (gọi tới module nào, ai gọi module này)
-## Luồng xử lý chính
-## Bất biến & giả định (invariants)
-## Cách test
-## Hạn chế đã biết
+| Function/Class | Signature | Description | Errors raised |
+## Dependencies (which modules it calls, who calls this module)
+## Main processing flow
+## Invariants & assumptions
+## How to test
+## Known limitations
 ```

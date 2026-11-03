@@ -1,19 +1,22 @@
 #!/usr/bin/env python3
-"""render_doc.py — xuất tài liệu Markdown thành HTML / PDF / DOCX / XLSX có thiết kế, kèm visual QA.
+"""render_doc.py — export a Markdown document to designed HTML / PDF / DOCX / XLSX, with visual QA.
 
 Usage:
     python render_doc.py doc.md --to pdf,docx,xlsx [--out-dir dist] [--qa] [--landscape] [--toc auto|on|off]
 
 Design notes:
-- Markdown là *single source of truth*; mọi định dạng khác sinh ra từ nó, nên sửa nội dung một chỗ.
-- Mermaid được render trước bằng mmdc (SVG cho HTML/PDF, PNG 2x cho DOCX) — Word/PDF không
-  hiểu code block mermaid.
-- `[CẦN XÁC NHẬN: ...]` / `[TO CONFIRM: ...]` được tô thành callout (HTML class `.confirm`,
-  DOCX character style `Confirm`) để người đọc quét nhanh các điểm chưa chốt.
-- XLSX chỉ lấy các bảng trong tài liệu (mỗi bảng một sheet, tên theo heading gần nhất) — hợp
-  cho data dictionary, ma trận truy vết, bảng finding mà người đọc muốn lọc/sắp xếp.
-- Mỗi công cụ ngoài (pandoc, mmdc, Chrome) là tùy chọn: thiếu thì bỏ qua định dạng đó và báo
-  WARN, không làm hỏng các định dạng còn lại.
+- Markdown is the *single source of truth*; every other format is generated from it, so content
+  is edited in one place.
+- Mermaid is pre-rendered with mmdc (SVG for HTML/PDF, 2x PNG for DOCX) — Word/PDF do not
+  understand mermaid code blocks.
+- `[TO CONFIRM: ...]` / `[CẦN XÁC NHẬN: ...]` markers become highlighted callouts (HTML class
+  `.confirm`, DOCX character style `Confirm`) so readers can scan for undecided items.
+- XLSX contains only the document's tables (one sheet per table, named after the nearest heading)
+  — useful for data dictionaries, traceability matrices and finding lists people filter/sort.
+- Generated labels (figure captions, index sheet, footer) follow the document language:
+  Vietnamese documents get Vietnamese labels, everything else gets English.
+- Every external tool (pandoc, mmdc, Chrome) is optional: a missing one skips that format with a
+  warning and never breaks the others.
 """
 from __future__ import annotations
 
@@ -50,7 +53,7 @@ class Report:
 
 # ----------------------------------------------------------------- pre-processing
 def render_mermaid(md: str, work: Path, fmt: str, rep: Report) -> str:
-    """Thay block mermaid bằng ảnh. fmt='svg' (HTML/PDF) hoặc 'png' (DOCX)."""
+    """Replace mermaid blocks with images. fmt='svg' (HTML/PDF) or 'png' (DOCX)."""
     mmdc = shutil.which("mmdc")
     counter = 0
 
@@ -72,18 +75,18 @@ def render_mermaid(md: str, work: Path, fmt: str, rep: Report) -> str:
             cmd += ["-s", "2"]
         r = subprocess.run(cmd, capture_output=True, text=True, timeout=180)
         if r.returncode != 0 or not out.exists():
-            rep.warnings.append(f"Mermaid #{counter} không render được: {r.stderr.strip()[-200:]}")
+            rep.warnings.append(f"Mermaid #{counter} failed to render: {r.stderr.strip()[-200:]}")
             return m.group(0)
-        return f"![Hình {counter}]({out.as_posix()}){{.diagram}}\n"
+        return f"![{label('figure', md)} {counter}]({out.as_posix()}){{.diagram}}\n"
 
     new = MERMAID_RE.sub(repl, md)
     if counter and not mmdc:
-        rep.warnings.append("Không có mmdc: diagram Mermaid giữ dạng code (cài @mermaid-js/mermaid-cli để render).")
+        rep.warnings.append("mmdc not found: Mermaid diagrams left as code (install @mermaid-js/mermaid-cli to render them).")
     return new
 
 
 def mark_confirm(md: str) -> str:
-    """Bọc marker cần xác nhận thành span có class/style, bỏ qua code fence và inline code."""
+    """Wrap open-item markers in a styled span; skip code fences and real inline code."""
     out: list[str] = []
     in_fence = False
     for line in md.splitlines():
@@ -107,15 +110,33 @@ def doc_title(md: str, fallback: str) -> str:
     return re.sub(r"[*_`]", "", m.group(1)).strip() if m else fallback
 
 
+VI_CHARS_RE = re.compile(r"[ăâđêôơưạảấầẩẫậắằẳẵặẹẻẽếềểễệỉịọỏốồổỗộớờởỡợụủứừửữựỳỵỷỹ]", re.I)
+LABELS = {
+    "en": {"toc": "Contents", "figure": "Figure", "index": "Index", "section": "Section in document",
+           "rows": "Rows", "source": "Source", "exported": "Exported", "table": "Table", "page": "Page"},
+    "vi": {"toc": "Mục lục", "figure": "Hình", "index": "Mục lục", "section": "Mục trong tài liệu",
+           "rows": "Số dòng", "source": "Nguồn", "exported": "Xuất lúc", "table": "Bảng", "page": "Trang"},
+}
+
+
+def doc_lang(md: str) -> str:
+    """'vi' when Vietnamese diacritics make up a noticeable share of letters, else 'en'."""
+    letters = sum(ch.isalpha() for ch in md) or 1
+    return "vi" if len(VI_CHARS_RE.findall(md)) / letters > 0.01 else "en"
+
+
+def label(key: str, md: str) -> str:
+    return LABELS[doc_lang(md)][key]
+
+
 def _toc_title(md: str) -> str:
-    """Tài liệu tiếng Việt (có ký tự dấu đặc trưng) → 'Mục lục', còn lại 'Contents'."""
-    return "Mục lục" if re.search(r"[ăâđêôơưạảấầẩẫậắằẳẵặẹẻẽếềểễệỉịọỏốồổỗộớờởỡợụủứừửữựỳỵỷỹ]", md, re.I) else "Contents"
+    return label("toc", md)
 
 
 def pandoc_ok(rep: Report) -> bool:
     if shutil.which("pandoc"):
         return True
-    rep.warnings.append("Không có pandoc: bỏ qua HTML/PDF/DOCX.")
+    rep.warnings.append("pandoc not found: skipping HTML/PDF/DOCX.")
     return False
 
 
@@ -134,14 +155,14 @@ def to_html(md: str, src: Path, out: Path, toc: bool, title: str, rep: Report, m
         cmd += ["--toc", "--toc-depth=2"]
     r = subprocess.run(cmd, capture_output=True, text=True)
     if r.returncode != 0:
-        rep.warnings.append(f"pandoc HTML lỗi: {r.stderr[-300:]}")
+        rep.warnings.append(f"pandoc HTML error: {r.stderr[-300:]}")
         return None
     _post_html(out, mobile)
     return out
 
 
 def _cardify(soup, table) -> None:
-    """Bảng ≥ 4 cột → mỗi dòng thành một thẻ (nhãn: giá trị) để đọc trên màn hình hẹp."""
+    """Tables with ≥ 4 columns → one card per row (label: value) for narrow screens."""
     heads = [th.get_text(" ", strip=True) for th in table.select("thead th")]
     if not heads:
         return
@@ -167,7 +188,7 @@ def _cardify(soup, table) -> None:
 
 
 def _post_html(path: Path, mobile: bool = False) -> None:
-    """Đánh dấu bảng rộng (≥ 7 cột) để CSS thu nhỏ chữ; đặt figure cho diagram."""
+    """Mark wide tables (≥ 7 columns) so CSS shrinks them; wrap diagrams in figures."""
     try:
         from bs4 import BeautifulSoup
     except ImportError:
@@ -181,7 +202,7 @@ def _post_html(path: Path, mobile: bool = False) -> None:
         fig = img.find_parent("figure")
         if fig:
             fig["class"] = (fig.get("class") or []) + ["diagram"]
-    # ID nằm giữa câu (FR-004, AC-006.3) không được gãy ở dấu gạch nối
+    # IDs inside sentences (FR-004, AC-006.3) must not break at the hyphen
     id_re = re.compile(r"\b[A-ZĐ]{1,5}-\d{1,4}(?:\.\d+)*\b")
     for node in list(soup.find_all(string=id_re)):
         if node.parent and node.parent.name in ("code", "pre", "script", "style"):
@@ -197,7 +218,7 @@ def _post_html(path: Path, mobile: bool = False) -> None:
         for piece in parts:
             node.insert_before(piece)
         node.extract()
-    # ô chỉ chứa ID (FR-001, AC-002.1, OQ-12) không được xuống dòng giữa ID
+    # cells holding only an ID (FR-001, AC-002.1, OQ-12) must not wrap
     for td in soup.find_all(["td", "th"]):
         if re.fullmatch(r"\s*[A-ZĐ]{1,5}-\d{1,4}(\.\d+)*\s*", td.get_text()):
             td["class"] = (td.get("class") or []) + ["id"]
@@ -213,7 +234,7 @@ def _post_html(path: Path, mobile: bool = False) -> None:
             first = t.find("tr")
             if first and len(first.find_all(["th", "td"])) >= 4:
                 _cardify(soup, t)
-    # Mục lục: chuyển xuống sau tiêu đề + bảng metadata, bỏ cấp H1 (chỉ có một H1)
+    # Table of contents: move it below the title + metadata table, drop the single-H1 level
     toc = soup.find("nav", id="TOC")
     h1 = soup.find("h1")
     if toc and h1:
@@ -250,8 +271,8 @@ def to_pdf(html: Path, out: Path, title: str, landscape: bool, rep: Report, mobi
             browser = p.chromium.launch(args=["--no-sandbox"], **kw)
             page = browser.new_page()
             page.goto(html.as_uri(), wait_until="networkidle")
-            if mobile:  # khổ ~ màn hình điện thoại, lề hẹp
-                # Viewport = bề rộng nội dung trang (94 mm ≈ 355 px) để Chrome không dàn trang rộng rồi thu nhỏ
+            if mobile:  # ~phone-screen page, narrow margins
+                # Viewport = page content width (94 mm ≈ 355 px) so Chrome doesn't lay out wide and shrink
                 page.set_viewport_size({"width": 355, "height": 640})
                 page.add_style_tag(content="@page { size: 108mm 192mm; margin: 8mm 7mm 12mm; }")
                 page.pdf(path=str(out), width="108mm", height="192mm", print_background=True, prefer_css_page_size=True,
@@ -265,9 +286,9 @@ def to_pdf(html: Path, out: Path, title: str, landscape: bool, rep: Report, mobi
             browser.close()
         return out
     except Exception as e:  # noqa: BLE001 — fallback sang Chrome CLI
-        rep.warnings.append(f"Playwright lỗi ({type(e).__name__}), thử Chrome CLI (không có số trang).")
+        rep.warnings.append(f"Playwright failed ({type(e).__name__}); falling back to Chrome CLI (no page numbers).")
     if not chrome:
-        rep.warnings.append("Không có Chrome/Chromium: bỏ qua PDF.")
+        rep.warnings.append("Chrome/Chromium not found: skipping PDF.")
         return None
     r = subprocess.run([chrome, "--headless=new", "--no-sandbox", "--disable-gpu", "--no-pdf-header-footer",
                         f"--print-to-pdf={out}", html.as_uri()], capture_output=True, text=True, timeout=180)
@@ -284,25 +305,25 @@ def to_docx(md: str, src: Path, out: Path, toc: bool, rep: Report) -> Path | Non
     tmp_md.write_text(body, encoding="utf-8")
     cmd = ["pandoc", str(tmp_md), "-f", "gfm+attributes+bracketed_spans+implicit_figures+pipe_tables",
            "-t", "docx", "--resource-path", f"{work}:{src.parent}", "-o", str(out)]
-    if len(H1_RE.findall(md)) == 1:  # một H1 duy nhất → thành Title, H2 → Heading 1 (Navigation Pane đúng cấp)
+    if len(H1_RE.findall(md)) == 1:  # single H1 → Title, H2 → Heading 1 (correct Navigation Pane levels)
         cmd += ["--shift-heading-level-by=-1"]
     if REFERENCE_DOCX.exists():
         cmd += ["--reference-doc", str(REFERENCE_DOCX)]
     else:
-        rep.warnings.append("Thiếu assets/reference.docx: DOCX dùng style mặc định của pandoc.")
+        rep.warnings.append("assets/reference.docx missing: DOCX uses pandoc's default styles.")
     if toc:
         cmd += ["--toc", "--toc-depth=2", "--metadata", f"toc-title={_toc_title(md)}"]
     r = subprocess.run(cmd, capture_output=True, text=True)
     if r.returncode != 0:
-        rep.warnings.append(f"pandoc DOCX lỗi: {r.stderr[-300:]}")
+        rep.warnings.append(f"pandoc DOCX error: {r.stderr[-300:]}")
         return None
-    _post_docx(out)
+    _post_docx(out, doc_lang(md))
     return out
 
 
 def _nobreak_ids(d) -> None:
-    """Thay '-' trong ID (FR-004, AC-006.3) bằng w:noBreakHyphen của Word — không phụ thuộc font,
-    tìm kiếm trong Word vẫn khớp, và ID không bị gãy cuối dòng."""
+    """Replace '-' inside IDs (FR-004, AC-006.3) with Word's w:noBreakHyphen — font-independent,
+    still matches Word search, and IDs never break at line ends."""
     from docx.oxml import OxmlElement
     from docx.oxml.ns import qn
     id_re = re.compile(r"\b([A-ZĐ]{1,5})-(\d{1,4}(?:\.\d+)*)\b")
@@ -333,9 +354,9 @@ def _nobreak_ids(d) -> None:
 
 
 def _column_widths(t, usable: int) -> list[int]:
-    """Cột ngắn (ID, Có/Không, kiểu dữ liệu) được đủ rộng cho từ dài nhất để không gãy giữa từ;
-    phần còn lại chia theo độ dài nội dung trung bình."""
-    char_tw = 118  # twips/ký tự ở cỡ 9pt (ước lượng có dư cho chữ có dấu & mono)
+    """Short columns (IDs, yes/no, data types) get enough width for their longest word so words never
+    split; the remaining width is shared by average content length."""
+    char_tw = 118  # twips per character at 9pt (generous estimate for diacritics & mono)
     ncol = len(t.columns)
     mins, weights = [], []
     for ci in range(ncol):
@@ -344,18 +365,18 @@ def _column_widths(t, usable: int) -> list[int]:
         mins.append(min(longest, 22) * char_tw + 240)
         weights.append(max(sum(min(len(tx), 80) for tx in texts) / max(len(texts), 1), 4))
     base = sum(mins)
-    if base >= usable:  # quá nhiều cột: co theo tỉ lệ min
+    if base >= usable:  # too many columns: scale the minimums down proportionally
         return [int(usable * m / base) for m in mins]
     extra = usable - base
-    # chỉ cột "dài" (văn bản mô tả) nhận phần dư; cột ngắn giữ min
+    # only "long" (descriptive) columns receive the extra width; short columns keep their minimum
     long_w = [w if w > 14 else 0 for w in weights]
     tot = sum(long_w) or sum(weights)
     src = long_w if sum(long_w) else weights
     return [int(m + extra * w / tot) for m, w in zip(mins, src)]
 
 
-def _post_docx(path: Path) -> None:
-    """Style bảng: header nền xám nhạt + đậm, viền dưới mảnh, padding; ảnh vừa khổ trang."""
+def _post_docx(path: Path, lang: str = "en") -> None:
+    """Table styling: light-grey bold header, thin bottom borders, padding; images fit the page."""
     try:
         import docx
         from docx.oxml import OxmlElement
@@ -378,9 +399,9 @@ def _post_docx(path: Path) -> None:
             e.set(qn("w:color"), color)
             b.append(e)
 
-    usable_twips = 9600  # ~16,9 cm: A4 trừ lề 2 cm mỗi bên
+    usable_twips = 9600  # ~16.9 cm: A4 minus 2 cm margins
     for t in d.tables:
-        # Bảng full chiều ngang, độ rộng cột theo độ dài nội dung (min/max để tránh cột ID bị bóp)
+        # Full-width tables; column widths follow content length (min/max so ID columns aren't squeezed)
         widths = _column_widths(t, usable_twips)
         tblPr = t._tbl.tblPr
         for tag in ("w:tblW", "w:tblLayout"):
@@ -434,17 +455,23 @@ def _post_docx(path: Path) -> None:
                     p.paragraph_format.space_after = Pt(0)
                     for run in p.runs:
                         run.font.size = Pt(9)
-        for row in t.rows:  # không tách một hàng qua hai trang
+        for row in t.rows:  # never split a row across pages
             trp = row._tr.get_or_add_trPr()
             cs = OxmlElement("w:cantSplit")
             cs.set(qn("w:val"), "true")
             trp.append(cs)
-        # lặp header khi bảng sang trang
+        # repeat the header row on every page
         trPr = t.rows[0]._tr.get_or_add_trPr()
         h = OxmlElement("w:tblHeader")
         h.set(qn("w:val"), "true")
         trPr.append(h)
     _nobreak_ids(d)
+    if lang == "en":  # reference.docx footer ships with the Vietnamese word; localise it
+        for sec in d.sections:
+            for fp in sec.footer.paragraphs:
+                for run in fp.runs:
+                    if "Trang" in run.text:
+                        run.text = run.text.replace("Trang", "Page")
     max_w, max_h = Cm(16.5), Cm(13)
     for shape in d.inline_shapes:
         ratio = min(1.0, max_w / shape.width, max_h / shape.height)
@@ -461,7 +488,7 @@ class MdTable:
     heading_raw: str
     header: list[str]
     rows: list[list[str]]
-    is_meta: bool = False  # bảng metadata ngay sau H1
+    is_meta: bool = False  # metadata table right after the H1
 
 
 def _clean_cell(s: str) -> str:
@@ -482,11 +509,11 @@ def _split_row(line: str) -> list[str]:
 
 def extract_tables(md: str) -> list[MdTable]:
     tables: list[MdTable] = []
-    heading = heading_raw = "Bảng"
+    heading = heading_raw = label("table", md)
     lines = md.splitlines()
     i, in_fence = 0, False
     last_h_level = 0
-    since_heading = 0  # số dòng không rỗng kể từ heading gần nhất
+    since_heading = 0  # non-empty lines since the nearest heading
     while i < len(lines):
         ln = lines[i]
         if FENCE_RE.match(ln.strip()):
@@ -520,18 +547,18 @@ def to_xlsx(md: str, out: Path, title: str, src: Path, rep: Report) -> Path | No
         from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
         from openpyxl.utils import get_column_letter
     except ImportError:
-        rep.warnings.append("Không có openpyxl: bỏ qua XLSX.")
+        rep.warnings.append("openpyxl not installed: skipping XLSX.")
         return None
     all_tables = extract_tables(md)
     meta = next((t for t in all_tables if t.is_meta), None)
     tables = [t for t in all_tables if len(t.header) >= 2 and t.rows and not t.is_meta]
     if not tables:
-        rep.warnings.append("Tài liệu không có bảng nào ≥ 2 cột: không tạo XLSX.")
+        rep.warnings.append("The document has no table with ≥ 2 columns: no XLSX created.")
         return None
     font_name = "Arial"
     hdr_font = Font(name=font_name, bold=True, color="FFFFFF", size=10)
     body_font = Font(name=font_name, size=10, color="1B2130")
-    hdr_fill = PatternFill("solid", fgColor="24324F")  # navy: header nổi rõ khi lọc/cuộn
+    hdr_fill = PatternFill("solid", fgColor="24324F")  # navy: header stays visible while filtering/scrolling
     confirm_fill = PatternFill("solid", fgColor="FFF6E0")
     thin = Side(style="thin", color="E3E6EC")
     strong = Side(style="medium", color="C9CED8")
@@ -539,31 +566,32 @@ def to_xlsx(md: str, out: Path, title: str, src: Path, rep: Report) -> Path | No
 
     wb = Workbook()
     ov = wb.active
-    ov.title = "Mục lục"
+    L = LABELS[doc_lang(md)]
+    ov.title = L["index"]
     ov["A1"] = title
     ov["A1"].font = Font(name=font_name, bold=True, size=14)
-    ov["A2"] = f"Nguồn: {src.name} · Xuất lúc: {dt.datetime.now().strftime('%Y-%m-%d %H:%M')}"
+    ov["A2"] = f"{L['source']}: {src.name} · {L['exported']}: {dt.datetime.now().strftime('%Y-%m-%d %H:%M')}"
     ov["A2"].font = Font(name=font_name, size=9, color="6B7385")
     r0 = 4
-    if meta and meta.rows:  # metadata tài liệu (phiên bản, ngày, owner...) dạng key: value
+    if meta and meta.rows:  # document metadata (version, date, owner...) as key: value
         for k, v in zip(meta.header, meta.rows[0]):
             ov.cell(row=r0, column=1, value=k).font = Font(name=font_name, size=9, color="6B7385")
             ov.cell(row=r0, column=2, value=v).font = body_font
             r0 += 1
         r0 += 1
     ov.cell(row=r0, column=1, value="Sheet")
-    ov.cell(row=r0, column=2, value="Mục trong tài liệu")
-    ov.cell(row=r0, column=3, value="Số dòng")
+    ov.cell(row=r0, column=2, value=L["section"])
+    ov.cell(row=r0, column=3, value=L["rows"])
     for ci in (1, 2, 3):
         ov.cell(row=r0, column=ci).font, ov.cell(row=r0, column=ci).fill = hdr_font, hdr_fill
-    used: set[str] = {"Mục lục"}
+    used: set[str] = {L["index"]}
     for n, t in enumerate(tables, 1):
-        # Ưu tiên định danh trong `backtick` của heading (vd tên bảng `order_items`), nếu không có
-        # thì bỏ số mục đầu dòng; Excel giới hạn tên sheet 31 ký tự.
+        # Prefer the identifier in the heading's backticks (e.g. table name `order_items`); otherwise
+        # drop the leading section number. Excel limits sheet names to 31 characters.
         ident = (re.search(r"(?:Bảng|Table|Sheet)\s+`?([A-Za-z_][\w.]*)`?", t.heading, re.I)
                  or re.search(r"`([A-Za-z_][\w.]*)`", t.heading_raw))
         base = ident.group(1) if ident else re.sub(r"^[\d.]+\s*", "", t.heading)
-        base = re.sub(r"[\[\]:*?/\\]", " ", base).strip()[:31] or f"Bảng {n}"
+        base = re.sub(r"[\[\]:*?/\\]", " ", base).strip()[:31] or f"{L['table']} {n}"
         name, k = base, 2
         while name in used:
             name, k = f"{base[:28]} {k}", k + 1
@@ -609,12 +637,12 @@ def _num(v: str) -> object:
 
 # ----------------------------------------------------------------- QA
 def visual_qa(pdf: Path | None, md: str, out_dir: Path, rep: Report) -> None:
-    """Render trang PDF thành PNG để agent xem bằng mắt + các check tự động."""
+    """Render PDF pages to PNG for the agent to look at, plus automatic checks."""
     qa: dict[str, object] = {}
     wide = [t.heading for t in extract_tables(md) if len(t.header) >= 7]
     if wide:
         qa["wide_tables"] = wide
-        rep.warnings.append(f"{len(wide)} bảng ≥ 7 cột (dễ chật trên A4 dọc/mobile): {wide[:5]} — cân nhắc tách bảng hoặc --landscape.")
+        rep.warnings.append(f"{len(wide)} table(s) with ≥ 7 columns (cramped on portrait A4/mobile): {wide[:5]} — consider splitting them or --landscape.")
     if MERMAID_RE.search(md) and not shutil.which("mmdc"):
         qa["mermaid_unrendered"] = True
     if pdf and pdf.exists():
@@ -628,8 +656,8 @@ def visual_qa(pdf: Path | None, md: str, out_dir: Path, rep: Report) -> None:
             qa["fonts"] = names
             not_emb = [f for f in fonts if f.split() and " no " in f]
             if not_emb:
-                rep.warnings.append(f"Có font không nhúng trong PDF: {len(not_emb)}")
-        if shutil.which("pdftotext"):  # cỡ chữ hiệu dụng: phát hiện trang bị thu nhỏ (chữ tí hon)
+                rep.warnings.append(f"Non-embedded fonts in PDF: {len(not_emb)}")
+        if shutil.which("pdftotext"):  # effective text size: detect pages shrunk to tiny text
             bb = subprocess.run(["pdftotext", "-bbox", str(pdf), "-"], capture_output=True, text=True).stdout
             hs = sorted(float(m.group(2)) - float(m.group(1))
                         for m in re.finditer(r'yMin="([\d.]+)"[^>]*yMax="([\d.]+)"', bb))
@@ -637,8 +665,8 @@ def visual_qa(pdf: Path | None, md: str, out_dir: Path, rep: Report) -> None:
                 med = hs[len(hs) // 2]
                 qa["median_word_height_pt"] = round(med, 1)
                 if med < 7.5:
-                    rep.warnings.append(f"Chữ quá nhỏ trong PDF (≈{med:.1f}pt): có phần tử rộng hơn trang làm Chrome "
-                                        "thu nhỏ cả trang — tìm bảng/code/ảnh không xuống dòng.")
+                    rep.warnings.append(f"Text too small in PDF (≈{med:.1f}pt): something wider than the page made "
+                                        "Chrome shrink the whole page — look for unwrapped tables/code/images.")
         if shutil.which("pdftoppm"):
             prev = out_dir / f"{pdf.stem}-preview"
             prev.mkdir(exist_ok=True)
@@ -651,12 +679,12 @@ def visual_qa(pdf: Path | None, md: str, out_dir: Path, rep: Report) -> None:
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("doc")
-    ap.add_argument("--to", default="html,pdf,docx", help="html,pdf,docx,xlsx (phân tách bằng dấu phẩy)")
+    ap.add_argument("--to", default="html,pdf,docx", help="html,pdf,docx,xlsx (comma-separated)")
     ap.add_argument("--out-dir", default=None)
-    ap.add_argument("--qa", action="store_true", help="Render PNG từng trang PDF + check tự động")
+    ap.add_argument("--qa", action="store_true", help="Render every PDF page to PNG + automatic checks")
     ap.add_argument("--landscape", action="store_true")
     ap.add_argument("--page", choices=["a4", "mobile"], default="a4",
-                    help="mobile: PDF khổ màn hình điện thoại, bảng ≥4 cột chuyển thành thẻ")
+                    help="mobile: phone-sized PDF, tables with ≥4 columns become cards")
     ap.add_argument("--toc", choices=["auto", "on", "off"], default="auto")
     a = ap.parse_args(argv)
 
@@ -682,7 +710,7 @@ def main(argv: list[str] | None = None) -> int:
         if "html" not in fmts:
             html_path.unlink(missing_ok=True)
     if "docx" in fmts:
-        # DOCX: mục lục là field Word phải "Update field" mới hiện số trang → chỉ chèn khi người dùng yêu cầu
+        # DOCX: the TOC is a Word field that needs "Update field" to show page numbers → only on request
         p = to_docx(md, src, out_dir / f"{src.stem}.docx", a.toc == "on", rep)
         if p:
             rep.outputs["docx"] = str(p)

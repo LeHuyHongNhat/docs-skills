@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
-"""check_diagram.py — kiểm tính đầy đủ/nhất quán của inventory trích từ ảnh diagram, và sinh Mermaid.
+"""check_diagram.py — check completeness/consistency of an inventory extracted from a diagram image, and emit Mermaid.
 
 Usage:
     python check_diagram.py inventory.json [--mermaid out.mmd]
 
-Inventory schema (JSON) — chọn theo loại diagram:
+Inventory schema (JSON) — pick the shape for the diagram type:
   flowchart / bpmn / swimlane / state:
     {"diagram_type": "flowchart",
      "nodes": [{"id": "N1", "label": "...", "type": "start|end|task|decision|data|subprocess|event|state", "lane": "optional"}],
-     "edges": [{"from": "N1", "to": "N2", "label": "optional, bắt buộc với cạnh ra từ decision"}],
-     "unreadable": ["mô tả vùng/nhãn không đọc được"]}
+     "edges": [{"from": "N1", "to": "N2", "label": "optional; required on edges leaving a decision"}],
+     "unreadable": ["description of unreadable regions/labels"]}
   erd:
     {"diagram_type": "erd",
      "entities": [{"name": "orders", "attributes": [{"name": "id", "type": "bigint", "pk": true,
@@ -18,13 +18,13 @@ Inventory schema (JSON) — chọn theo loại diagram:
   sequence:
     {"diagram_type": "sequence", "participants": ["User", "API"],
      "messages": [{"seq": 1, "from": "User", "to": "API", "label": "POST /login", "kind": "sync|async|reply",
-                   "fragment": "optional: alt/opt/loop + điều kiện"}]}
+                   "fragment": "optional: alt/opt/loop + condition"}]}
 
 Design notes:
-- Mục đích là bắt lỗi *trích xuất* (sót cạnh, decision thiếu nhánh, FK trỏ bảng không tồn tại)
-  trước khi viết văn — lỗi ở bước này lan sang toàn bộ tài liệu.
-- Mermaid sinh ra dùng để render lại và so sánh bằng mắt với ảnh gốc (round-trip check).
-- Exit code 1 nếu có lỗi mức ERROR; WARN không chặn nhưng phải được giải thích trong tài liệu.
+- The point is to catch *extraction* errors (missed edges, decisions with missing branches, FKs to
+  non-existent tables) before writing prose — an error at this step spreads through the whole document.
+- The generated Mermaid is re-rendered and compared visually with the source image (round-trip check).
+- Exit code 1 on any ERROR; WARNs do not block but must be explained in the document.
 """
 from __future__ import annotations
 
@@ -48,38 +48,38 @@ def check_flow(inv: dict[str, Any]) -> list[Issue]:
     ids = [n["id"] for n in nodes]
     by_id = {n["id"]: n for n in nodes}
     for dup in {i for i in ids if ids.count(i) > 1}:
-        issues.append(("ERROR", f"Node id trùng: {dup}"))
+        issues.append(("ERROR", f"Duplicate node id: {dup}"))
     out_e: dict[str, list[dict[str, Any]]] = defaultdict(list)
     in_e: dict[str, list[dict[str, Any]]] = defaultdict(list)
     for e in edges:
         for end in ("from", "to"):
             if e[end] not in by_id:
-                issues.append(("ERROR", f"Cạnh {e['from']}→{e['to']} tham chiếu node không tồn tại: {e[end]}"))
+                issues.append(("ERROR", f"Edge {e['from']}→{e['to']} references a non-existent node: {e[end]}"))
         out_e[e["from"]].append(e)
         in_e[e["to"]].append(e)
     starts = [n["id"] for n in nodes if n.get("type") == "start"]
     ends = [n["id"] for n in nodes if n.get("type") == "end"]
     if not starts:
-        issues.append(("WARN", "Không có node start — xác nhận lại ảnh, hoặc ghi rõ điểm bắt đầu quy trình."))
+        issues.append(("WARN", "No start node — re-check the image, or state where the process starts."))
     if not ends:
-        issues.append(("WARN", "Không có node end — quy trình có kết thúc không?"))
+        issues.append(("WARN", "No end node — does the process ever end?"))
     for n in nodes:
         nid, t = n["id"], n.get("type", "task")
         if not n.get("label", "").strip() and t not in {"start", "end"}:
-            issues.append(("WARN", f"Node {nid} không có nhãn."))
+            issues.append(("WARN", f"Node {nid} has no label."))
         if t == "decision":
             outs = out_e[nid]
             if len(outs) < 2:
-                issues.append(("ERROR", f"Decision {nid} '{n.get('label','')}' chỉ có {len(outs)} nhánh ra — thiếu nhánh?"))
+                issues.append(("ERROR", f"Decision {nid} '{n.get('label','')}' has only {len(outs)} outgoing branch(es) — missing branch?"))
             labels = [str(e.get("label", "")).strip() for e in outs]
             if any(not lb for lb in labels):
-                issues.append(("ERROR", f"Decision {nid} có nhánh ra không có nhãn điều kiện."))
+                issues.append(("ERROR", f"Decision {nid} has an outgoing branch without a condition label."))
             if len(set(labels)) != len(labels):
-                issues.append(("WARN", f"Decision {nid} có nhãn nhánh trùng nhau: {labels}"))
+                issues.append(("WARN", f"Decision {nid} has duplicate branch labels: {labels}"))
         if t != "end" and not out_e[nid] and inv.get("diagram_type") != "state":
-            issues.append(("ERROR", f"Node {nid} '{n.get('label','')}' không có cạnh ra (dead end) và không phải end."))
+            issues.append(("ERROR", f"Node {nid} '{n.get('label','')}' has no outgoing edge (dead end) and is not an end node."))
         if t != "start" and not in_e[nid]:
-            issues.append(("WARN", f"Node {nid} '{n.get('label','')}' không có cạnh vào — không thể tới được?"))
+            issues.append(("WARN", f"Node {nid} '{n.get('label','')}' has no incoming edge — unreachable?"))
     # reachability
     seen: set[str] = set()
     q = deque(starts)
@@ -92,8 +92,8 @@ def check_flow(inv: dict[str, Any]) -> list[Issue]:
     if starts:
         for nid in ids:
             if nid not in seen:
-                issues.append(("WARN", f"Node {nid} không tới được từ start."))
-    # mỗi node tới được end?
+                issues.append(("WARN", f"Node {nid} is not reachable from start."))
+    # can every node reach an end?
     rev: dict[str, list[str]] = defaultdict(list)
     for e in edges:
         rev[e["to"]].append(e["from"])
@@ -108,7 +108,7 @@ def check_flow(inv: dict[str, Any]) -> list[Issue]:
     if ends:
         for nid in ids:
             if nid not in can_end:
-                issues.append(("WARN", f"Từ node {nid} không có đường tới end (vòng lặp không lối ra?)."))
+                issues.append(("WARN", f"No path from node {nid} to an end (loop without exit?)."))
     return issues
 
 
@@ -118,32 +118,32 @@ def check_erd(inv: dict[str, Any]) -> list[Issue]:
     for name, e in ents.items():
         attrs = e.get("attributes", [])
         if not any(a.get("pk") for a in attrs):
-            issues.append(("WARN", f"Entity {name} không có primary key được đánh dấu."))
+            issues.append(("WARN", f"Entity {name} has no primary key marked."))
         anames = [a["name"] for a in attrs]
         for d in {a for a in anames if anames.count(a) > 1}:
-            issues.append(("ERROR", f"Entity {name} có cột trùng: {d}"))
+            issues.append(("ERROR", f"Entity {name} has a duplicate column: {d}"))
         for a in attrs:
             fk = a.get("fk")
             if fk:
                 tbl, _, col = fk.partition(".")
                 if tbl not in ents:
-                    issues.append(("ERROR", f"FK {name}.{a['name']} → {fk}: bảng {tbl} không có trong inventory."))
+                    issues.append(("ERROR", f"FK {name}.{a['name']} → {fk}: table {tbl} is not in the inventory."))
                 elif col and col not in [x["name"] for x in ents[tbl].get("attributes", [])]:
-                    issues.append(("ERROR", f"FK {name}.{a['name']} → {fk}: cột {col} không tồn tại."))
+                    issues.append(("ERROR", f"FK {name}.{a['name']} → {fk}: column {col} does not exist."))
     rel_pairs = set()
     for r in inv.get("relationships", []):
         for side in ("from", "to"):
             if r[side] not in ents:
-                issues.append(("ERROR", f"Relationship tham chiếu entity không tồn tại: {r[side]}"))
+                issues.append(("ERROR", f"Relationship references a non-existent entity: {r[side]}"))
         if not VALID_CARD.match(str(r.get("cardinality", ""))):
-            issues.append(("WARN", f"Cardinality '{r.get('cardinality')}' của {r['from']}–{r['to']} không theo dạng 'A:B' (1, 0..1, N, 1..N, M)."))
+            issues.append(("WARN", f"Cardinality '{r.get('cardinality')}' of {r['from']}–{r['to']} is not in 'A:B' form (1, 0..1, N, 1..N, M)."))
         rel_pairs.add(frozenset((r["from"], r["to"])))
     for name, e in ents.items():
         for a in e.get("attributes", []):
             if a.get("fk"):
                 tbl = a["fk"].split(".")[0]
                 if tbl in ents and frozenset((name, tbl)) not in rel_pairs:
-                    issues.append(("WARN", f"FK {name}.{a['name']} → {tbl} nhưng không có relationship tương ứng."))
+                    issues.append(("WARN", f"FK {name}.{a['name']} → {tbl} but no matching relationship."))
     return issues
 
 
@@ -152,13 +152,13 @@ def check_sequence(inv: dict[str, Any]) -> list[Issue]:
     parts = set(inv.get("participants", []))
     seqs = [m.get("seq") for m in inv.get("messages", [])]
     if seqs != sorted(seqs):
-        issues.append(("WARN", "Thứ tự seq của messages không tăng dần."))
+        issues.append(("WARN", "Message seq numbers are not increasing."))
     for m in inv.get("messages", []):
         for side in ("from", "to"):
             if m[side] not in parts:
-                issues.append(("ERROR", f"Message {m.get('seq')} tham chiếu participant không tồn tại: {m[side]}"))
+                issues.append(("ERROR", f"Message {m.get('seq')} references a non-existent participant: {m[side]}"))
         if not str(m.get("label", "")).strip():
-            issues.append(("WARN", f"Message {m.get('seq')} không có nhãn."))
+            issues.append(("WARN", f"Message {m.get('seq')} has no label."))
     return issues
 
 
@@ -192,7 +192,7 @@ def to_mermaid(inv: dict[str, Any]) -> str:
             lines.append(f"  {_mid(e['from'])} -->{lb} {_mid(e['to'])}")
         return "\n".join(lines)
     if dt == "erd":
-        # Mermaid crow's foot: trái dùng |o || }o }| ; phải dùng o| || o{ |{
+        # Mermaid crow's foot: left side uses |o || }o }| ; right side uses o| || o{ |{
         card = {"1": ("||", "||"), "0..1": ("|o", "o|"), "N": ("}o", "o{"), "M": ("}o", "o{"),
                 "*": ("}o", "o{"), "0..N": ("}o", "o{"), "0..*": ("}o", "o{"),
                 "1..N": ("}|", "|{"), "1..*": ("}|", "|{")}
@@ -207,9 +207,9 @@ def to_mermaid(inv: dict[str, Any]) -> str:
             for a in e.get("attributes", []):
                 keys = ",".join(k for k, f in (("PK", a.get("pk")), ("FK", a.get("fk"))) if f)
                 full_type = str(a.get("type") or "string")
-                base_type = re.sub(r"\W.*$", "", full_type) or "string"  # Mermaid chỉ nhận kiểu dạng từ đơn
+                base_type = re.sub(r"\W.*$", "", full_type) or "string"  # Mermaid only accepts single-word types
                 comment = full_type if full_type != base_type else ""
-                if a.get("unique"):  # giữ ký hiệu UQ như ERD gốc (Mermaid chỉ có key UK)
+                if a.get("unique"):  # keep the source ERD's UQ label (Mermaid only has the UK key)
                     comment = (comment + " UQ").strip()
                 if a.get("nullable"):
                     comment = (comment + " NULL").strip()
@@ -225,7 +225,7 @@ def to_mermaid(inv: dict[str, Any]) -> str:
         for m in inv.get("messages", []):
             lines.append(f"  {_mid(m['from'])}{arrow.get(m.get('kind', 'sync'), '->>')}{_mid(m['to'])}: {m.get('seq')}. {_esc(m.get('label', ''))}")
         return "\n".join(lines)
-    return f"%% diagram_type '{dt}' chưa hỗ trợ sinh Mermaid"
+    return f"%% diagram_type '{dt}': Mermaid generation not supported"
 
 
 def run(inv: dict[str, Any]) -> list[Issue]:
@@ -237,16 +237,16 @@ def run(inv: dict[str, Any]) -> list[Issue]:
     elif dt == "sequence":
         issues = check_sequence(inv)
     else:
-        issues = [("WARN", f"diagram_type '{dt}' không có bộ kiểm tra tự động — kiểm thủ công.")]
+        issues = [("WARN", f"diagram_type '{dt}' has no automatic checker — check manually.")]
     for u in inv.get("unreadable", []):
-        issues.append(("WARN", f"Vùng không đọc được (phải ghi [CẦN XÁC NHẬN] trong tài liệu): {u}"))
+        issues.append(("WARN", f"Unreadable region (must be marked [TO CONFIRM] / [CẦN XÁC NHẬN] in the document): {u}"))
     return issues
 
 
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("inventory")
-    ap.add_argument("--mermaid", help="Ghi Mermaid ra file này để render & so sánh với ảnh gốc")
+    ap.add_argument("--mermaid", help="Write Mermaid to this file to render & compare with the source image")
     a = ap.parse_args(argv)
     inv = json.loads(Path(a.inventory).read_text(encoding="utf-8"))
     issues = run(inv)

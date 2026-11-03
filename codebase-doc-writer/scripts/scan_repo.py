@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
-"""scan_repo.py — lập inventory có trích dẫn file:line cho một codebase, làm nền viết tài liệu.
+"""scan_repo.py — build a file:line-cited inventory of a codebase as the basis for writing docs.
 
 Usage:
     python scan_repo.py <repo_dir> [--format md|json] [--max-depth 3]
 
 Design notes:
-- Chỉ dùng regex/heuristic (không import code của repo) → an toàn với repo lạ và chạy được
-  mà không cần cài dependency. Đổi lại có thể sót route/env var khai báo theo cách lạ:
-  output là *điểm khởi đầu để đọc code*, không phải nguồn sự thật cuối cùng.
-- Mọi phát hiện kèm `file:line` để người viết tài liệu trích dẫn và kiểm lại.
+- Regex/heuristics only (never imports the repo's code) → safe on unknown repos and needs no
+  dependencies. The trade-off: routes/env vars declared in unusual ways can be missed, so the output
+  is *a starting point for reading the code*, not the final source of truth.
+- Every finding carries `file:line` so the writer can cite and re-check it.
 """
 from __future__ import annotations
 
@@ -33,7 +33,7 @@ MANIFESTS = {"pyproject.toml", "requirements.txt", "requirements-dev.txt", "setu
              "alembic.ini", "Procfile", "serverless.yml", "app.yaml"}
 DOC_NAMES = re.compile(r"^(readme|changelog|contributing|architecture|adr-.*|.*\.md)$", re.I)
 
-# (framework, extensions áp dụng, pattern) — lọc theo extension để decorator Python không bị khớp nhầm pattern Express.
+# (framework, applicable extensions, pattern) — filter by extension so Python decorators never match the Express pattern.
 ROUTE_PATTERNS: list[tuple[str, set[str], re.Pattern[str]]] = [
     ("fastapi", {".py"}, re.compile(r"@(?P<obj>\w+)\.(?P<method>get|post|put|patch|delete|head|options)\(\s*[\"'](?P<path>[^\"']*)[\"']")),
     ("flask", {".py"}, re.compile(r"@(?P<obj>\w+)\.route\(\s*[\"'](?P<path>[^\"']*)[\"'](?:.*methods\s*=\s*\[(?P<methods>[^\]]*)\])?")),
@@ -49,7 +49,7 @@ ENV_PATTERNS = [
     re.compile(r"process\.env\.(?P<name>[A-Z][A-Z0-9_]+)"),
     re.compile(r"process\.env\[\s*[\"'](?P<name>[A-Z][A-Z0-9_]+)[\"']\s*\]"),
     re.compile(r"System\.getenv\(\s*\"(?P<name>[A-Z][A-Z0-9_]+)\""),
-    re.compile(r"^\s*(?P<name>[A-Z][A-Z0-9_]+)\s*=", re.M),  # chỉ áp dụng cho .env.example
+    re.compile(r"^\s*(?P<name>[A-Z][A-Z0-9_]+)\s*=", re.M),  # only applied to .env.example files
 ]
 SETTINGS_CLASS_RE = re.compile(r"class\s+(\w+)\((?:[\w.]*BaseSettings)\)")
 SETTINGS_FIELD_RE = re.compile(r"^\s{4}(?P<name>[a-z_][a-z0-9_]*)\s*:\s*(?P<type>[^=\n]+?)(?:\s*=\s*(?P<default>.+))?$", re.M)
@@ -177,7 +177,7 @@ def scan(root: Path, max_depth: int = 3) -> Inventory:
                     inv.cli.append(Hit(rel, line_of(t, m.start()), {"match": m.group(0)[:80]}))
             for m in TODO_RE.finditer(t):
                 inv.todos.append(Hit(rel, line_of(t, m.start()), {"text": m.group(0)[:100]}))
-            # pydantic BaseSettings: mỗi field là một env var (có thể kèm env_prefix)
+            # pydantic BaseSettings: every field is an env var (optionally with env_prefix)
             for cm in SETTINGS_CLASS_RE.finditer(t):
                 body_start = t.find("\n", cm.end()) + 1
                 block = t[body_start:]
@@ -216,7 +216,7 @@ def scan(root: Path, max_depth: int = 3) -> Inventory:
 
 def render_md(inv: Inventory) -> str:
     o: list[str] = [f"# Repo inventory: {inv.root}", "",
-                    "> Sinh tự động bằng regex — dùng để định hướng đọc code; kiểm lại từng mục trước khi đưa vào tài liệu.", ""]
+                    "> Auto-generated with regex — use it to guide code reading; verify every item before putting it in a document.", ""]
     o += ["## Languages", ", ".join(f"{k}: {v} files" for k, v in inv.languages.items()) or "(none)", ""]
     o += ["## Tree", "```", *inv.tree, "```", ""]
     o += ["## Manifests / config", *[f"- {m}" for m in inv.manifests], ""]

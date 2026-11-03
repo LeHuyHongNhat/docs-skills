@@ -1,101 +1,101 @@
 ---
 name: product-spec-writer
-description: Viết tài liệu đặc tả sản phẩm chuẩn chuyên nghiệp cho BA/PM/PO/DA — BRD, PRD, SRS/FRD, user story + acceptance criteria (Gherkin), use case specification, business rules, non-functional requirements, metric/KPI definition, data dictionary nghiệp vụ. Dùng skill này bất cứ khi nào người dùng muốn biến meeting notes, ý tưởng, ticket, email, yêu cầu rời rạc thành tài liệu đặc tả chặt chẽ, có ID, kiểm thử được — kể cả khi họ chỉ nói "viết PRD", "viết spec", "viết user story", "viết tài liệu yêu cầu", "định nghĩa metric", "write requirements", "draft a PRD/BRD/SRS", hoặc "chuẩn hóa yêu cầu này". Không dùng cho tài liệu sinh từ source code (dùng codebase-doc-writer), đặc tả từ ảnh biểu đồ (dùng diagram-to-doc), hay chỉ review/sửa câu chữ tài liệu có sẵn (dùng doc-clarity-review).
+description: 'Write professional product specifications for BA/PM/PO/DA — BRD, PRD, SRS/FRD, user stories + acceptance criteria (Gherkin), use case specifications, business rules, non-functional requirements, metric/KPI definitions, business data dictionaries. Use this skill whenever the user wants to turn meeting notes, ideas, tickets, emails or scattered requirements into a rigorous, ID-tagged, testable specification — even if they only say "write a PRD", "write a spec", "write user stories", "write requirements", "define this metric", "draft a PRD/BRD/SRS", or in Vietnamese "viết PRD", "viết spec", "viết user story", "viết tài liệu yêu cầu", "định nghĩa metric", "chuẩn hóa yêu cầu này". Writes in the user''s language (English or Vietnamese). Do NOT use for documentation generated from source code (use codebase-doc-writer), specifications from diagram images (use diagram-to-doc), or only reviewing/editing the wording of an existing document (use doc-clarity-review).'
 ---
 
 # Product Spec Writer
 
-Mục tiêu: tạo tài liệu đặc tả mà dev, QA và stakeholder đọc xong **hiểu giống nhau**, QA viết được test case trực tiếp từ đó, và mọi chỗ chưa chắc chắn đều hiện rõ thay vì bị lấp bằng phỏng đoán.
+Goal: produce a specification that dev, QA and stakeholders all **understand the same way** after reading, that QA can write test cases from directly, and in which every uncertainty is visible instead of being filled in with guesses.
 
-## Quy trình
+## Process
 
-### 1. Xác định loại tài liệu và người đọc
+### 1. Identify the document type and the reader
 
-| Người dùng cần | Loại tài liệu | Template |
+| The user needs | Document type | Template |
 |---|---|---|
-| Lý do kinh doanh, phạm vi dự án, stakeholder, lợi ích | BRD | `references/templates.md#brd` |
-| Một tính năng/sản phẩm: vấn đề, mục tiêu, scope, user story, AC, metric | PRD | `references/templates.md#prd` |
-| Đặc tả hệ thống chi tiết để dev/QA thực thi | SRS / FRD | `references/templates.md#srs` |
-| Backlog item cho sprint | User story + AC | `references/templates.md#user-story` |
-| Tương tác actor–hệ thống theo luồng | Use case spec | `references/templates.md#use-case` |
-| Định nghĩa KPI/metric cho dashboard, tracking | Metric definition | `references/templates.md#metric` |
+| Business case, project scope, stakeholders, benefits | BRD | `references/templates.md#brd` |
+| One feature/product: problem, goals, scope, user stories, AC, metrics | PRD | `references/templates.md#prd` |
+| Detailed system specification for dev/QA to implement | SRS / FRD | `references/templates.md#srs` |
+| Backlog item for a sprint | User story + AC | `references/templates.md#user-story` |
+| Actor–system interaction as flows | Use case spec | `references/templates.md#use-case` |
+| KPI/metric definition for dashboards, tracking | Metric definition | `references/templates.md#metric` |
 
-Nếu người dùng không nói rõ loại: chọn loại khớp nhất với input và nói một dòng ở đầu câu trả lời là đã chọn loại nào, vì sao. Chỉ hỏi lại khi hai loại dẫn tới cấu trúc khác hẳn nhau *và* sai thì tốn công làm lại.
+If the user does not state the type: pick the type that best matches the input and say in one line at the top of your reply which type you chose and why. Ask only when two types lead to very different structures *and* getting it wrong means costly rework.
 
-Đọc `references/writing-standards.md` (chuẩn câu chữ dùng chung) trước khi viết. Đọc phần template tương ứng trong `references/templates.md`.
+Read `references/writing-standards.md` (the shared writing standard) before writing. Read the matching template section in `references/templates.md`.
 
-### 2. Bóc tách input thành inventory trước khi viết
+### 2. Break the input down into an inventory before writing
 
-Input thường là meeting notes lộn xộn, chat, email. Trước khi viết văn bản, liệt kê (có thể chỉ trong suy nghĩ hoặc file nháp):
+Input is usually messy meeting notes, chat, email. Before writing prose, list (in your head or in a scratch file is fine):
 
-- **Actors** và vai trò của họ.
-- **Facts**: mọi con số, ngưỡng, quy tắc, ràng buộc — kèm nguồn (ai nói, ở đâu).
-- **Mâu thuẫn**: hai nguồn nói khác nhau về cùng một điều (vd hạn điểm 6 tháng vs 12 tháng). Đây là phát hiện có giá trị nhất của BA — không được âm thầm chọn một bên.
-- **Khoảng trống**: điều tài liệu loại này bắt buộc phải có nhưng input không nói (vd không ai nói chuyện gì xảy ra khi thanh toán thất bại).
-- **Out of scope** được nhắc đến hoặc ngầm hiểu.
+- **Actors** and their roles.
+- **Facts**: every number, threshold, rule, constraint — with its source (who said it, where).
+- **Contradictions**: two sources saying different things about the same item (e.g. points expire after 6 months vs 12 months). This is the most valuable finding a BA makes — never silently pick one side.
+- **Gaps**: things this document type must contain but the input does not mention (e.g. nobody said what happens when payment fails).
+- **Out of scope** items, stated or implied.
 
-Lý do: viết thẳng từ input lộn xộn dễ làm mất fact và che giấu mâu thuẫn; inventory giúp kiểm soát độ phủ.
+Why: writing straight from messy input easily loses facts and hides contradictions; the inventory lets you control coverage.
 
-### 3. Viết theo template
+### 3. Write to the template
 
-Nguyên tắc khi điền template:
+Rules for filling in the template:
 
-- **Mỗi requirement có ID** (`BR-`, `FR-`, `NFR-`, `US-`, `AC-`, `UC-`, `DR-`) và dùng modal chuẩn (phải / không được / nên / được phép). Không dùng "có thể" trong câu requirement.
-- **Viết theo EARS** cho functional requirement: "Khi <sự kiện>, hệ thống phải <hành vi>"; "Nếu <lỗi>, thì hệ thống phải <xử lý>".
-- **Acceptance criteria dạng Gherkin** (Given/When/Then hoặc Cho/Khi/Thì — giữ nhất quán một kiểu trong tài liệu). Mỗi user story phải có ít nhất: 1 happy path, các nhánh lỗi/biên mà input nhắc tới, và kiểm tra ranh giới của mọi ngưỡng số (đúng ngưỡng, dưới ngưỡng, trên ngưỡng).
-- **NFR phải đo được**: metric + ngưỡng + điều kiện đo (vd "p95 ≤ 300 ms ở 200 RPS", "uptime ≥ 99,9%/tháng"). Nếu input không có số: viết khung NFR với [CẦN XÁC NHẬN: ngưỡng] thay vì tự bịa số.
-- **Business rule tách riêng khỏi UI**: rule (vd "điểm hết hạn sau N tháng") đặt trong bảng BR, các FR/AC tham chiếu ID rule đó. Khi rule đổi chỉ sửa một chỗ.
-- **Biên ngưỡng tường minh**: "≥ 50.000.000 VND" khác "> 50.000.000 VND". Nếu input nói "trên 50 triệu" mà không rõ có bao gồm 50 triệu hay không, ghi [CẦN XÁC NHẬN].
-- **Mọi mâu thuẫn và khoảng trống** từ bước 2 vào mục Open Questions (ID `OQ-`, ảnh hưởng, người trả lời). Giả định buộc phải đặt để viết tiếp → mục Assumptions (`AS-`).
-- Giữ đúng ngôn ngữ người dùng dùng; tiếng Việt giữ thuật ngữ kỹ thuật tiếng Anh thông dụng.
-- **Không đưa giá trị tự đề xuất vào requirement/AC.** Input nói "tầm 2-3s" → requirement ghi ngưỡng có trong input (≤ 3 giây) và đưa percentile/điều kiện tải vào Open Questions; không tự chế "p95 ≤ 2s". Giá trị gợi ý (nếu muốn giúp stakeholder quyết nhanh) để ở cột ghi chú của Open Questions.
-- **Độ dài tương xứng input** (writing-standards §7b): chỉ thêm quy ước RFC 2119, Glossary, ma trận truy vết khi là SRS/tài liệu lớn; mỗi câu hỏi mở chỉ xuất hiện một lần trong bảng Open Questions.
+- **Every requirement has an ID** (`BR-`, `FR-`, `NFR-`, `US-`, `AC-`, `UC-`, `DR-`) and uses a standard modal: MUST / MUST NOT / SHOULD / MAY (in Vietnamese documents: phải / không được / nên / được phép). Never use Vietnamese "có thể" in a requirement sentence (it is ambiguous between possibility and permission).
+- **Write functional requirements in EARS**: "When <event>, the system MUST <behaviour>"; "If <error>, then the system MUST <handling>".
+- **Acceptance criteria in Gherkin** (Given/When/Then, or Cho/Khi/Thì in Vietnamese documents — use one style consistently within a document). Every user story must have at least: 1 happy path, the error/edge branches mentioned in the input, and boundary checks for every numeric threshold (at the threshold, below it, above it).
+- **NFRs must be measurable**: metric + threshold + measurement condition (e.g. "p95 ≤ 300 ms at 200 RPS", "uptime ≥ 99.9%/month"). If the input has no number: write the NFR skeleton with [TO CONFIRM: threshold] (Vietnamese documents: [CẦN XÁC NHẬN: ngưỡng]) instead of inventing a number.
+- **Keep business rules separate from the UI**: a rule (e.g. "points expire after N months") goes in the BR table, and FRs/ACs reference that rule's ID. When the rule changes, only one place is edited.
+- **Explicit threshold boundaries**: "≥ 50,000,000 VND" is not the same as "> 50,000,000 VND". If the input says "over 50 million" without making clear whether 50 million itself is included, write [TO CONFIRM: …] / [CẦN XÁC NHẬN: …].
+- **Every contradiction and gap** from step 2 goes into the Open Questions section (ID `OQ-`, impact, who answers). Assumptions you are forced to make in order to keep writing → Assumptions section (`AS-`).
+- **Output language**: write the document in the language the user writes in (English or Vietnamese most often). In Vietnamese documents, keep common English technical terms (API, endpoint, user story, acceptance criteria, latency, KPI …) untranslated. Mark open items as [TO CONFIRM: <specific question>] in English documents and [CẦN XÁC NHẬN: <câu hỏi>] in Vietnamese documents; both are recognised by the linter and highlighted by the renderer. Write the marker as plain text, never inside backticks.
+- **Do not put self-proposed values into requirements/AC.** Input says "around 2-3s" → the requirement states the threshold given in the input (≤ 3 seconds) and the percentile/load condition goes into Open Questions; do not make up "p95 ≤ 2s". Suggested values (if you want to help stakeholders decide quickly) go in the notes column of Open Questions.
+- **Length proportional to the input** (writing-standards §7b): add RFC 2119 conventions, a Glossary and a traceability matrix only for an SRS/large document; each open question appears only once, in the Open Questions table.
 
-### 4. Tự kiểm
+### 4. Self-check
 
-1. Chạy linter trên file kết quả:
+1. Run the linter on the output file:
    ```bash
    python <skill-dir>/scripts/lint_doc.py <output.md>
    ```
-   Sửa mọi finding `high`. Finding `medium` còn lại phải có lý do giữ (vd từ "đơn giản" nằm trong tên tính năng).
-2. Đối chiếu inventory: mọi fact trong input xuất hiện trong tài liệu hoặc được ghi rõ là out of scope; mọi mâu thuẫn có trong Open Questions.
-3. Đọc lại với vai QA: với mỗi AC, có viết được test case pass/fail rõ ràng không? Nếu không — AC chưa đạt.
+   Fix every `high` finding. Any remaining `medium` finding must have a reason to keep it (e.g. the word "simple" is part of a feature name).
+2. Check against the inventory: every fact in the input appears in the document or is explicitly marked out of scope; every contradiction is in Open Questions.
+3. Re-read as QA: for each AC, can you write a test case with a clear pass/fail? If not — the AC is not done.
 
-### 5. Bàn giao
+### 5. Hand-off
 
-### Xuất định dạng & kiểm tra thẩm mỹ
+### Export formats & visual check
 
-Markdown là nguồn. Khi người dùng cần PDF/DOCX/XLSX (gửi sếp/khách, in, "file Word", "Excel để lọc"), hoặc nói tài liệu sẽ được chia sẻ, đọc `references/visual-style.md` rồi render:
+Markdown is the source. When the user needs PDF/DOCX/XLSX (sending to an approver/client, printing, "a Word file", "Excel to filter"), or says the document will be shared, read `references/visual-style.md`, then render:
 ```bash
-python <skill-dir>/scripts/render_doc.py <file.md> --to pdf,docx,xlsx --out-dir <thư mục output> --qa
+python <skill-dir>/scripts/render_doc.py <file.md> --to pdf,docx,xlsx --out-dir <output dir> --qa
 ```
-Người dùng nói đọc trên điện thoại/mobile → thêm `--page mobile` (khổ hẹp, bảng thành thẻ); cần cả bản in thì render thêm bản A4. Xem warnings và các ảnh trang trong `qa.preview_pages` (ít nhất trang đầu, trang có bảng lớn nhất, trang có diagram); sửa `.md` rồi render lại nếu bảng tràn, diagram không hiện, chữ lỗi dấu. Không nói định dạng nào là "đã xuất" nếu script báo bỏ qua nó. Người dùng không nhắc định dạng → chỉ giao `.md` và nhắc một dòng rằng có thể xuất PDF/DOCX/XLSX.
+User says they will read on a phone/mobile → add `--page mobile` (narrow page, tables become cards); if a printed version is also needed, render an A4 version as well. Review the warnings and the page images in `qa.preview_pages` (at least the first page, the page with the largest table, the page with a diagram); fix the `.md` and re-render if a table overflows, a diagram does not show, or text has broken diacritics. Do not say a format was "exported" if the script reports it skipped it. User does not mention a format → deliver only the `.md` and add one line saying it can be exported to PDF/DOCX/XLSX.
 
-- Lưu tài liệu Markdown (và các định dạng đã render).
-- Trong câu trả lời: 2–4 dòng tóm tắt + số Open Questions cần stakeholder trả lời. Không dán lại toàn bộ tài liệu vào chat nếu đã có file.
+- Save the Markdown document (and any rendered formats).
+- In the reply: a 2–4 line summary + the number of Open Questions that stakeholders need to answer. Do not paste the whole document into chat if a file already exists.
 
-## Mẫu ngắn (để định hướng văn phong)
+## Short example (to set the writing style)
 
-❌ "Người dùng có thể đổi điểm lấy voucher nhanh chóng, hệ thống sẽ xử lý phù hợp nếu điểm không đủ."
+❌ "Users can quickly redeem points for vouchers, and the system will handle it appropriately if there are not enough points."
 
 ✅
 ```
-BR-003. 100 điểm = 10.000 VND giá trị voucher. Chỉ đổi theo bội số 100 điểm.
-FR-007. Khi người dùng xác nhận đổi điểm, hệ thống phải trừ điểm và phát hành voucher trong ≤ 3 giây (p95).
-FR-008. Nếu số điểm khả dụng < số điểm cần đổi, thì hệ thống phải chặn giao dịch và hiển thị "Bạn chưa đủ điểm để đổi voucher này".
+BR-003. 100 points = 10,000 VND of voucher value. Points are redeemed only in multiples of 100.
+FR-007. When the user confirms a redemption, the system MUST deduct the points and issue the voucher within ≤ 3 seconds (p95).
+FR-008. If the available points < the points required, then the system MUST block the transaction and display "You do not have enough points to redeem this voucher".
 
-AC-007.1  Given người dùng có 500 điểm khả dụng
-          When đổi voucher 50.000 VND (500 điểm)
-          Then số điểm khả dụng = 0 và voucher có trạng thái "Chưa sử dụng"
-AC-007.2  Given người dùng có 499 điểm khả dụng
-          When đổi voucher 50.000 VND
-          Then giao dịch bị chặn, điểm không đổi, hiển thị thông báo theo FR-008
+AC-007.1  Given the user has 500 available points
+          When they redeem a 50,000 VND voucher (500 points)
+          Then available points = 0 and the voucher has status "Unused"
+AC-007.2  Given the user has 499 available points
+          When they redeem a 50,000 VND voucher
+          Then the transaction is blocked, points are unchanged, and the message per FR-008 is displayed
 ```
 
-## Tài nguyên
+## Resources
 
-- `references/writing-standards.md` — chuẩn câu chữ, modal, EARS, danh sách từ mơ hồ, xử lý thiếu/mâu thuẫn.
-- `references/templates.md` — template BRD, PRD, SRS, user story, use case, metric definition.
-- `scripts/lint_doc.py` — linter phát hiện từ mơ hồ, placeholder, ID trùng, thuật ngữ không nhất quán.
-- `scripts/render_doc.py` + `assets/` — xuất HTML/PDF/DOCX/XLSX có thiết kế, `--qa` render ảnh trang để kiểm tra.
-- `references/visual-style.md` — quy tắc viết Markdown để render đẹp và quy trình visual QA.
+- `references/writing-standards.md` — writing standard, modals, EARS, vague-term list, handling missing/contradictory information.
+- `references/templates.md` — templates for BRD, PRD, SRS, user story, use case, metric definition.
+- `scripts/lint_doc.py` — linter that detects vague terms, placeholders, duplicate IDs, inconsistent terminology.
+- `scripts/render_doc.py` + `assets/` — designed HTML/PDF/DOCX/XLSX export; `--qa` renders page images for checking.
+- `references/visual-style.md` — rules for writing Markdown that renders well, and the visual QA process.

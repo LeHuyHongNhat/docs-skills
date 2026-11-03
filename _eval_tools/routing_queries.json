@@ -1,28 +1,146 @@
 [
-  {"query": "mình vừa họp xong với marketing về tính năng giới thiệu bạn bè nhận thưởng, note lộn xộn lắm, mình paste dưới đây, viết giúp bản PRD có user story với acceptance criteria để gửi dev nhé:\n- mời bạn đăng ký thành công thì cả 2 được 50k\n- tối đa 10 lượt/tháng\n- bạn phải đặt đơn đầu tiên trong 7 ngày", "expected": "product-spec-writer"},
-  {"query": "Draft a BRD for our warehouse barcode scanning project. Stakeholders: ops director, 3 warehouse leads, IT. Goal is cutting picking errors from 2.1% to under 0.5% by Q2. Budget 800tr.", "expected": "product-spec-writer"},
-  {"query": "viết user story + AC dạng given when then cho chức năng quên mật khẩu qua email, link reset hết hạn sau 30 phút, mỗi link chỉ dùng 1 lần", "expected": "product-spec-writer"},
-  {"query": "Sếp bảo DA team phải có tài liệu định nghĩa chuẩn cho các KPI: GMV, AOV, conversion rate checkout. Mỗi team đang tính một kiểu. Bảng nguồn là dwh.orders và dwh.sessions. Soạn giúp mình.", "expected": "product-spec-writer"},
-  {"query": "chuyển đống yêu cầu rời rạc trong ticket JIRA này thành tài liệu SRS có ID requirement, NFR đo được: khách muốn app chạy trên cả iOS lẫn Android, đăng nhập bằng Zalo, xem lịch sử giao dịch 12 tháng, xuất sao kê PDF", "expected": "product-spec-writer"},
-  {"query": "repo billing-service ở ./services/billing chưa có tài liệu gì, viết README giúp mình để dev mới clone về chạy được, có bảng env vars luôn", "expected": "codebase-doc-writer"},
-  {"query": "Can you document the REST API in src/api/routes/*.ts as an API reference for the mobile team? Include request/response schemas and error codes.", "expected": "codebase-doc-writer"},
-  {"query": "đọc code trong thư mục ingestion-pipeline/ rồi viết tài liệu kiến trúc có diagram để onboard dev mới, nói rõ data đi từ kafka vào clickhouse thế nào", "expected": "codebase-doc-writer"},
-  {"query": "viết runbook cho service payment-gateway (code ở ./payment-gateway): cách restart, health check, sự cố thường gặp khi queue bị nghẽn", "expected": "codebase-doc-writer"},
-  {"query": "We decided to move from REST polling to websockets in the notification service. Look at the code in notifier/ and write an ADR capturing the decision and consequences.", "expected": "codebase-doc-writer"},
-  {"query": "[ảnh đính kèm: bpmn_quy_trinh_hoan_tien.png] đây là BPMN quy trình hoàn tiền bên CSKH vẽ trên draw.io, viết lại thành tài liệu đặc tả quy trình có business rules giúp mình", "expected": "diagram-to-doc"},
-  {"query": "I attached a photo of the whiteboard ERD from today's design session (erd_whiteboard.jpg). Turn it into a proper data dictionary with PK/FK and cardinality.", "expected": "diagram-to-doc"},
-  {"query": "có cái sequence diagram luồng thanh toán VNPay (sequence_vnpay.png), viết spec từng bước gọi API, xử lý timeout giúp mình", "expected": "diagram-to-doc"},
-  {"query": "designer gửi mockup màn hình đăng ký (signup_mockup.png), viết screen spec liệt kê từng field, validation, trạng thái lỗi để dev FE làm", "expected": "diagram-to-doc"},
-  {"query": "screenshot sơ đồ state machine trạng thái đơn hàng đây (order_states.png), mô tả thành bảng transition chuẩn cho team", "expected": "diagram-to-doc"},
-  {"query": "Review giúp mình bản PRD này xem chỗ nào mơ hồ, không test được: 'Hệ thống phải xử lý nhanh, hỗ trợ nhiều phương thức thanh toán, v.v. Người dùng có thể hủy đơn khi cần.'", "expected": "doc-clarity-review"},
-  {"query": "anh PM viết spec kiểu văn nói quá, mình paste vào đây, viết lại cho chuyên nghiệp chặt chẽ giúp em: 'khi user bấm thanh toán thì cho qua trang VNPay liền, xong thì báo user là ok, lỗi thì báo lỗi phù hợp'", "expected": "doc-clarity-review"},
-  {"query": "Is this requirement testable? 'The system shall be user-friendly and respond quickly under heavy load.' Rewrite it if not.", "expected": "doc-clarity-review"},
-  {"query": "soát lỗi câu chữ, thuật ngữ không nhất quán trong file srs_v2.md trước khi mình gửi khách hàng ký", "expected": "doc-clarity-review"},
-  {"query": "QA phàn nàn acceptance criteria trong mấy user story này không viết test được, xem giúp chỗ nào cần sửa và sửa luôn:\nUS-12: Là khách hàng tôi muốn tìm kiếm sản phẩm. AC: kết quả hiển thị phù hợp, nhanh.", "expected": "doc-clarity-review"},
-  {"query": "vẽ giúp mình flowchart bằng mermaid cho quy trình: nhân viên tạo đơn -> trưởng phòng duyệt -> kế toán thanh toán", "expected": "none"},
-  {"query": "dịch file README.md này sang tiếng Anh giữ nguyên format markdown", "expected": "none"},
-  {"query": "viết email gửi khách hàng xin lùi deadline dự án 2 tuần vì thay đổi scope", "expected": "none"},
-  {"query": "fix giúp bug: hàm calculate_discount trả về số âm khi voucher lớn hơn giá trị đơn", "expected": "none"},
-  {"query": "viết test case chi tiết (steps, test data, expected result) dạng bảng excel cho chức năng đăng nhập để QA chạy regression", "expected": "none"},
-  {"query": "làm slide 10 trang thuyết trình kết quả kinh doanh Q3 cho ban giám đốc", "expected": "none"}
+  {
+    "query": "mình vừa họp xong với marketing về tính năng giới thiệu bạn bè nhận thưởng, note lộn xộn lắm, mình paste dưới đây, viết giúp bản PRD có user story với acceptance criteria để gửi dev nhé:\n- mời bạn đăng ký thành công thì cả 2 được 50k\n- tối đa 10 lượt/tháng\n- bạn phải đặt đơn đầu tiên trong 7 ngày",
+    "expected": "product-spec-writer"
+  },
+  {
+    "query": "Draft a BRD for our warehouse barcode scanning project. Stakeholders: ops director, 3 warehouse leads, IT. Goal is cutting picking errors from 2.1% to under 0.5% by Q2. Budget 800tr.",
+    "expected": "product-spec-writer"
+  },
+  {
+    "query": "viết user story + AC dạng given when then cho chức năng quên mật khẩu qua email, link reset hết hạn sau 30 phút, mỗi link chỉ dùng 1 lần",
+    "expected": "product-spec-writer"
+  },
+  {
+    "query": "Sếp bảo DA team phải có tài liệu định nghĩa chuẩn cho các KPI: GMV, AOV, conversion rate checkout. Mỗi team đang tính một kiểu. Bảng nguồn là dwh.orders và dwh.sessions. Soạn giúp mình.",
+    "expected": "product-spec-writer"
+  },
+  {
+    "query": "chuyển đống yêu cầu rời rạc trong ticket JIRA này thành tài liệu SRS có ID requirement, NFR đo được: khách muốn app chạy trên cả iOS lẫn Android, đăng nhập bằng Zalo, xem lịch sử giao dịch 12 tháng, xuất sao kê PDF",
+    "expected": "product-spec-writer"
+  },
+  {
+    "query": "repo billing-service ở ./services/billing chưa có tài liệu gì, viết README giúp mình để dev mới clone về chạy được, có bảng env vars luôn",
+    "expected": "codebase-doc-writer"
+  },
+  {
+    "query": "Can you document the REST API in src/api/routes/*.ts as an API reference for the mobile team? Include request/response schemas and error codes.",
+    "expected": "codebase-doc-writer"
+  },
+  {
+    "query": "đọc code trong thư mục ingestion-pipeline/ rồi viết tài liệu kiến trúc có diagram để onboard dev mới, nói rõ data đi từ kafka vào clickhouse thế nào",
+    "expected": "codebase-doc-writer"
+  },
+  {
+    "query": "viết runbook cho service payment-gateway (code ở ./payment-gateway): cách restart, health check, sự cố thường gặp khi queue bị nghẽn",
+    "expected": "codebase-doc-writer"
+  },
+  {
+    "query": "We decided to move from REST polling to websockets in the notification service. Look at the code in notifier/ and write an ADR capturing the decision and consequences.",
+    "expected": "codebase-doc-writer"
+  },
+  {
+    "query": "[ảnh đính kèm: bpmn_quy_trinh_hoan_tien.png] đây là BPMN quy trình hoàn tiền bên CSKH vẽ trên draw.io, viết lại thành tài liệu đặc tả quy trình có business rules giúp mình",
+    "expected": "diagram-to-doc"
+  },
+  {
+    "query": "I attached a photo of the whiteboard ERD from today's design session (erd_whiteboard.jpg). Turn it into a proper data dictionary with PK/FK and cardinality.",
+    "expected": "diagram-to-doc"
+  },
+  {
+    "query": "có cái sequence diagram luồng thanh toán VNPay (sequence_vnpay.png), viết spec từng bước gọi API, xử lý timeout giúp mình",
+    "expected": "diagram-to-doc"
+  },
+  {
+    "query": "designer gửi mockup màn hình đăng ký (signup_mockup.png), viết screen spec liệt kê từng field, validation, trạng thái lỗi để dev FE làm",
+    "expected": "diagram-to-doc"
+  },
+  {
+    "query": "screenshot sơ đồ state machine trạng thái đơn hàng đây (order_states.png), mô tả thành bảng transition chuẩn cho team",
+    "expected": "diagram-to-doc"
+  },
+  {
+    "query": "Review giúp mình bản PRD này xem chỗ nào mơ hồ, không test được: 'Hệ thống phải xử lý nhanh, hỗ trợ nhiều phương thức thanh toán, v.v. Người dùng có thể hủy đơn khi cần.'",
+    "expected": "doc-clarity-review"
+  },
+  {
+    "query": "anh PM viết spec kiểu văn nói quá, mình paste vào đây, viết lại cho chuyên nghiệp chặt chẽ giúp em: 'khi user bấm thanh toán thì cho qua trang VNPay liền, xong thì báo user là ok, lỗi thì báo lỗi phù hợp'",
+    "expected": "doc-clarity-review"
+  },
+  {
+    "query": "Is this requirement testable? 'The system shall be user-friendly and respond quickly under heavy load.' Rewrite it if not.",
+    "expected": "doc-clarity-review"
+  },
+  {
+    "query": "soát lỗi câu chữ, thuật ngữ không nhất quán trong file srs_v2.md trước khi mình gửi khách hàng ký",
+    "expected": "doc-clarity-review"
+  },
+  {
+    "query": "QA phàn nàn acceptance criteria trong mấy user story này không viết test được, xem giúp chỗ nào cần sửa và sửa luôn:\nUS-12: Là khách hàng tôi muốn tìm kiếm sản phẩm. AC: kết quả hiển thị phù hợp, nhanh.",
+    "expected": "doc-clarity-review"
+  },
+  {
+    "query": "vẽ giúp mình flowchart bằng mermaid cho quy trình: nhân viên tạo đơn -> trưởng phòng duyệt -> kế toán thanh toán",
+    "expected": "none"
+  },
+  {
+    "query": "dịch file README.md này sang tiếng Anh giữ nguyên format markdown",
+    "expected": "none"
+  },
+  {
+    "query": "viết email gửi khách hàng xin lùi deadline dự án 2 tuần vì thay đổi scope",
+    "expected": "none"
+  },
+  {
+    "query": "fix giúp bug: hàm calculate_discount trả về số âm khi voucher lớn hơn giá trị đơn",
+    "expected": "none"
+  },
+  {
+    "query": "viết test case chi tiết (steps, test data, expected result) dạng bảng excel cho chức năng đăng nhập để QA chạy regression",
+    "expected": "none"
+  },
+  {
+    "query": "làm slide 10 trang thuyết trình kết quả kinh doanh Q3 cho ban giám đốc",
+    "expected": "none"
+  },
+  {
+    "query": "Here are my messy notes from today's planning call about a referral program (invite a friend, both get $5 after the friend's first order within 7 days, max 10 invites/month). Turn them into a proper PRD with user stories and acceptance criteria for the dev team.",
+    "expected": "product-spec-writer"
+  },
+  {
+    "query": "Our analytics and marketing teams compute weekly active users differently. Write a metric definition doc for WAU and 30-day retention that everyone can use, based on the events table schema I'll paste below.",
+    "expected": "product-spec-writer"
+  },
+  {
+    "query": "There's no README in ./inventory-api (FastAPI + Postgres). Write one so a new engineer can get it running locally, including an env var table.",
+    "expected": "codebase-doc-writer"
+  },
+  {
+    "query": "Read the code under services/checkout and produce an architecture overview with a C4 container diagram for onboarding.",
+    "expected": "codebase-doc-writer"
+  },
+  {
+    "query": "Attached is a screenshot of our loan approval swimlane diagram (loan_flow.png). Write a process specification from it that IT can build against.",
+    "expected": "diagram-to-doc"
+  },
+  {
+    "query": "I have a photo of an ERD from a whiteboard session (erd_photo.jpg). Can you turn it into a data dictionary with PK/FK and cardinalities?",
+    "expected": "diagram-to-doc"
+  },
+  {
+    "query": "Can you review this spec and point out anything vague or untestable? 'The system should respond quickly and handle errors appropriately. Users may export reports in various formats, etc.'",
+    "expected": "doc-clarity-review"
+  },
+  {
+    "query": "Polish this requirements section so it's unambiguous and professional before I send it to the client: 'When user clicks pay it goes to the gateway, if ok we show success, otherwise show a suitable error.'",
+    "expected": "doc-clarity-review"
+  },
+  {
+    "query": "Translate this README into Vietnamese, keep the markdown formatting.",
+    "expected": "none"
+  },
+  {
+    "query": "Write a cover letter for a senior BA position at a fintech company.",
+    "expected": "none"
+  }
 ]

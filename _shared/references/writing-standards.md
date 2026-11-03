@@ -1,151 +1,159 @@
-# Writing Standards — chuẩn câu chữ cho tài liệu sản phẩm & kỹ thuật
+# Writing Standards — wording standards for product & technical documents
 
-File này dùng chung cho cả bộ skill. Đọc toàn bộ trước khi viết hoặc review tài liệu.
+This file is shared by every skill in the set. Read all of it before writing or reviewing a document.
 
-## Mục lục
-1. Nguyên tắc cốt lõi
-2. Ngôn ngữ & thuật ngữ (VI/EN)
-3. Modal verb — mức độ bắt buộc
-4. Viết một requirement đạt chuẩn
-5. Danh sách từ/cụm từ mơ hồ và cách thay thế
-6. Định dạng số, đơn vị, thời gian
-7. Xử lý thông tin thiếu hoặc mâu thuẫn (+ 7b. Độ dài tương xứng)
-8. Checklist tự kiểm trước khi bàn giao
+## Contents
+1. Core principles
+2. Language & terminology (EN/VI)
+3. Modal verbs — level of obligation
+4. Writing a well-formed requirement
+5. List of vague terms and their replacements
+6. Formatting numbers, units and time
+7. Handling missing or conflicting information (+ 7b. Length proportional to input)
+8. Self-check checklist before hand-off
 
 ---
 
-## 1. Nguyên tắc cốt lõi
+## 1. Core principles
 
-Người đọc tài liệu (dev, QA, stakeholder, auditor) không thể hỏi lại người viết. Vì vậy mỗi câu phải có **đúng một cách hiểu**, và mọi cam kết phải **kiểm chứng được**.
+Document readers (dev, QA, stakeholders, auditors) cannot ask the writer follow-up questions. Therefore every sentence must have **exactly one interpretation**, and every commitment must be **verifiable**.
 
-- **Một câu – một ý.** Câu chứa "và", "hoặc" nối hai hành vi độc lập thì tách thành hai câu/hai requirement.
-- **Có chủ thể rõ ràng.** Mỗi hành động phải nói *ai* (actor/hệ thống/service nào) làm. Tránh bị động không chủ thể: "Dữ liệu được xử lý" → "Service `billing-worker` xử lý dữ liệu".
-- **Định lượng thay vì định tính.** "Nhanh" không kiểm thử được; "p95 latency ≤ 300 ms ở 200 RPS" thì được.
-- **Không bịa.** Chỉ viết điều có nguồn (input của người dùng, code, ảnh, tài liệu). Thiếu thông tin thì đánh dấu, không lấp chỗ trống bằng số "nghe hợp lý".
-- **Nhất quán thuật ngữ.** Một khái niệm – một từ – suốt tài liệu. Định nghĩa trong Glossary ngay lần đầu xuất hiện nếu dễ hiểu sai.
-- **Viết cho người quét nhanh.** Heading rõ, bảng cho dữ liệu có cấu trúc, ID cho mọi requirement để trace.
+- **One sentence – one idea.** If a sentence joins two independent behaviours with "and" or "or", split it into two sentences / two requirements.
+- **Name the subject.** Every action must state *who* (which actor / system / service) performs it. Avoid passive voice without an agent: "The data is processed" → "Service `billing-worker` processes the data".
+- **Quantify instead of qualify.** "Fast" is not testable; "p95 latency ≤ 300 ms at 200 RPS" is.
+- **Do not invent.** Write only what has a source (user input, code, images, documents). When information is missing, mark it; do not fill the gap with numbers that merely "sound reasonable".
+- **Consistent terminology.** One concept – one term – throughout the document. Define it in the Glossary at first use if it is easy to misread.
+- **Write for skimmers.** Clear headings, tables for structured data, an ID on every requirement for traceability.
 
-## 2. Ngôn ngữ & thuật ngữ (VI/EN)
+## 2. Language & terminology (EN/VI)
 
-- Viết theo ngôn ngữ người dùng dùng để yêu cầu. Tài liệu tiếng Việt **giữ nguyên thuật ngữ kỹ thuật tiếng Anh** khi đó là từ ngành dùng hằng ngày (API, endpoint, user story, acceptance criteria, backlog, sprint, latency, timeout, retry, cache, payload, token, KPI, funnel, churn, retention). Không dịch gượng ("giao diện lập trình ứng dụng" → dùng "API").
-- Lần đầu dùng từ viết tắt ít phổ biến: viết đầy đủ kèm viết tắt — "Service Level Objective (SLO)".
-- Không trộn hai từ cho cùng một khái niệm: chọn "người dùng" *hoặc* "khách hàng" *hoặc* "user" — nếu chúng là các actor khác nhau thì định nghĩa rõ sự khác nhau trong Glossary.
-- Văn phong: trung tính, khẳng định, không cảm thán, không marketing ("tuyệt vời", "đột phá", "mạnh mẽ" → bỏ).
-- Ngôi: dùng tên actor/hệ thống, không dùng "chúng ta", "bạn" trong đặc tả (README/hướng dẫn người dùng được phép dùng "bạn").
+- **Output language:** write the document in the language the user writes the request in (most often English or Vietnamese).
+- **Vietnamese documents keep English technical terms** that the industry uses daily (API, endpoint, user story, acceptance criteria, backlog, sprint, latency, timeout, retry, cache, payload, token, KPI, funnel, churn, retention). Do not force translations ("giao diện lập trình ứng dụng" → use "API").
+- **Open-item marker:** [TO CONFIRM: <specific question>] in English documents, [CẦN XÁC NHẬN: <câu hỏi cụ thể>] in Vietnamese documents. Both are recognised by the linter and highlighted by the renderer. Write the marker as plain text, never inside backticks (see §7).
+- **Number formatting:** English documents use a comma as thousands separator and a dot as decimal separator (`1,250,000.50`); Vietnamese documents use the reverse (`1.250.000,50`). See §6.
+- First use of a less common abbreviation: write the full form plus the abbreviation — "Service Level Objective (SLO)".
+- Do not mix two words for the same concept: pick "user" *or* "customer" (Vietnamese: "người dùng" *or* "khách hàng" *or* "user"). If they are different actors, define the difference in the Glossary.
+- Tone: neutral, assertive, no exclamations, no marketing words ("amazing", "breakthrough", "powerful" → remove; Vietnamese: "tuyệt vời", "đột phá", "mạnh mẽ").
+- Person: use actor/system names, not "we" or "you" ("chúng ta", "bạn") in specifications (README / user guides may use "you" / "bạn").
 
-Bảng thuật ngữ chuẩn hay gặp:
+Standard terminology table:
 
-| Nên dùng | Tránh |
-|---|---|
-| người dùng / user (chọn 1) | lúc "user", lúc "người sử dụng", lúc "khách" |
-| hệ thống trả về lỗi `<mã lỗi>` | hệ thống báo lỗi |
-| hiển thị thông báo "<nội dung chính xác>" | hiện thông báo phù hợp |
-| trong vòng N giây kể từ <sự kiện> | ngay lập tức, kịp thời |
-| tối đa / tối thiểu N | khoảng N, tầm N |
-| bắt buộc / không bắt buộc (field) | có thể nhập |
-| Acceptance Criteria (AC) | điều kiện chấp nhận (nếu team dùng tiếng Anh) |
-
-## 3. Modal verb — mức độ bắt buộc
-
-Dùng nhất quán theo RFC 2119. Khai báo quy ước này ở đầu tài liệu đặc tả.
-
-| Mức | Tiếng Việt | English | Ý nghĩa |
+| Use (EN) | Avoid (EN) | Use (VI) | Avoid (VI) |
 |---|---|---|---|
-| Bắt buộc | **phải** | MUST / SHALL | Không đạt = không nghiệm thu |
-| Cấm | **không được** | MUST NOT | Vi phạm = lỗi |
-| Khuyến nghị | **nên** | SHOULD | Có thể bỏ qua nếu có lý do ghi nhận |
-| Tùy chọn | **được phép** | MAY | Không ảnh hưởng nghiệm thu |
+| user (pick one term) | sometimes "user", sometimes "end user", sometimes "customer" | người dùng / user (chọn 1) | lúc "user", lúc "người sử dụng", lúc "khách" |
+| the system returns error `<error code>` | the system reports an error | hệ thống trả về lỗi `<mã lỗi>` | hệ thống báo lỗi |
+| displays the message "<exact text>" | displays an appropriate message | hiển thị thông báo "<nội dung chính xác>" | hiện thông báo phù hợp |
+| within N seconds of <event> | immediately, in a timely manner | trong vòng N giây kể từ <sự kiện> | ngay lập tức, kịp thời |
+| at most / at least N | about N, around N | tối đa / tối thiểu N | khoảng N, tầm N |
+| required / optional (field) | can be entered | bắt buộc / không bắt buộc (field) | có thể nhập |
+| Acceptance Criteria (AC) | — | Acceptance Criteria (AC) | điều kiện chấp nhận (nếu team dùng tiếng Anh) |
 
-"Có thể" trong tiếng Việt vừa mang nghĩa *khả năng* vừa mang nghĩa *cho phép* → **không dùng "có thể" trong câu requirement**. Dùng "được phép" (permission) hoặc viết lại thành năng lực của hệ thống ("Hệ thống phải cho phép người dùng xuất file CSV").
+## 3. Modal verbs — level of obligation
 
-## 4. Viết một requirement đạt chuẩn
+Use them consistently per RFC 2119. Declare this convention at the start of the specification.
 
-Một requirement tốt có các đặc tính (theo ISO/IEC/IEEE 29148): **cần thiết, đơn nghĩa, kiểm chứng được, đơn lẻ (singular), khả thi, truy vết được, nhất quán**.
+| Level | English | Vietnamese | Meaning |
+|---|---|---|---|
+| Mandatory | MUST / SHALL | **phải** | Not met = not accepted |
+| Prohibited | MUST NOT | **không được** | Violation = defect |
+| Recommended | SHOULD | **nên** | May be skipped if the reason is recorded |
+| Optional | MAY | **được phép** | Does not affect acceptance |
 
-Dùng mẫu EARS (Easy Approach to Requirements Syntax):
+In Vietnamese, "có thể" means both *possibility* and *permission* → **do not use "có thể" in a requirement sentence**. Use "được phép" (permission), or rewrite it as a system capability ("Hệ thống phải cho phép người dùng xuất file CSV" — "The system shall allow the user to export a CSV file").
 
-| Loại | Mẫu VI | Mẫu EN |
+## 4. Writing a well-formed requirement
+
+A good requirement has these characteristics (per ISO/IEC/IEEE 29148): **necessary, unambiguous, verifiable, singular, feasible, traceable, consistent**.
+
+Use the EARS pattern (Easy Approach to Requirements Syntax):
+
+| Type | EN pattern | VI pattern |
 |---|---|---|
-| Ubiquitous | Hệ thống `<X>` phải `<hành vi>`. | The `<system>` shall `<response>`. |
-| Event-driven | Khi `<sự kiện>`, hệ thống `<X>` phải `<hành vi>`. | When `<trigger>`, the `<system>` shall `<response>`. |
-| State-driven | Trong khi `<trạng thái>`, hệ thống phải `<hành vi>`. | While `<state>`, the `<system>` shall `<response>`. |
-| Unwanted behaviour | Nếu `<điều kiện lỗi>`, thì hệ thống phải `<xử lý>`. | If `<condition>`, then the `<system>` shall `<response>`. |
-| Optional feature | Ở nơi `<tính năng được bật>`, hệ thống phải `<hành vi>`. | Where `<feature>`, the `<system>` shall `<response>`. |
+| Ubiquitous | The `<system>` shall `<response>`. | Hệ thống `<X>` phải `<hành vi>`. |
+| Event-driven | When `<trigger>`, the `<system>` shall `<response>`. | Khi `<sự kiện>`, hệ thống `<X>` phải `<hành vi>`. |
+| State-driven | While `<state>`, the `<system>` shall `<response>`. | Trong khi `<trạng thái>`, hệ thống phải `<hành vi>`. |
+| Unwanted behaviour | If `<condition>`, then the `<system>` shall `<response>`. | Nếu `<điều kiện lỗi>`, thì hệ thống phải `<xử lý>`. |
+| Optional feature | Where `<feature>`, the `<system>` shall `<response>`. | Ở nơi `<tính năng được bật>`, hệ thống phải `<hành vi>`. |
 
-Ví dụ:
+Examples:
+- ❌ "The system shall process payments quickly and notify the user appropriately."
+- ✅ "FR-012. When the user clicks **Pay**, the system shall return the transaction result within ≤ 5 seconds (p95)."
+- ✅ "FR-013. If the payment gateway returns error code `51`, then the system shall display the message: *"Insufficient balance. Please choose another payment method."*"
+
+Vietnamese examples:
 - ❌ "Hệ thống phải xử lý thanh toán nhanh và thông báo cho người dùng phù hợp."
 - ✅ "FR-012. Khi người dùng nhấn **Thanh toán**, hệ thống phải trả kết quả giao dịch trong ≤ 5 giây (p95)."
 - ✅ "FR-013. Nếu cổng thanh toán trả mã lỗi `51`, thì hệ thống phải hiển thị thông báo: *"Số dư không đủ. Vui lòng chọn phương thức khác."*"
 
-**ID:** mỗi requirement có ID duy nhất, ổn định: `BR-` (business rule), `FR-` (functional), `NFR-` (non-functional), `US-` (user story), `AC-` (acceptance criterion), `UC-` (use case), `DR-` (data rule). Đánh số 3 chữ số; không tái sử dụng ID đã xóa.
+**ID:** every requirement has a unique, stable ID: `BR-` (business rule), `FR-` (functional), `NFR-` (non-functional), `US-` (user story), `AC-` (acceptance criterion), `UC-` (use case), `DR-` (data rule). Use 3-digit numbering; never reuse a deleted ID.
 
-## 5. Từ/cụm từ mơ hồ và cách thay thế
+## 5. Vague terms and their replacements
 
-Khi gặp các từ dưới đây trong câu mang tính cam kết, thay bằng tiêu chí đo được hoặc liệt kê đầy đủ. Script `scripts/lint_doc.py` phát hiện tự động phần lớn danh sách này.
+When any of the terms below appears in a committing sentence, replace it with a measurable criterion or a complete list. The script `scripts/lint_doc.py` detects most of this list automatically, in both languages.
 
-| Mơ hồ (VI) | Mơ hồ (EN) | Thay bằng |
+| Vague (EN) | Vague (VI) | Replace with |
 |---|---|---|
-| nhanh, nhanh chóng, ngay lập tức, kịp thời | fast, quickly, immediately, timely | ngưỡng thời gian + percentile + điều kiện tải |
-| dễ dùng, thân thiện, trực quan | user-friendly, intuitive, easy | tiêu chí usability đo được (số bước, task success rate) hoặc bỏ |
-| hợp lý, phù hợp, thích hợp | appropriate, reasonable, suitable | quy tắc cụ thể quyết định thế nào là "phù hợp" |
-| một số, nhiều, vài, đa số | some, several, many, most | con số hoặc danh sách đầy đủ |
-| khoảng, tầm, xấp xỉ | about, approximately, around | giá trị + dung sai (±) hoặc min/max |
-| v.v., ..., và các loại khác | etc., and so on | liệt kê đầy đủ; nếu danh sách mở, nói rõ nguồn cấu hình |
-| và/hoặc | and/or | tách thành hai câu hoặc nói rõ "ít nhất một trong" |
-| nếu cần, khi cần thiết, tùy trường hợp | as needed, if necessary, as appropriate | điều kiện kích hoạt cụ thể |
-| tối ưu, hiệu quả, mạnh mẽ, linh hoạt, ổn định | optimal, efficient, robust, flexible, seamless, stable | chỉ số đo được (throughput, uptime %, error rate) |
-| hỗ trợ (đứng một mình) | support | hành vi cụ thể hệ thống thực hiện |
-| TBD, TODO, ??? | TBD, TBC, TODO | mục Open Questions có owner + deadline |
-| nó, điều này, cái đó (đầu câu, không rõ chỉ cái gì) | it, this, that | lặp lại danh từ |
-| tương tự, như trên | similar, same as above | viết lại đầy đủ hoặc tham chiếu ID |
+| fast, quickly, immediately, timely | nhanh, nhanh chóng, ngay lập tức, kịp thời | time threshold + percentile + load condition |
+| user-friendly, intuitive, easy | dễ dùng, thân thiện, trực quan | a measurable usability criterion (number of steps, task success rate), or remove |
+| appropriate, reasonable, suitable | hợp lý, phù hợp, thích hợp | the specific rule that decides what counts as "appropriate" |
+| some, several, many, most | một số, nhiều, vài, đa số | a number or a complete list |
+| about, approximately, around | khoảng, tầm, xấp xỉ | value + tolerance (±) or min/max |
+| etc., and so on | v.v., ..., và các loại khác | a complete list; if the list is open-ended, state the configuration source |
+| and/or | và/hoặc | split into two sentences, or state "at least one of" |
+| as needed, if necessary, as appropriate | nếu cần, khi cần thiết, tùy trường hợp | the specific triggering condition |
+| optimal, efficient, robust, flexible, seamless, stable | tối ưu, hiệu quả, mạnh mẽ, linh hoạt, ổn định | a measurable metric (throughput, uptime %, error rate) |
+| support (on its own) | hỗ trợ (đứng một mình) | the specific behaviour the system performs |
+| TBD, TBC, TODO | TBD, TODO, ??? | an Open Questions entry with owner + deadline |
+| it, this, that (at sentence start, referent unclear) | nó, điều này, cái đó (đầu câu, không rõ chỉ cái gì) | repeat the noun |
+| similar, same as above | tương tự, như trên | write it out in full or reference the ID |
 
-So sánh không mốc: "nhanh hơn", "tốt hơn", "ít lỗi hơn" → phải nêu baseline: "giảm thời gian xử lý từ 8 s (bản v1.3) xuống ≤ 4 s".
+Comparisons without a baseline — "faster", "better", "fewer errors" (Vietnamese: "nhanh hơn", "tốt hơn", "ít lỗi hơn") — must state the baseline: "reduce processing time from 8 s (v1.3) to ≤ 4 s".
 
-## 6. Định dạng số, đơn vị, thời gian
+## 6. Formatting numbers, units and time
 
-- Luôn kèm đơn vị: `30 giây`, `5 MB`, `500.000 VND`. Ghi rõ tiền tệ.
-- Tiếng Việt: dấu chấm phân cách hàng nghìn, dấu phẩy thập phân (`1.250.000,50 VND`); tiếng Anh ngược lại. Trong bảng số liệu kỹ thuật/API được phép dùng định dạng máy (`1250000.5`) nhưng phải nhất quán.
-- Thời gian: ISO 8601 (`2026-11-03`, `2026-11-03T10:00:00+07:00`), nêu múi giờ khi nghiệp vụ phụ thuộc thời điểm.
-- Khoảng giá trị: ghi rõ biên có bao gồm hay không: "từ 50.000.000 VND trở lên" (≥) khác "trên 50.000.000 VND" (>). Đây là nguồn bug số 1 trong rule nghiệp vụ.
+- Always include the unit: `30 seconds`, `5 MB`, `500,000 VND` (Vietnamese documents: `30 giây`, `5 MB`, `500.000 VND`). State the currency explicitly.
+- Separators: English documents use a comma for thousands and a dot for decimals (`1,250,000.50 VND`); Vietnamese documents use a dot for thousands and a comma for decimals (`1.250.000,50 VND`). In technical/API data tables a machine format (`1250000.5`) is allowed, but it must be consistent.
+- Time: ISO 8601 (`2026-11-03`, `2026-11-03T10:00:00+07:00`); state the time zone when the business logic depends on the point in time.
+- Value ranges: state whether each bound is inclusive: "50,000,000 VND or more" (≥) differs from "over 50,000,000 VND" (>) — Vietnamese: "từ 50.000.000 VND trở lên" (≥) vs "trên 50.000.000 VND" (>). This is the number-one source of bugs in business rules.
 
-## 7. Xử lý thông tin thiếu hoặc mâu thuẫn
+## 7. Handling missing or conflicting information
 
-Không tự quyết thay stakeholder. Thay vào đó:
+Do not decide on behalf of stakeholders. Instead:
 
-1. Viết phần chắc chắn như bình thường.
-2. Chỗ thiếu: chèn [CẦN XÁC NHẬN: <câu hỏi cụ thể>] (EN: [TO CONFIRM: ...]) ngay tại vị trí, viết như văn bản thường — **không bọc trong backtick**, để bản PDF/DOCX tô nổi được marker.
-3. Chỗ mâu thuẫn giữa các nguồn: nêu cả hai phiên bản và nguồn của từng bản, không chọn ngầm.
-4. Gom tất cả vào mục **Open Questions** cuối tài liệu dạng bảng: `ID | Câu hỏi | Ảnh hưởng nếu không trả lời | Người cần trả lời`. Thêm cột `Hạn` chỉ khi input có mốc thời gian thật — một cột toàn [CẦN XÁC NHẬN] là độn.
-5. Nếu buộc phải giả định để tiếp tục, ghi vào mục **Assumptions** với ID `AS-xxx` để có thể trace và gỡ sau.
-6. Mỗi câu hỏi mở chỉ sống ở **một** nơi (bảng Open Questions); marker tại chỗ chỉ cần trỏ ID: [CẦN XÁC NHẬN: OQ-003]. Không lặp lại danh sách câu hỏi ở phụ lục hay tóm tắt.
-7. **Nguyên nhân chưa kiểm chứng luôn là giả thuyết — ở mọi chỗ trong tài liệu**, kể cả tóm tắt, cột "lý do", câu kết. Không viết "nguyên nhân gốc là…", "không bên nào sai", "gần như chắc chắn" khi chưa có dữ liệu chứng minh; viết "giả thuyết H1: … — kiểm chứng bằng …".
-8. Giá trị đề xuất (vd "gợi ý 5 phút") để ở cột ghi chú của Open Questions, **không** viết vào câu requirement hay acceptance criteria — nếu không, QA sẽ test theo con số chưa ai duyệt.
+1. Write the certain parts as usual.
+2. Where information is missing: insert [TO CONFIRM: <specific question>] (Vietnamese documents: [CẦN XÁC NHẬN: <câu hỏi cụ thể>]) at that exact spot, written as plain text — **not wrapped in backticks**, so the PDF/DOCX output can highlight the marker.
+3. Where sources conflict: state both versions and the source of each; do not silently pick one.
+4. Collect everything into an **Open Questions** section at the end of the document, as a table: `ID | Question | Impact if unanswered | Who must answer` (Vietnamese: `ID | Câu hỏi | Ảnh hưởng nếu không trả lời | Người cần trả lời`). Add a `Due date` (`Hạn`) column only when the input contains real dates — a column filled entirely with [TO CONFIRM] is padding.
+5. If an assumption is unavoidable in order to proceed, record it in an **Assumptions** section with an ID `AS-xxx` so it can be traced and removed later.
+6. Each open question lives in **one** place only (the Open Questions table); the in-place marker only needs to point to the ID: [TO CONFIRM: OQ-003] / [CẦN XÁC NHẬN: OQ-003]. Do not repeat the list of questions in an appendix or summary.
+7. **An unverified cause is always a hypothesis — everywhere in the document**, including the summary, a "reason" column, and closing sentences. Do not write "the root cause is…", "neither side is at fault", "almost certainly" (Vietnamese: "nguyên nhân gốc là…", "không bên nào sai", "gần như chắc chắn") without supporting data; write "hypothesis H1: … — verify by …" (Vietnamese: "giả thuyết H1: … — kiểm chứng bằng …").
+8. Proposed values (e.g. "suggest 5 minutes") go in the notes column of Open Questions, **not** in the requirement sentence or acceptance criteria — otherwise QA will test against a number nobody has approved.
 
-## 7b. Độ dài tương xứng với input
+## 7b. Length proportional to input
 
-Tài liệu dài hơn không chuyên nghiệp hơn. Người đọc phải lội qua phần thừa để tìm phần cần.
-- Độ chi tiết tỉ lệ với lượng thông tin thật trong input. Mốc tham khảo:
+A longer document is not a more professional one. Readers have to wade through the excess to find what they need.
+- Level of detail is proportional to the amount of real information in the input. Reference targets:
 
-  | Input | Độ dài đích của tài liệu |
+  | Input | Target document length |
   |---|---|
-  | Một đoạn / ≤ 15 dòng chat | ≤ 1.500–2.500 từ |
-  | Meeting notes 1 trang | ≤ 3.000–4.000 từ |
-  | Nhiều nguồn / hệ thống lớn | theo nhu cầu, nhưng mỗi mục phải có thông tin mới |
+  | One paragraph / ≤ 15 chat lines | ≤ 1,500–2,500 words |
+  | 1 page of meeting notes | ≤ 3,000–4,000 words |
+  | Multiple sources / large system | as needed, but every section must carry new information |
 
-  Vượt mốc → cắt trước: AC trùng ý, câu hỏi mở chi tiết vụn (gộp lại), mục đề xuất dài, giải thích lặp.
-- Chỉ thêm mục quy ước modal (RFC 2119), Glossary, ma trận truy vết khi tài liệu là SRS/đặc tả lớn hoặc có thuật ngữ thật sự dễ hiểu sai. Không định nghĩa từ hiển nhiên.
-- Không lặp cùng một nội dung ở hai mục (vd rủi ro lặp trong "quyết định thiết kế").
-- Mục không có nội dung thật thì bỏ hẳn (hoặc ghi một dòng "Không áp dụng — lý do") thay vì độn.
+  Over the target → cut first: duplicate ACs, fragmented minor open questions (merge them), long proposal sections, repeated explanations.
+- Add a modal-verb convention section (RFC 2119), a Glossary or a traceability matrix only when the document is an SRS / large specification or has terms that are genuinely easy to misread. Do not define obvious words.
+- Do not repeat the same content in two sections (e.g. risks repeated under "design decisions").
+- Drop a section entirely when it has no real content (or write one line, "Not applicable — <reason>"; Vietnamese: "Không áp dụng — lý do") instead of padding it.
 
-## 8. Checklist tự kiểm trước khi bàn giao
+## 8. Self-check checklist before hand-off
 
-- [ ] Chạy `python scripts/lint_doc.py <file>` — không còn finding mức `high`; mỗi finding `medium` còn lại có lý do giữ.
-- [ ] Mọi requirement có ID duy nhất và dùng đúng modal (phải/không được/nên/được phép).
-- [ ] Mọi con số có đơn vị; mọi ngưỡng có biên rõ (≥/>).
-- [ ] Không có câu bị động thiếu chủ thể ở phần đặc tả hành vi.
-- [ ] Thuật ngữ nhất quán với Glossary.
-- [ ] Mọi thông tin không có nguồn đã được đánh dấu [CẦN XÁC NHẬN] hoặc đưa vào Assumptions.
-- [ ] Mục Open Questions phản ánh đúng mọi mâu thuẫn đã phát hiện trong input.
-- [ ] Không có giá trị tự đề xuất nào nằm trong requirement/AC mà không đánh dấu.
-- [ ] Không có mục độn hoặc nội dung lặp (xem 7b).
-- [ ] Nếu bàn giao PDF/DOCX/XLSX: đã render bằng `scripts/render_doc.py --qa` và xem ảnh trang (xem `references/visual-style.md`).
+- [ ] Run `python scripts/lint_doc.py <file>` — no `high` findings remain; every remaining `medium` finding has a reason to keep it.
+- [ ] Every requirement has a unique ID and uses the correct modal verb (MUST / MUST NOT / SHOULD / MAY — phải / không được / nên / được phép).
+- [ ] Every number has a unit; every threshold has an explicit boundary (≥ / >).
+- [ ] No passive sentences without an agent in the behaviour specification.
+- [ ] Terminology is consistent with the Glossary.
+- [ ] All unsourced information is marked [TO CONFIRM] / [CẦN XÁC NHẬN] or listed under Assumptions.
+- [ ] The Open Questions section reflects every conflict found in the input.
+- [ ] No self-proposed value sits unmarked in a requirement/AC.
+- [ ] No padding sections or repeated content (see 7b).
+- [ ] If delivering PDF/DOCX/XLSX: rendered with `scripts/render_doc.py --qa` and the page images reviewed (see `references/visual-style.md`).

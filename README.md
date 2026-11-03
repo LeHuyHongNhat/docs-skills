@@ -9,11 +9,11 @@ Four [Agent Skills](https://github.com/agentskills/agentskills) that help AI age
 | [`diagram-to-doc`](diagram-to-doc/) | Turning images of flowcharts / BPMN / sequence diagrams / ERDs / state machines / wireframes into specifications and data dictionaries |
 | [`doc-clarity-review`](doc-clarity-review/) | Reviewing and rewriting existing docs: vague wording, contradictions, untestable requirements, inconsistent terminology |
 
-The skills write in whatever language the user writes in. Their writing standards and the bundled linter cover **Vietnamese and English** (e.g. *"nhanh chóng"* / *"quickly"*, *"v.v."* / *"etc."*).
+The skill instructions are written in English. Output follows the user's language; **English and Vietnamese** are both first-class — writing standards, the linter (e.g. *"quickly"* / *"nhanh chóng"*, *"etc."* / *"v.v."*), open-item markers and generated labels (figure captions, Excel index, Word footer) all work in both.
 
 ## Principles
 
-- **Never decide for the stakeholder.** Contradictions and missing information are marked `[CẦN XÁC NHẬN: …]` / `[TO CONFIRM: …]` and collected in an Open Questions table — never papered over with plausible-sounding numbers.
+- **Never decide for the stakeholder.** Contradictions and missing information are marked `[TO CONFIRM: …]` (or `[CẦN XÁC NHẬN: …]` in Vietnamese documents) and collected in an Open Questions table — never papered over with plausible-sounding numbers.
 - **Keep proposals out of the spec.** Anything the agent suggests lives in a separate, clearly labelled section, never inside requirements or acceptance criteria.
 - **Verify with tools, not vibes.** A wording linter, a diagram-inventory checker (missing branches, dangling nodes, broken FKs) and a renderer that produces page images for visual QA before hand-off.
 
@@ -58,7 +58,7 @@ python scripts/render_doc.py doc.md --to pdf --page mobile --out-dir out --qa
 - **Word:** Title/Heading styles that show up in the Navigation Pane, full-width tables, `Title · Page x/y` footer, non-breaking requirement IDs (`FR-004` never splits across lines).
 - **Excel:** one sheet per table with a frozen, filterable header, plus an index sheet.
 - **Mermaid diagrams:** pre-rendered to images.
-- **Open items:** `[CẦN XÁC NHẬN]` / `[TO CONFIRM]` markers are highlighted in every format.
+- **Open items:** `[TO CONFIRM]` / `[CẦN XÁC NHẬN]` markers are highlighted in every format.
 
 `--qa` flags tables wider than 6 columns, unrendered diagrams, non-embedded fonts and shrunken text.
 
@@ -76,7 +76,7 @@ _shared/            single source of truth for shared files
 _eval_tools/        evaluation tooling: automated checks, blind A/B prep, real `claude -p` routing eval
 dist/               packaged .skill files (for claude.ai upload)
 install.sh          installer for Claude Code / Codex / Cursor / Gemini CLI
-docs/               evaluation report (Vietnamese) and benchmarks
+docs/               evaluation report (English + Vietnamese) and benchmarks
 samples/            sample outputs produced by the skills (Word, A4/mobile PDF, Excel)
 ```
 
@@ -92,7 +92,7 @@ Edit scripts and references **in `_shared/`**, never the copies inside each skil
 
 ## Evaluation summary
 
-Evaluated with 7 methods over two iterations (full report, in Vietnamese: [`docs/bao-cao-kiem-dinh-doc-skills.md`](docs/bao-cao-kiem-dinh-doc-skills.md)).
+Evaluated with 7 methods over two iterations — full report: [`docs/evaluation-report.md`](docs/evaluation-report.md) (Vietnamese original: [`docs/bao-cao-kiem-dinh-doc-skills.md`](docs/bao-cao-kiem-dinh-doc-skills.md)).
 
 | Metric | With skills | Without skills |
 |---|---|---|

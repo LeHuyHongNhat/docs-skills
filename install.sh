@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
-# install.sh — cài 4 skill vào thư mục skill của các agent hỗ trợ chuẩn Agent Skills (SKILL.md).
+# install.sh — install the 4 skills into the skill directory of agents that support Agent Skills (SKILL.md).
 #
 # Usage:
-#   ./install.sh                      # mặc định: Claude Code, cấp user (~/.claude/skills)
-#   ./install.sh claude codex cursor  # nhiều đích cùng lúc
-#   ./install.sh --project claude     # cấp project (./.claude/skills) thay vì user
-#   ./install.sh --link claude        # symlink thay vì copy (tiện khi đang phát triển skill)
+#   ./install.sh                      # default: Claude Code, user scope (~/.claude/skills)
+#   ./install.sh claude codex cursor  # several targets at once
+#   ./install.sh --project claude     # project scope (./.claude/skills) instead of user
+#   ./install.sh --link claude        # symlink instead of copy (handy while developing)
 #
-# Đích hỗ trợ: claude | codex | cursor | gemini | agents (thư mục chung .agents/skills)
+# Targets: claude | codex | cursor | gemini | agents (shared .agents/skills directory)
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")" && pwd)"
@@ -35,7 +35,7 @@ dir_for() {
     codex|agents) echo "$base/.agents/skills" ;;
     cursor) echo "$base/.cursor/skills" ;;
     gemini) echo "$base/.gemini/skills" ;;
-    *) echo "Đích không hỗ trợ: $1" >&2; exit 2 ;;
+    *) echo "Unsupported target: $1" >&2; exit 2 ;;
   esac
 }
 
@@ -47,17 +47,17 @@ for t in "${TARGETS[@]}"; do
     if [[ $MODE == link ]]; then
       ln -s "$ROOT/$s" "$dest/$s"
     else
-      # không copy evals/ (test case, có file input lớn) vào máy người dùng
+      # skip evals/ (test cases with large input fixtures)
       mkdir -p "$dest/$s"
       (cd "$ROOT/$s" && tar --exclude=evals --exclude=__pycache__ -cf - .) | (cd "$dest/$s" && tar -xf -)
     fi
   done
-  echo "✓ $t ($SCOPE): ${#SKILLS[@]} skill → $dest"
+  echo "✓ $t ($SCOPE): ${#SKILLS[@]} skills → $dest"
 done
 
 cat <<'EOF'
 
-Công cụ ngoài để xuất PDF/DOCX (không bắt buộc — thiếu thì skill vẫn giao .md):
+Optional tools for PDF/DOCX export (without them the skills still deliver Markdown):
   pandoc · Chrome/Chromium + `pip install playwright` · `npm i -g @mermaid-js/mermaid-cli`
   pip install python-docx openpyxl beautifulsoup4 pyyaml
 EOF

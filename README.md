@@ -1,81 +1,112 @@
-# doc-skills — Bộ skill giúp AI agent viết tài liệu sản phẩm chuẩn chuyên nghiệp
+# docs-skills — Agent Skills for writing professional product & technical documentation
 
-Bộ 4 [Claude skill](https://docs.claude.com) hỗ trợ BA, PM, PO, DA và dev viết tài liệu **chặt chẽ, không mơ hồ, không bịa**, và xuất ra định dạng trình bày đẹp (PDF A4 / PDF điện thoại / Word / Excel).
+Four [Agent Skills](https://github.com/agentskills/agentskills) that help AI agents (Claude, Codex, Cursor, Gemini CLI, …) write documentation for BAs, PMs, POs, data analysts and developers that is **precise, unambiguous and never invented** — and export it as well-designed PDF (A4 or phone-sized), Word and Excel files.
 
-| Skill | Dùng khi |
+| Skill | Use it for |
 |---|---|
-| [`product-spec-writer`](product-spec-writer/) | BRD, PRD, SRS, user story + acceptance criteria (Gherkin), use case, định nghĩa metric/KPI |
-| [`codebase-doc-writer`](codebase-doc-writer/) | README, API reference, architecture overview, ADR, runbook — viết từ source code, mọi fact truy được về `file:line` |
-| [`diagram-to-doc`](diagram-to-doc/) | Ảnh flowchart / BPMN / sequence / ERD / state / wireframe → đặc tả, data dictionary |
-| [`doc-clarity-review`](doc-clarity-review/) | Review và viết lại tài liệu có sẵn: từ mơ hồ, mâu thuẫn, yêu cầu không kiểm thử được |
+| [`product-spec-writer`](product-spec-writer/) | BRDs, PRDs, SRS/FRDs, user stories with Gherkin acceptance criteria, use cases, metric/KPI definitions |
+| [`codebase-doc-writer`](codebase-doc-writer/) | READMEs, API references, architecture overviews (C4/arc42), ADRs, runbooks — written from source code, every fact traceable to `file:line` |
+| [`diagram-to-doc`](diagram-to-doc/) | Turning images of flowcharts / BPMN / sequence diagrams / ERDs / state machines / wireframes into specifications and data dictionaries |
+| [`doc-clarity-review`](doc-clarity-review/) | Reviewing and rewriting existing docs: vague wording, contradictions, untestable requirements, inconsistent terminology |
 
-## Nguyên tắc
+The skills write in whatever language the user writes in. Their writing standards and the bundled linter cover **Vietnamese and English** (e.g. *"nhanh chóng"* / *"quickly"*, *"v.v."* / *"etc."*).
 
-- **Không tự quyết thay stakeholder:** mâu thuẫn và thông tin thiếu được đánh dấu `[CẦN XÁC NHẬN]` và gom vào Open Questions, không lấp bằng số "nghe hợp lý".
-- **Đề xuất tách khỏi đặc tả:** những gì agent tự đề xuất nằm ở mục riêng, không lẫn vào requirement/AC.
-- **Kiểm chứng bằng công cụ:** linter câu chữ (VI + EN), kiểm inventory diagram, render + xem ảnh từng trang trước khi bàn giao.
+## Principles
 
-## Cài đặt
+- **Never decide for the stakeholder.** Contradictions and missing information are marked `[CẦN XÁC NHẬN: …]` / `[TO CONFIRM: …]` and collected in an Open Questions table — never papered over with plausible-sounding numbers.
+- **Keep proposals out of the spec.** Anything the agent suggests lives in a separate, clearly labelled section, never inside requirements or acceptance criteria.
+- **Verify with tools, not vibes.** A wording linter, a diagram-inventory checker (missing branches, dangling nodes, broken FKs) and a renderer that produces page images for visual QA before hand-off.
 
-Bốn skill theo chuẩn mở **Agent Skills** (`SKILL.md` + `scripts/` + `references/` + `assets/`). Cùng một thư mục skill chạy được trên nhiều agent; chỉ khác nơi đặt file.
+## Install
 
-| Nền tảng | Cách cài | Ghi chú |
+All four skills follow the open Agent Skills format (`SKILL.md` + `scripts/` + `references/` + `assets/`), so the same folders work across agents — only the install location differs.
+
+| Platform | How | Notes |
 |---|---|---|
-| **Claude Code** (khuyên dùng) | Trong Claude Code: `/plugin marketplace add LeHuyHongNhat/docs-skills` rồi `/plugin install docs-skills@docs-skills` | Cập nhật bằng `/plugin marketplace update`. Skill hiện với tên `docs-skills:<tên>` |
-| **Claude Code** (thủ công) | `./install.sh claude` → copy vào `~/.claude/skills/` (thêm `--project` để cài vào `./.claude/skills/` của repo hiện tại) | Dùng khi không muốn qua plugin |
-| **claude.ai / Claude Desktop** | Settings → Customize → **Skills** → upload từng file trong [`dist/`](dist/) (`*.skill` là file zip chứa thư mục skill) | Phải bật code execution & file creation để chạy linter/render |
-| **Claude API** | Upload qua Skills API, gọi trong Messages API bằng `container.skills` kèm tool code execution — xem [Agent Skills quickstart](https://platform.claude.com/docs/en/agents-and-tools/agent-skills/quickstart) | Dùng khi tích hợp vào sản phẩm/agent riêng |
-| **OpenAI Codex CLI** | `./install.sh codex` → `~/.agents/skills/` | Đọc chuẩn SKILL.md |
-| **Cursor** | `./install.sh cursor` → `~/.cursor/skills/` | Cursor cũng đọc `.claude/skills/` |
+| **Claude Code** (recommended) | `/plugin marketplace add LeHuyHongNhat/docs-skills` then `/plugin install docs-skills@docs-skills` | Update with `/plugin marketplace update`. Skills appear as `docs-skills:<name>` |
+| **Claude Code** (manual) | `./install.sh claude` → copies into `~/.claude/skills/` (add `--project` for `./.claude/skills/`) | |
+| **claude.ai / Claude Desktop** | Settings → Customize → **Skills** → upload the `.skill` files from [`dist/`](dist/) (each is a zip of one skill folder) | Enable code execution & file creation so the linter/renderer can run |
+| **Claude API** | Upload through the Skills API and attach via `container.skills` with the code-execution tool — see the [Agent Skills quickstart](https://platform.claude.com/docs/en/agents-and-tools/agent-skills/quickstart) | For embedding in your own agent/product |
+| **OpenAI Codex CLI** | `./install.sh codex` → `~/.agents/skills/` | |
+| **Cursor** | `./install.sh cursor` → `~/.cursor/skills/` | Cursor also reads `.claude/skills/` |
 | **Gemini CLI** | `./install.sh gemini` → `~/.gemini/skills/` | Gemini CLI ≥ 0.26 |
-| **ChatGPT** | Skills đang ở dạng beta cho gói Business/Enterprise — xem hướng dẫn upload của OpenAI | Gói cá nhân: dùng Custom GPT, dán `SKILL.md` vào Instructions và đính `references/*.md` làm Knowledge (mất phần script render) |
+| **ChatGPT** | Skills are in beta for Business/Enterprise workspaces — follow OpenAI's upload instructions | On personal plans, use a Custom GPT: paste `SKILL.md` into Instructions and attach `references/*.md` as Knowledge (the render scripts won't run) |
 
-Repo đang **private**: lệnh `/plugin marketplace add` và `git clone` cần máy đã đăng nhập GitHub (`gh auth login` hoặc git credential) với quyền đọc repo. Người không có quyền dùng file `.skill` trong `dist/`.
+Install to several agents at once: `./install.sh claude codex cursor`. While developing, `--link` symlinks instead of copying.
 
-Cài nhiều đích một lần: `./install.sh claude codex cursor`. Đang sửa skill thì dùng `--link` để symlink thay vì copy.
+### Optional dependencies for export
 
-**Công cụ cho phần xuất định dạng** (không bắt buộc — thiếu thì skill vẫn giao `.md` và báo rõ định dạng nào chưa xuất được):
+Without these the skills still deliver Markdown and say exactly which formats could not be produced.
 
 ```bash
 pip install python-docx openpyxl beautifulsoup4 pyyaml playwright
 npm i -g @mermaid-js/mermaid-cli
-# + pandoc và Chrome/Chromium
+# plus pandoc and Chrome/Chromium
 ```
 
-## Cấu trúc repo
+## Export & visual QA
+
+```bash
+# A4 PDF + Word + Excel, with page previews and automatic layout checks
+python scripts/render_doc.py doc.md --to pdf,docx,xlsx --out-dir out --qa
+
+# Phone-sized PDF (tables with ≥ 4 columns become label/value cards)
+python scripts/render_doc.py doc.md --to pdf --page mobile --out-dir out --qa
+```
+
+- **PDF:** Inter typography, repeating table headers, page numbers.
+- **Word:** Title/Heading styles that show up in the Navigation Pane, full-width tables, `Title · Page x/y` footer, non-breaking requirement IDs (`FR-004` never splits across lines).
+- **Excel:** one sheet per table with a frozen, filterable header, plus an index sheet.
+- **Mermaid diagrams:** pre-rendered to images.
+- **Open items:** `[CẦN XÁC NHẬN]` / `[TO CONFIRM]` markers are highlighted in every format.
+
+`--qa` flags tables wider than 6 columns, unrendered diagrams, non-embedded fonts and shrunken text.
+
+## Repository layout
 
 ```
-.claude-plugin/     marketplace.json — cài cả bộ qua Claude Code plugin
-_shared/            nguồn dùng chung (single source of truth)
+.claude-plugin/     marketplace.json — install all four skills as one Claude Code plugin
+_shared/            single source of truth for shared files
   references/       writing-standards.md, visual-style.md
   scripts/          lint_doc.py, render_doc.py
   assets/           doc-theme.css, reference.docx
-  tests/            48 unit test (pytest)
-<skill>/            4 skill; scripts/references/assets được đồng bộ từ _shared bằng build.sh
-  evals/            test case theo format `claude plugin eval`
-_eval_tools/        công cụ kiểm định: auto checks, blind A/B, routing eval bằng `claude -p`
-dist/               file .skill đã đóng gói (upload lên claude.ai)
-install.sh          cài vào Claude Code / Codex / Cursor / Gemini CLI
-docs/               báo cáo kiểm định + benchmark
-samples/            file mẫu do skill tạo (Word, PDF A4/mobile, Excel)
+  tests/            48 unit tests (pytest)
+<skill>/            the four skills; scripts/references/assets are synced from _shared by build.sh
+  evals/            test cases in `claude plugin eval` format
+_eval_tools/        evaluation tooling: automated checks, blind A/B prep, real `claude -p` routing eval
+dist/               packaged .skill files (for claude.ai upload)
+install.sh          installer for Claude Code / Codex / Cursor / Gemini CLI
+docs/               evaluation report (Vietnamese) and benchmarks
+samples/            sample outputs produced by the skills (Word, A4/mobile PDF, Excel)
 ```
 
-## Phát triển
+## Development
 
 ```bash
-./build.sh              # đồng bộ _shared → 4 skill + validate
-./build.sh --package    # + đóng gói vào dist/
+./build.sh              # sync _shared → the four skills, then validate
+./build.sh --package    # also package into dist/
 cd _shared && python -m pytest -q tests
 ```
 
-Sửa script/reference **trong `_shared/`**, không sửa bản copy trong từng skill.
+Edit scripts and references **in `_shared/`**, never the copies inside each skill.
 
-## Kết quả kiểm định (tóm tắt)
+## Evaluation summary
 
-| Chỉ số | Có skill | Không skill |
+Evaluated with 7 methods over two iterations (full report, in Vietnamese: [`docs/bao-cao-kiem-dinh-doc-skills.md`](docs/bao-cao-kiem-dinh-doc-skills.md)).
+
+| Metric | With skills | Without skills |
 |---|---|---|
-| Assertion pass rate (10 case) | **92,5%** | 72,0% |
-| Blind A/B (8 case nội dung, vòng 1) | **thắng 8/8** | – |
-| Routing đúng skill (`claude -p`, 52 lượt) | **100%** | – |
+| Assertion pass rate (10 cases) | **92.5%** | 72.0% |
+| Blind A/B, content cases (iteration 1) | **won 8/8** | – |
+| Correct skill routing (`claude -p`, 52 runs, with 3 competing skills installed) | **100%** | – |
+| Ground-truth fidelity (flowchart edges / ERD columns / planted review issues) | 16/16 · 25/25 · 13/13 | – |
 
-Chi tiết, phương pháp và hạn chế: [`docs/bao-cao-kiem-dinh-doc-skills.md`](docs/bao-cao-kiem-dinh-doc-skills.md).
+**Known limitations:**
+- Output for very short inputs is still longer than ideal.
+- Runs take roughly 2–2.5× longer than a plain agent, because the skills verify more (they run the code, render the files, lint the text).
+- Each configuration was run once per case.
+- The judge is from the same model family as the writer; human blind review is the recommended next step.
+
+## License
+
+Copyright 2026 Le Huy Hong Nhat. Licensed under the [Apache License, Version 2.0](LICENSE).

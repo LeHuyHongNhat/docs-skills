@@ -17,9 +17,26 @@ Bộ 4 [Claude skill](https://docs.claude.com) hỗ trợ BA, PM, PO, DA và dev
 
 ## Cài đặt
 
-Tải file `.skill` trong [`dist/`](dist/) và cài vào Claude (claude.ai → Settings → Skills), hoặc copy thư mục skill vào `~/.claude/skills/` cho Claude Code.
+Bốn skill theo chuẩn mở **Agent Skills** (`SKILL.md` + `scripts/` + `references/` + `assets/`). Cùng một thư mục skill chạy được trên nhiều agent; chỉ khác nơi đặt file.
 
-Xuất PDF/DOCX cần `pandoc`, Chrome/Chromium (qua Playwright) và `@mermaid-js/mermaid-cli`. Thiếu công cụ nào thì skill vẫn giao `.md` và báo rõ định dạng nào chưa xuất được.
+| Nền tảng | Cách cài | Ghi chú |
+|---|---|---|
+| **Claude Code** | `./install.sh claude` → copy vào `~/.claude/skills/` (thêm `--project` để cài vào `./.claude/skills/` của repo hiện tại) | Đầy đủ tính năng, kể cả xuất PDF/DOCX/XLSX nếu máy có công cụ |
+| **claude.ai / Claude Desktop** | Settings → Customize → **Skills** → upload từng file trong [`dist/`](dist/) (`*.skill`) | Cần bật code execution để chạy linter/render |
+| **OpenAI Codex CLI** | `./install.sh codex` → `~/.agents/skills/` | Đọc chuẩn SKILL.md |
+| **Cursor** | `./install.sh cursor` → `~/.cursor/skills/` | Cursor cũng đọc `.claude/skills/` |
+| **Gemini CLI** | `./install.sh gemini` → `~/.gemini/skills/` | Gemini CLI ≥ 0.26 |
+| **ChatGPT** | Skills đang ở dạng beta cho gói Business/Enterprise — xem hướng dẫn upload của OpenAI | Gói cá nhân: dùng Custom GPT, dán `SKILL.md` vào Instructions và đính `references/*.md` làm Knowledge (mất phần script render) |
+
+Cài nhiều đích một lần: `./install.sh claude codex cursor`. Đang sửa skill thì dùng `--link` để symlink thay vì copy.
+
+**Công cụ cho phần xuất định dạng** (không bắt buộc — thiếu thì skill vẫn giao `.md` và báo rõ định dạng nào chưa xuất được):
+
+```bash
+pip install python-docx openpyxl beautifulsoup4 pyyaml playwright
+npm i -g @mermaid-js/mermaid-cli
+# + pandoc và Chrome/Chromium
+```
 
 ## Cấu trúc repo
 
@@ -32,7 +49,8 @@ _shared/            nguồn dùng chung (single source of truth)
 <skill>/            4 skill; scripts/references/assets được đồng bộ từ _shared bằng build.sh
   evals/            test case theo format `claude plugin eval`
 _eval_tools/        công cụ kiểm định: auto checks, blind A/B, routing eval bằng `claude -p`
-dist/               file .skill đã đóng gói
+dist/               file .skill đã đóng gói (upload lên claude.ai)
+install.sh          cài vào Claude Code / Codex / Cursor / Gemini CLI
 docs/               báo cáo kiểm định + benchmark
 samples/            file mẫu do skill tạo (Word, PDF A4/mobile, Excel)
 ```

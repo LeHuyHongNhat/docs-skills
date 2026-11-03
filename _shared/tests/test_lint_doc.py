@@ -150,3 +150,9 @@ def test_user_story_heading_not_term_conflict() -> None:
 def test_mapping_table_ids_not_duplicates() -> None:
     text = "| ID v0.3 | ID v0.4 | Ghi chú |\n|---|---|---|\n| FR-004 | FR-004 | giữ |\n| FR-004 | FR-007 | tách |\n"
     assert not [f for f in lint_text(text, term_groups=[]) if f.rule == "R09"]
+
+
+def test_english_gaps_found_in_smoke_run() -> None:
+    r = rules("FR-040. When the user clicks Export, the system shall return the file right away. Users can export a lot of rows.")
+    kinds = {(x[0], x[2]) for x in r}
+    assert ("R04", "right away") in kinds and ("R04", "a lot of") in kinds and ("R05", "can") in kinds

@@ -152,7 +152,7 @@ def to_html(md: str, src: Path, out: Path, toc: bool, title: str, rep: Report, m
            "-t", "html5", "--standalone", "--embed-resources", "--css", str(THEME_CSS),
            "--metadata", f"pagetitle={title}", "--resource-path", f"{work}:{src.parent}", "-o", str(out)]
     if toc:
-        cmd += ["--toc", "--toc-depth=2"]
+        cmd += ["--toc", "--toc-depth=2", "--metadata", f"toc-title={_toc_title(md)}"]
     r = subprocess.run(cmd, capture_output=True, text=True)
     if r.returncode != 0:
         rep.warnings.append(f"pandoc HTML error: {r.stderr[-300:]}")

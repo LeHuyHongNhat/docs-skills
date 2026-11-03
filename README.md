@@ -98,7 +98,7 @@ Evaluated with 7 methods over two iterations — full report: [`docs/evaluation-
 |---|---|---|
 | Assertion pass rate (10 cases) | **92.5%** | 72.0% |
 | Blind A/B, content cases (iteration 1) | **won 8/8** | – |
-| Correct skill routing (`claude -p`, 52 runs, with 3 competing skills installed) | **100%** | – |
+| Correct skill routing (`claude -p`, 72 runs, Vietnamese + English queries, 3 competing skills installed) | **100%** | – |
 | Ground-truth fidelity (flowchart edges / ERD columns / planted review issues) | 16/16 · 25/25 · 13/13 | – |
 
 **Known limitations:**

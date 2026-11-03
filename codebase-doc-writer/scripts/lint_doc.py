@@ -89,9 +89,11 @@ VAGUE_TERMS: list[Term] = [
     *_t(["đầy đủ", "cần thiết", "liên quan"], COMPLETE, ("các bên liên quan", "bên liên quan"), strong=False),
     *_t(["tương tự", "như trên"], "Viết lại đầy đủ hoặc tham chiếu ID cụ thể."),
     # --- English ---
-    *_t(["fast", "quick", "quickly", "immediately", "instantly", "timely", "as soon as possible", "asap"], TIME),
+    *_t(["fast", "quick", "quickly", "immediately", "instantly", "timely", "as soon as possible", "asap",
+         "right away", "in real time", "real-time"], TIME, ("real-time bidding",)),
     *_t(["easy", "easily", "user-friendly", "user friendly", "intuitive", "simple", "simply"], USAB),
     *_t(["appropriate", "appropriately", "reasonable", "suitable", "adequate", "sufficient", "proper", "properly"], RULE),
+    *_t(["a lot of", "lots of", "a lot"], QTY, strong=False),
     *_t(["some", "several", "many", "most", "various", "numerous", "a few"], QTY,
         ("at most", "many-to-many", "one-to-many", "many-to-one", "most recent", "most recently"), strong=False),
     *_t(["approximately", "roughly", "about", "around"], APPROX,
@@ -107,7 +109,8 @@ VAGUE_TERMS: list[Term] = [
 PLACEHOLDER_RE = re.compile(r"(?<!\w)(?:TBD|TBC|TODO|FIXME|XXX)(?!\w)|\?{3,}")
 OPEN_LIST_RE = re.compile(r"(?<!\w)(?:v\.v\.?|vv\.|etc\.?|and so on|và các loại khác|và các [^\s,.]+ khác)(?!\w)|,\s*\.\.\.|…", re.I)
 AND_OR_RE = re.compile(r"(?<!\w)(?:và\s*/\s*hoặc|and\s*/\s*or)(?!\w)", re.I)
-WEAK_MODAL_RE = re.compile(r"(?<!\w)(?:có thể|could|might|would)(?!\w)", re.I)
+# "can" in a requirement is ambiguous (capability vs. permission) — same trap as Vietnamese "có thể"
+WEAK_MODAL_RE = re.compile(r"(?<!\w)(?:có thể|can|could|might|would)(?!\w)", re.I)
 COMPARATIVE_RE = re.compile(
     r"(?<!\w)(?:nhanh hơn|tốt hơn|cao hơn|thấp hơn|ít hơn|nhiều hơn|lớn hơn|nhỏ hơn|"
     r"faster|better|higher|lower|fewer|greater|smaller|more efficient)(?!\w)", re.I

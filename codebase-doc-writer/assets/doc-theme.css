@@ -103,9 +103,10 @@ figure.diagram { margin: 1.2rem 0; text-align: center; break-inside: avoid; }
 figure.diagram img { max-width: 100%; height: auto; }
 figure.diagram figcaption { font-size: .8rem; color: var(--ink-3); margin-top: .3rem; }
 
-/* ---------- Mục lục ---------- */
+/* ---------- Table of contents ---------- */
 nav#TOC { border: 1px solid var(--line); border-radius: 8px; padding: .8rem 1.2rem; margin: 1.2rem 0 2rem; font-size: .9rem; }
-nav#TOC::before { content: "Mục lục"; display: block; font-weight: 600; margin-bottom: .4rem; color: var(--ink-2); }
+/* title comes from pandoc toc-title metadata (localised by render_doc.py) */
+nav#TOC #toc-title, nav#TOC h2 { display: block; font-size: .9rem; font-weight: 600; margin: 0 0 .4rem; padding: 0; border: 0; color: var(--ink-2); }
 nav#TOC ul { list-style: none; padding-left: 1rem; margin: 0; }
 nav#TOC > ul { padding-left: 0; }
 nav#TOC a { border: 0; color: var(--ink); }

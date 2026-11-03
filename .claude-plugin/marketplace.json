@@ -1,0 +1,22 @@
+{
+  "name": "docs-skills",
+  "owner": { "name": "Le Huy Hong Nhat" },
+  "metadata": {
+    "description": "Bộ skill giúp AI agent viết tài liệu sản phẩm/kỹ thuật chuẩn chuyên nghiệp: PRD, SRS, README, data dictionary, review tài liệu; xuất PDF/DOCX/XLSX.",
+    "version": "2.2.0"
+  },
+  "plugins": [
+    {
+      "name": "docs-skills",
+      "description": "4 skill: product-spec-writer, codebase-doc-writer, diagram-to-doc, doc-clarity-review",
+      "source": "./",
+      "strict": false,
+      "skills": [
+        "./product-spec-writer",
+        "./codebase-doc-writer",
+        "./diagram-to-doc",
+        "./doc-clarity-review"
+      ]
+    }
+  ]
+}

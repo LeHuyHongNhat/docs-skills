@@ -21,12 +21,16 @@ Bốn skill theo chuẩn mở **Agent Skills** (`SKILL.md` + `scripts/` + `refer
 
 | Nền tảng | Cách cài | Ghi chú |
 |---|---|---|
-| **Claude Code** | `./install.sh claude` → copy vào `~/.claude/skills/` (thêm `--project` để cài vào `./.claude/skills/` của repo hiện tại) | Đầy đủ tính năng, kể cả xuất PDF/DOCX/XLSX nếu máy có công cụ |
-| **claude.ai / Claude Desktop** | Settings → Customize → **Skills** → upload từng file trong [`dist/`](dist/) (`*.skill`) | Cần bật code execution để chạy linter/render |
+| **Claude Code** (khuyên dùng) | Trong Claude Code: `/plugin marketplace add LeHuyHongNhat/docs-skills` rồi `/plugin install docs-skills@docs-skills` | Cập nhật bằng `/plugin marketplace update`. Skill hiện với tên `docs-skills:<tên>` |
+| **Claude Code** (thủ công) | `./install.sh claude` → copy vào `~/.claude/skills/` (thêm `--project` để cài vào `./.claude/skills/` của repo hiện tại) | Dùng khi không muốn qua plugin |
+| **claude.ai / Claude Desktop** | Settings → Customize → **Skills** → upload từng file trong [`dist/`](dist/) (`*.skill` là file zip chứa thư mục skill) | Phải bật code execution & file creation để chạy linter/render |
+| **Claude API** | Upload qua Skills API, gọi trong Messages API bằng `container.skills` kèm tool code execution — xem [Agent Skills quickstart](https://platform.claude.com/docs/en/agents-and-tools/agent-skills/quickstart) | Dùng khi tích hợp vào sản phẩm/agent riêng |
 | **OpenAI Codex CLI** | `./install.sh codex` → `~/.agents/skills/` | Đọc chuẩn SKILL.md |
 | **Cursor** | `./install.sh cursor` → `~/.cursor/skills/` | Cursor cũng đọc `.claude/skills/` |
 | **Gemini CLI** | `./install.sh gemini` → `~/.gemini/skills/` | Gemini CLI ≥ 0.26 |
 | **ChatGPT** | Skills đang ở dạng beta cho gói Business/Enterprise — xem hướng dẫn upload của OpenAI | Gói cá nhân: dùng Custom GPT, dán `SKILL.md` vào Instructions và đính `references/*.md` làm Knowledge (mất phần script render) |
+
+Repo đang **private**: lệnh `/plugin marketplace add` và `git clone` cần máy đã đăng nhập GitHub (`gh auth login` hoặc git credential) với quyền đọc repo. Người không có quyền dùng file `.skill` trong `dist/`.
 
 Cài nhiều đích một lần: `./install.sh claude codex cursor`. Đang sửa skill thì dùng `--link` để symlink thay vì copy.
 
@@ -41,6 +45,7 @@ npm i -g @mermaid-js/mermaid-cli
 ## Cấu trúc repo
 
 ```
+.claude-plugin/     marketplace.json — cài cả bộ qua Claude Code plugin
 _shared/            nguồn dùng chung (single source of truth)
   references/       writing-standards.md, visual-style.md
   scripts/          lint_doc.py, render_doc.py

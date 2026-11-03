@@ -1,0 +1,6 @@
+schema_version: "1.1"
+name: erd-to-data-dictionary
+expected_outcome: |
+  Data dictionary đủ 5 bảng × 25 cột với kiểu, PK/FK/UQ, nullable đúng; 4 quan hệ với cardinality đúng; phát hiện payments.amount dùng FLOAT cho tiền.
+context:
+  scaffold_script: place-files.sh

@@ -1,0 +1,6 @@
+schema_version: "1.1"
+name: prd-loyalty-from-meeting-notes
+expected_outcome: |
+  PRD tiếng Việt đầy đủ mục tiêu/metric, scope + out of scope, business rules có ID, user story + AC Given/When/Then có kiểm tra biên, NFR đo được; mâu thuẫn hạn điểm 6 vs 12 tháng và câu hỏi hủy phòng dùng voucher nằm trong Open Questions, không bị tự quyết.
+context:
+  scaffold_script: place-files.sh

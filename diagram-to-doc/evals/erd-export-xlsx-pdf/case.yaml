@@ -1,0 +1,6 @@
+schema_version: "1.1"
+name: erd-export-xlsx-pdf
+expected_outcome: |
+  Ba file cùng nội dung; XLSX có sheet riêng cho từng bảng (header cố định, lọc được); PDF trình bày gọn gàng, chữ có dấu đúng, diagram là hình, bảng không tràn lề, marker cần xác nhận nổi bật.
+context:
+  scaffold_script: place-files.sh

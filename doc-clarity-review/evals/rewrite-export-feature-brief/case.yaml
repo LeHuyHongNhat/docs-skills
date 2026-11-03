@@ -1,0 +1,6 @@
+schema_version: "1.1"
+name: rewrite-export-feature-brief
+expected_outcome: |
+  Bản viết lại giữ đủ mọi fact (Excel, ngưỡng ~10.000 dòng chạy ngầm + email link, phân quyền admin/manager/staff theo chi nhánh, lưu 7 ngày), dùng ID + modal chuẩn, không tự bịa ngưỡng thời gian/danh sách cột, đánh dấu cần xác nhận cho biên 10k và nội dung file.
+context:
+  scaffold_script: place-files.sh

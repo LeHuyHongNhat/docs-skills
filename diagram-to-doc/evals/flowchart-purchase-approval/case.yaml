@@ -1,0 +1,6 @@
+schema_version: "1.1"
+name: flowchart-purchase-approval
+expected_outcome: |
+  Đặc tả phủ đủ 5 actor, 4 decision với tất cả nhánh (TP có 3 nhánh), ngưỡng 50.000.000 VND, 3 trạng thái kết thúc; phát hiện khoảng trống = 50tr và vòng lặp bổ sung không giới hạn; có Mermaid.
+context:
+  scaffold_script: place-files.sh

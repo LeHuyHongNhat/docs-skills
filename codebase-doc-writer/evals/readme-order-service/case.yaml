@@ -1,0 +1,6 @@
+schema_version: "1.1"
+name: readme-order-service
+expected_outcome: |
+  README đúng với code: 5 endpoint, 6 env var (kể cả SMTP_HOST chỉ đọc ở worker và không có trong .env.example) với default đúng, lệnh chạy theo Makefile/compose, Python 3.11, có worker + Redis + Postgres; không bịa endpoint/lệnh.
+context:
+  scaffold_script: place-files.sh

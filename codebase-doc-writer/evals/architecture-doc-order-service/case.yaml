@@ -1,0 +1,6 @@
+schema_version: "1.1"
+name: architecture-doc-order-service
+expected_outcome: |
+  Tài liệu kiến trúc mô tả đúng API (FastAPI) → Postgres + Redis queue orders.created → worker xác nhận đơn + gửi email SMTP có retry 3 lần; có Mermaid hợp lệ; trích file path; mục rủi ro dựa trên bằng chứng code.
+context:
+  scaffold_script: place-files.sh

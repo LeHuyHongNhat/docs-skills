@@ -1,0 +1,1 @@
+Tính năng export báo cáo doanh thu: user bấm nút export là ra file excel liền, file có đủ thông tin cần thiết. Nếu data nhiều quá (tầm 10k dòng trở lên) thì cho chạy ngầm rồi gửi mail link tải. Admin với manager xem đc hết các chi nhánh, staff thì chỉ export được chi nhánh của mình thôi. File export xong lưu tầm 7 ngày rồi xóa. Nhớ làm sao cho nhanh và ổn định nha.

@@ -1,0 +1,6 @@
+schema_version: "1.1"
+name: review-otp-srs-draft
+expected_outcome: |
+  Báo cáo bắt được phần lớn 13 vấn đề cài sẵn (đặc biệt mâu thuẫn 5 vs 3 phút là Critical), không đánh lỗi nặng FR-001/FR-006 vốn đã tốt, bản sửa không tự bịa số liệu.
+context:
+  scaffold_script: place-files.sh

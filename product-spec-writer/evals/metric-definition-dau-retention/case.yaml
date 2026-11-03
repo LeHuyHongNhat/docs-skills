@@ -1,0 +1,6 @@
+schema_version: "1.1"
+name: metric-definition-dau-retention
+expected_outcome: |
+  Tài liệu định nghĩa metric với công thức tường minh, grain, múi giờ, nguồn bảng, định nghĩa active, loại trừ internal, chiến lược distinct id, loại retention, SQL tham chiếu, ví dụ tính tay; giải thích nguyên nhân chênh lệch (push_received, UTC vs giờ VN, anonymous_id, internal) dưới dạng giả thuyết cần kiểm chứng.
+context:
+  scaffold_script: place-files.sh

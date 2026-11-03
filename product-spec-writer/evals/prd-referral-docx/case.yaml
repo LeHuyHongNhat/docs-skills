@@ -1,0 +1,6 @@
+schema_version: "1.1"
+name: prd-referral-docx
+expected_outcome: |
+  PRD ngắn gọn tương xứng input, file Word trình bày chuyên nghiệp: heading dùng style Heading, bảng full ngang có header nổi bật, marker cần xác nhận được tô; các rule 50.000 VND, 10 lượt/tháng, 7 ngày, 30 ngày, 1 lần/thiết bị có ID; câu hỏi hủy đơn đầu tiên ở Open Questions.
+context:
+  scaffold_script: place-files.sh

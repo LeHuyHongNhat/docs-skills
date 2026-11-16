@@ -1,0 +1,26 @@
+# Claim ledger — Discord engineering blog, "Why Discord is switching from Go to Rust" (4 Feb 2020)
+claims:
+  - id: C1
+    text: "The Go service showed latency/CPU spikes roughly every 2 minutes"
+    type: descriptive
+    test: none
+    verified: tool-extract   # read through a text-extraction tool, not line by line
+    why: "Production observation shown in charts; no numbers in text, no repeated measurement windows."
+  - id: C2
+    text: "The spikes were caused by Go's garbage collector scanning a large LRU cache"
+    type: causal
+    test: none
+    verified: tool-extract   # read through a text-extraction tool, not line by line
+    why: "Supported by mechanism (forced GC at least every 2 minutes) and by tuning experiments described in prose; not a controlled comparison with numbers."
+  - id: C3
+    text: "The Rust version has no spikes and lower latency, CPU and memory"
+    type: comparative
+    test: none
+    verified: tool-extract   # read through a text-extraction tool, not line by line
+    why: "Before/after values appear only in charts; hardware parity, load and measurement windows are not stated; one service, one deployment."
+  - id: C4
+    text: "The improvement is due to Rust (the language)"
+    type: causal
+    test: none
+    verified: tool-extract   # read through a text-extraction tool, not line by line
+    why: "Confounded: the port also changed the data structure (BTreeMap), the metrics library, memory copying and the tokio version; cache size was raised afterwards. No ablation."

@@ -87,9 +87,13 @@ Rules:
 ERD, sequence, wireframe and state machine have their own structures — see `references/diagram-types.md`.
 
 
+## Charts & comparisons
+
+Diagrams rarely contain numbers, so charts are rarely needed: do not chart invented volumes. Use `references/presentation-and-charts.md` for (a) a `::: {.kpis}` summary of the inventory (steps, branches, issues found) at the top of long documents, (b) a comparison table or `::: {.compare}` block when the user provides two versions of a diagram (as-is vs to-be), and (c) charts only when the image itself shows numbers (e.g. a dashboard screenshot). User asks for an artifact / web page → render `--to html`.
+
 ## Export formats & visual check
 
-Markdown is the source. When the user needs PDF/DOCX/XLSX (sending to an approver/client, printing, "a Word file", "Excel to filter"), or says the document will be shared, read `references/visual-style.md` and then render:
+Markdown is the source. When the user needs PDF/DOCX/XLSX/HTML (sending to an approver/client, printing, "a Word file", "Excel to filter"), or says the document will be shared, read `references/visual-style.md` and then render:
 ```bash
 python <skill-dir>/scripts/render_doc.py <file.md> --to pdf,docx,xlsx --out-dir <output dir> --qa
 ```
@@ -103,3 +107,7 @@ If the user says they will read it on a phone/mobile → add `--page mobile` (na
 - `scripts/check_diagram.py` — checks the inventory (missing branches, dead-end nodes, wrong FKs...) and generates the round-trip Mermaid.
 - `scripts/lint_doc.py` — vague-wording linter.
 - `scripts/render_doc.py` + `assets/` + `references/visual-style.md` — designed PDF/DOCX/XLSX export with visual QA (data dictionary → XLSX, one sheet per table).
+- `references/presentation-and-charts.md` + `scripts/charts.py` — when to chart, chart chooser, takeaway titles, comparison layouts (KPI tiles, side-by-side, ✓ ✗ ◐ tables), validated colour palette.
+- `references/research-rigor.md` + `scripts/stats_check.py` — only when the image is a chart/dashboard with numbers and the document draws conclusions from them.
+- `references/reader-test.md` — optional final check for documents read by people outside the conversation: a reader with only the document answers 5–8 questions; fix what they get wrong.
+- `references/agent-assisted-research.md` — when the document reports work an agent helped produce: what evidence must exist (plan, run log, checked citations), failure modes to look for, responsibility and disclosure.

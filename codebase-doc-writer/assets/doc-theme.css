@@ -153,3 +153,45 @@ body.mobile figure.diagram img { width: 100%; height: auto; }
   body.mobile .card-row { font-size: .9rem; }
   body.mobile .card-label { font-size: .82rem; }
 }
+
+/* ---------- Charts (render_doc.py: ```chart → inline SVG) ---------- */
+:root {
+  --good: #1e7b4a; --good-bg: #ecf6f0;
+  --bad: #b42318; --bad-bg: #fdf0ee;
+  --part: #9a5b00; --part-bg: #fff6e0;
+}
+figure.chart { margin: 1.4rem 0 1.6rem; break-inside: avoid; }
+figure.chart svg { display: block; width: 100%; height: auto; }
+figure.chart svg text { font-family: var(--font); }
+figure.chart svg rect[fill]:hover, figure.chart svg circle:hover { opacity: .85; }
+details.chart-data { margin-top: .3rem; font-size: .85rem; color: var(--ink-3); }
+details.chart-data summary { cursor: pointer; }
+details.chart-data table { margin-top: .4rem; }
+
+/* ---------- Comparison helpers ---------- */
+/* ::: {.compare}  side-by-side columns (2–3); stacks on narrow screens */
+div.compare { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: .8rem; margin: 1rem 0 1.4rem; }
+div.compare > * { border: 1px solid var(--line); border-radius: 8px; padding: .7rem .9rem; background: var(--bg); break-inside: avoid; }
+div.compare > * > h3, div.compare > * > h4 { margin-top: 0; }
+div.compare > .rec, div.compare > section.rec { border: 1.5px solid var(--accent); box-shadow: inset 0 3px 0 var(--accent); }
+/* ::: {.kpis}  stat tiles: a list whose items start with **number** */
+div.kpis ul { list-style: none; padding: 0; margin: 1rem 0 1.4rem; display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: .6rem; }
+li.kpi { border: 1px solid var(--line); border-radius: 8px; padding: .6rem .8rem; margin: 0; background: var(--bg-soft); font-size: .85rem; color: var(--ink-2); line-height: 1.4; break-inside: avoid; }
+strong.kpi-value { display: block; font-size: 1.6rem; font-weight: 700; color: var(--ink); letter-spacing: -0.02em; line-height: 1.2; font-variant-numeric: tabular-nums; }
+/* ✓ ✗ ◐ cells: colour + glyph (never colour alone) */
+td.mark-yes { color: var(--good); font-weight: 600; }
+td.mark-no { color: var(--bad); font-weight: 600; }
+td.mark-part { color: var(--part); font-weight: 600; }
+/* recommended column (header contains ★ / (recommended) / (khuyến nghị)) */
+th.rec { background: var(--accent-soft); color: var(--accent); }
+td.rec { background: #f7f9fe; }
+/* inline semantic deltas: [+20,5 điểm]{.good} [−3%]{.bad} [0%]{.neutral} — always write the sign */
+.good { color: var(--good); background: var(--good-bg); border-radius: 4px; padding: 0 .3em; font-weight: 600; }
+.bad { color: var(--bad); background: var(--bad-bg); border-radius: 4px; padding: 0 .3em; font-weight: 600; }
+.neutral { color: var(--ink-2); background: var(--bg-soft); border-radius: 4px; padding: 0 .3em; }
+@media print {
+  details.chart-data { display: none; }   /* PDF: the chart already prints its values */
+  div.compare { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
+}
+body.mobile div.compare, body.mobile div.kpis ul { grid-template-columns: 1fr; }
+body.mobile figure.chart svg { width: 100%; }

@@ -2,7 +2,7 @@
 """routing_eval.py — đo khả năng định tuyến của cả bộ skill bằng `claude -p` thật.
 
 Khác run_eval.py của skill-creator (cài 1 skill/lần, đo trigger yes/no), script này cài
-CẢ 4 skill cùng lúc để đo đúng rủi ro của một *bộ* skill: nhầm skill anh em (confusion),
+CẢ bộ skill cùng lúc để đo đúng rủi ro của một *bộ* skill: nhầm skill anh em (confusion),
 bỏ sót (undertrigger) và kích hoạt nhầm cho request ngoài phạm vi (false trigger).
 
 Usage:
@@ -24,8 +24,8 @@ from collections import Counter, defaultdict
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 
-SKILLS_ROOT = Path("/home/claude/doc-skills")
-SKILLS = ["product-spec-writer", "codebase-doc-writer", "diagram-to-doc", "doc-clarity-review"]
+SKILLS_ROOT = Path(__file__).resolve().parents[1]
+SKILLS = ["product-spec-writer", "codebase-doc-writer", "diagram-to-doc", "doc-clarity-review", "community-post-writer"]
 
 
 def read_description(skill: str) -> str:
@@ -36,7 +36,7 @@ def read_description(skill: str) -> str:
 
 
 def install(project: Path, uid: str, competitors: dict[str, str] | None = None) -> dict[str, str]:
-    """Cài 4 skill của bộ + (tùy chọn) skill cạnh tranh, để đo độ bền định tuyến khi có đối thủ."""
+    """Cài cả bộ skill + (tùy chọn) skill cạnh tranh, để đo độ bền định tuyến khi có đối thủ."""
     cmd_dir = project / ".claude" / "commands"
     cmd_dir.mkdir(parents=True, exist_ok=True)
     names: dict[str, str] = {}

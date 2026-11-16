@@ -1,13 +1,14 @@
 # docs-skills — Agent Skills for writing professional product & technical documentation
 
-Four [Agent Skills](https://github.com/agentskills/agentskills) that help AI agents (Claude, Codex, Cursor, Gemini CLI, …) write documentation for BAs, PMs, POs, data analysts and developers that is **precise, unambiguous and never invented** — and export it as well-designed PDF (A4 or phone-sized), Word and Excel files.
+Five [Agent Skills](https://github.com/agentskills/agentskills) that help AI agents (Claude, Codex, Cursor, Gemini CLI, …) write documentation for BAs, PMs, POs, data analysts and developers that is **precise, unambiguous and never invented**, turn research into **accessible community posts**, and present both with **charts, comparison layouts and a contrast-checked palette** — exported as well-designed HTML pages, PDF (A4 or phone-sized), Word and Excel files.
 
 | Skill | Use it for |
 |---|---|
 | [`product-spec-writer`](product-spec-writer/) | BRDs, PRDs, SRS/FRDs, user stories with Gherkin acceptance criteria, use cases, metric/KPI definitions |
 | [`codebase-doc-writer`](codebase-doc-writer/) | READMEs, API references, architecture overviews (C4/arc42), ADRs, runbooks — written from source code, every fact traceable to `file:line` |
 | [`diagram-to-doc`](diagram-to-doc/) | Turning images of flowcharts / BPMN / sequence diagrams / ERDs / state machines / wireframes into specifications and data dictionaries |
-| [`doc-clarity-review`](doc-clarity-review/) | Reviewing and rewriting existing docs: vague wording, contradictions, untestable requirements, inconsistent terminology |
+| [`doc-clarity-review`](doc-clarity-review/) | Reviewing and rewriting existing docs: vague wording, contradictions, untestable requirements, inconsistent terminology, misleading charts |
+| [`community-post-writer`](community-post-writer/) | Forum / community posts (Viblo, dev.to, Reddit, Discourse, Facebook groups, LinkedIn, X threads) from research, experiments and experience: explainers, tutorials, research summaries, lessons learned, comparisons, content plans and series |
 
 The skill instructions are written in English. Output follows the user's language; **English and Vietnamese** are both first-class — writing standards, the linter (e.g. *"quickly"* / *"nhanh chóng"*, *"etc."* / *"v.v."*), open-item markers and generated labels (figure captions, Excel index, Word footer) all work in both.
 
@@ -15,11 +16,12 @@ The skill instructions are written in English. Output follows the user's languag
 
 - **Never decide for the stakeholder.** Contradictions and missing information are marked `[TO CONFIRM: …]` (or `[CẦN XÁC NHẬN: …]` in Vietnamese documents) and collected in an Open Questions table — never papered over with plausible-sounding numbers.
 - **Keep proposals out of the spec.** Anything the agent suggests lives in a separate, clearly labelled section, never inside requirements or acceptance criteria.
+- **Show, then explain.** Numbers that compare or trend become charts with a takeaway title and a mandatory source; options become comparison tables with ✓ ✗ ◐; colours come from one validated palette and never carry meaning alone.
 - **Verify with tools, not vibes.** A wording linter, a diagram-inventory checker (missing branches, dangling nodes, broken FKs) and a renderer that produces page images for visual QA before hand-off.
 
 ## Install
 
-All four skills follow the open Agent Skills format (`SKILL.md` + `scripts/` + `references/` + `assets/`), so the same folders work across agents — only the install location differs.
+All five skills follow the open Agent Skills format (`SKILL.md` + `scripts/` + `references/` + `assets/`), so the same folders work across agents — only the install location differs.
 
 | Platform | How | Notes |
 |---|---|---|
@@ -44,11 +46,62 @@ npm i -g @mermaid-js/mermaid-cli
 # plus pandoc and Chrome/Chromium
 ```
 
+## Charts & comparison layouts
+
+Write a chart as a YAML block in Markdown; the renderer draws it (no plotting library needed):
+
+````markdown
+```chart
+type: hbar            # bar | hbar | grouped | stacked | line | slope | dumbbell | heatmap | interval
+title: Skills raise the assertion pass rate by 20.5 points     # the takeaway
+subtitle: Assertion pass rate, 10 eval cases (%)
+categories: [With skills, Without skills]
+values: [92.5, 72.0]
+unit: "%"
+highlight: With skills
+source: docs/evaluation-report.md §3.2                          # required
+```
+````
+
+- **HTML/PDF:** inline SVG with hover values and a collapsible data table. **Word:** 2× PNG. **Excel:** one data sheet per chart. **`--to charts`:** standalone SVG + PNG per chart for forum posts and slides.
+- **Comparison helpers:** `::: {.kpis}` stat tiles, `::: {.compare}` side-by-side blocks, ✓ ✗ ◐ table cells coloured *with* their glyph, ★ in a header highlights the recommended column, `[+20.5 pts]{.good}` / `{.bad}` deltas.
+- **Colour:** a fixed 6-colour categorical order plus sequential/diverging ramps, validated for contrast (text ≥ 4.5:1, marks ≥ 3:1) and colour-vision deficiency — `python scripts/charts.py validate "#hex,#hex"` checks any custom palette.
+- Guide for agents: [`_shared/references/presentation-and-charts.md`](_shared/references/presentation-and-charts.md). Sample: [`samples/bao-cao-kiem-dinh-artifact.md`](samples/bao-cao-kiem-dinh-artifact.md) → [PDF](samples/bao-cao-kiem-dinh-artifact.pdf).
+
+## Community posts
+
+`community-post-writer` builds an **evidence ledger** before writing (every claim → source, strength, limits), proposes several **angles** from one body of research, writes for the platform's real rendering (Markdown forums vs plain-text Facebook/LinkedIn/X), and applies the research-rigor pass to any post that makes claims from data, and checks the draft with `post_check.py`: sentence/paragraph length (syllable-aware for Vietnamese), undefined acronyms, hype and AI-cliché words (VI + EN), figures without a nearby source, title clickbait, platform length limits and unsupported Markdown. It also reports structural tells of machine-written prose (contrast-for-weight, staged run-ups, one-line closers, bold-label lists, dash density), headings that carry no information, and headline numbers that never reappear in the body. `--export` produces a paste-ready plain-text version.
+
+## Research rigor
+
+Readable is not the same as correct. When a document or post compares things with numbers, claims a cause, summarises a study or shows a benchmark/backtest, the skills apply [`research-rigor.md`](_shared/references/research-rigor.md) and compute the uncertainty with `stats_check.py` (stdlib only, checked against scipy):
+
+```bash
+python scripts/stats_check.py diff-prop 38 50 31 50     # "38/50 beats 31/50"? → +14 pts, 95% CI −4 to +31 → INCONCLUSIVE
+python scripts/stats_check.py mcnemar 10 3 --n 50       # paired per-item comparison
+python scripts/stats_check.py seeds 71.2 70.8 72.5 --baseline 70.1 69.9 70.4
+python scripts/stats_check.py sharpe 1.8 1430 --trials 300   # Sharpe SE, CI, deflated for 300 backtests
+python scripts/stats_check.py claims claims.yaml --strict    # every claim of a post, Holm-corrected; fails on overclaims
+```
+
+- **Design decides the verb**: only randomised/controlled designs earn causal wording; a benchmark earns "on this dataset"; a backtest earns "in simulation, gross/net of costs".
+- **Threat checklists by domain**: ML evaluation (leakage, baseline parity, seeds, judge validity), data science (selection, confounders, peeking), quant (economic hypothesis, look-ahead, survivorship, multiple testing, costs, decay), systems benchmarks (same load, percentiles, confounded rewrites).
+- **Reporting other people's studies**: tables over abstracts, intervals with estimates, the authors' own non-claims, follow-ups and versions, undefined sign conventions quoted verbatim.
+- Each claim carries an evidence state (`verified: primary | own-data | tool-extract | secondary | …`); a snippet or a summary does not verify a claim, and only the first two can carry strong wording.
+- For work an agent helped produce, [`agent-assisted-research.md`](_shared/references/agent-assisted-research.md) asks for the evidence first: a plan frozen before the first run with its decision rule, a run log, a reproduced baseline, checked citations. `stats_check.py runs` computes the comparison straight from the log (paired by seed) and warns about single-seed results; `fwer`, `ppv` and `winners-curse` show what trying many variants produces by luck alone.
+- A reader test ([`reader-test.md`](_shared/references/reader-test.md)) puts the finished text in front of a reader who has only the text.
+- `post_check.py --rigor` flags the mechanical gaps (including reasoning from overlapping intervals and misdescribed confidence intervals); the `interval` chart type draws estimates with their confidence intervals; a 12-point rubric (R1–R12) is used for self-review.
+
+[`samples/rebuild-comparison/`](samples/rebuild-comparison/) rebuilds three real articles (METR's AI-productivity study, McLean & Pontiff on anomaly decay, Discord's Go→Rust post) and scores originals and rebuilds on the rubric. The comparison is self-graded with n = 3, and the skill's own tool reports it as inconclusive.
+
 ## Export & visual QA
 
 ```bash
 # A4 PDF + Word + Excel, with page previews and automatic layout checks
 python scripts/render_doc.py doc.md --to pdf,docx,xlsx --out-dir out --qa
+
+# Shareable self-contained web page (artifact) + chart images
+python scripts/render_doc.py doc.md --to html,charts --out-dir out
 
 # Phone-sized PDF (tables with ≥ 4 columns become label/value cards)
 python scripts/render_doc.py doc.md --to pdf --page mobile --out-dir out --qa
@@ -65,13 +118,13 @@ python scripts/render_doc.py doc.md --to pdf --page mobile --out-dir out --qa
 ## Repository layout
 
 ```
-.claude-plugin/     marketplace.json — install all four skills as one Claude Code plugin
+.claude-plugin/     marketplace.json — install all five skills as one Claude Code plugin
 _shared/            single source of truth for shared files
-  references/       writing-standards.md, visual-style.md
-  scripts/          lint_doc.py, render_doc.py
+  references/       writing-standards.md, visual-style.md, presentation-and-charts.md, research-rigor.md, reader-test.md, agent-assisted-research.md
+  scripts/          lint_doc.py, render_doc.py, charts.py, stats_check.py
   assets/           doc-theme.css, reference.docx
-  tests/            48 unit tests (pytest)
-<skill>/            the four skills; scripts/references/assets are synced from _shared by build.sh
+  tests/            110 unit tests (pytest)
+<skill>/            the five skills; scripts/references/assets are synced from _shared by build.sh
   evals/            test cases in `claude plugin eval` format
 _eval_tools/        evaluation tooling: automated checks, blind A/B prep, real `claude -p` routing eval
 dist/               packaged .skill files (for claude.ai upload)
@@ -83,7 +136,7 @@ samples/            sample outputs produced by the skills (Word, A4/mobile PDF, 
 ## Development
 
 ```bash
-./build.sh              # sync _shared → the four skills, then validate
+./build.sh              # sync _shared → the five skills, then validate
 ./build.sh --package    # also package into dist/
 cd _shared && python -m pytest -q tests
 ```
@@ -92,7 +145,7 @@ Edit scripts and references **in `_shared/`**, never the copies inside each skil
 
 ## Evaluation summary
 
-Evaluated with 7 methods over two iterations — full report: [`docs/evaluation-report.md`](docs/evaluation-report.md) (Vietnamese original: [`docs/bao-cao-kiem-dinh-doc-skills.md`](docs/bao-cao-kiem-dinh-doc-skills.md)).
+The four documentation skills were evaluated with 7 methods over two iterations — full report: [`docs/evaluation-report.md`](docs/evaluation-report.md) (Vietnamese original: [`docs/bao-cao-kiem-dinh-doc-skills.md`](docs/bao-cao-kiem-dinh-doc-skills.md)).
 
 | Metric | With skills | Without skills |
 |---|---|---|
@@ -101,11 +154,17 @@ Evaluated with 7 methods over two iterations — full report: [`docs/evaluation-
 | Correct skill routing (`claude -p`, 72 runs, Vietnamese + English queries, 3 competing skills installed) | **100%** | – |
 | Ground-truth fidelity (flowchart edges / ERD columns / planted review issues) | 16/16 · 25/25 · 13/13 | – |
 
+**Not yet evaluated (v2.3):** the chart/presentation layer, the research-rigor layer and `community-post-writer` have unit tests (palette validation, every chart type, statistics against scipy reference values, post checker) and four eval cases (three in `community-post-writer/evals/`, one report audit in `doc-clarity-review/evals/`), but no with/without-skill benchmark, routing run or independent (human or other-model) grading yet. The rebuild comparison in `samples/rebuild-comparison/` is self-graded.
+
 **Known limitations:**
 - Output for very short inputs is still longer than ideal.
 - Runs take roughly 2–2.5× longer than a plain agent, because the skills verify more (they run the code, render the files, lint the text).
 - Each configuration was run once per case.
 - The judge is from the same model family as the writer; human blind review is the recommended next step.
+
+## Credits
+
+Several ideas were adapted from public skills after a review recorded in [`docs/external-skills-review.md`](docs/external-skills-review.md): structural tells of machine-written prose ([blader/humanizer](https://github.com/blader/humanizer), MIT), engineering-blog standards ([getsentry/skills](https://github.com/getsentry/skills), Apache-2.0), the reader test ([anthropics/skills](https://github.com/anthropics/skills)), evidence binding and statistical pitfalls ([K-Dense-AI/claude-scientific-skills](https://github.com/K-Dense-AI/claude-scientific-skills), MIT), editing passes ([coreyhaines31/marketingskills](https://github.com/coreyhaines31/marketingskills), MIT) and skill-authoring guidance ([obra/superpowers](https://github.com/obra/superpowers), MIT). The agent-assisted-research guide adapts the course handout "AI Vibe-Researcher" by Nguyễn Thanh Huy (AI VIET NAM, AIO2026). The ideas were re-expressed in this project's own words and examples; no text was copied.
 
 ## License
 

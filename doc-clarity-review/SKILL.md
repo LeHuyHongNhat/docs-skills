@@ -58,9 +58,19 @@ python <skill-dir>/scripts/lint_doc.py <revised.md>
 The revised version must have no remaining `high` findings other than intentional [TO CONFIRM] / [CẦN XÁC NHẬN] locations.
 
 
+### Charts, comparisons & HTML artifacts
+
+For a review report, read `references/presentation-and-charts.md` and consider:
+- Findings by severity × category → `stacked` or `heatmap` chart (source: the findings table in the same report), plus `::: {.kpis}` tiles (high / medium / low counts).
+- Each key rewrite as a `::: {.compare}` block (original vs proposed), same order on both sides.
+- When reviewing a document that already has charts: check takeaway titles, units, `source:`, truncated axes, dual axes, colour-only encoding and numbers that disagree with the text — report them with the rubric codes.
+- Claims from data ("A is better", "increased by 30%", backtests, eval results): check them against `references/research-rigor.md` (rubric R1–R12) and recompute with `scripts/stats_check.py` when the counts are in the document; report unsupported strength as UNSOURCED or VIS-CLAIM.
+- **Auditing a report against its evidence** (an experiment report, an agent-written summary, a benchmark write-up delivered with code or logs): follow `references/agent-assisted-research.md` §6. For each number find the run-log record behind it (recompute with `scripts/stats_check.py runs` when a log is provided); check that each cited work exists and was the source of the claim; read the code for model selection on the test split, merged splits and unequal treatment of the arms; compare the reported seed or run with all recorded ones (cherry-picking). Report each finding with location, the evidence checked and severity; where a part is clean, say what was checked.
+- User asks for an artifact / web page → render `--to html`.
+
 ### Export formats (revised document) & visual check
 
-Markdown is the source. When the user needs PDF/DOCX/XLSX (to send to an approver/client, to print, "a Word file", "Excel for filtering"), or says the document will be shared, read `references/visual-style.md` and then render:
+Markdown is the source. When the user needs PDF/DOCX/XLSX/HTML (to send to an approver/client, to print, "a Word file", "Excel for filtering"), or says the document will be shared, read `references/visual-style.md` and then render:
 ```bash
 python <skill-dir>/scripts/render_doc.py <file.md> --to pdf,docx,xlsx --out-dir <output dir> --qa
 ```
@@ -73,4 +83,8 @@ If the document is already good: say plainly that it is good and list the few fi
 - `references/review-rubric.md` — error code taxonomy, severity definitions, report format, example.
 - `references/writing-standards.md` — shared wording standards.
 - `scripts/render_doc.py` + `assets/` + `references/visual-style.md` — export the revised document to PDF/DOCX and the findings table to XLSX.
+- `references/presentation-and-charts.md` + `scripts/charts.py` — when to chart, chart chooser, takeaway titles, comparison layouts (KPI tiles, side-by-side, ✓ ✗ ◐ tables), validated colour palette.
+- `references/research-rigor.md` + `scripts/stats_check.py` — rules and statistics for claims made from data (CIs, paired tests, seeds, Sharpe, overclaim flags).
+- `references/reader-test.md` — optional final check for documents read by people outside the conversation: a reader with only the document answers 5–8 questions; fix what they get wrong.
+- `references/agent-assisted-research.md` — when the document reports work an agent helped produce: what evidence must exist (plan, run log, checked citations), failure modes to look for, responsibility and disclosure.
 - `scripts/lint_doc.py` — surface linter (`--format json` for further processing; `--terms` to pass project-specific synonym groups).

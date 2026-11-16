@@ -60,12 +60,22 @@ Rules for filling in the template:
    Fix every `high` finding. Any remaining `medium` finding must have a reason to keep it (e.g. the word "simple" is part of a feature name).
 2. Check against the inventory: every fact in the input appears in the document or is explicitly marked out of scope; every contradiction is in Open Questions.
 3. Re-read as QA: for each AC, can you write a test case with a clear pass/fail? If not — the AC is not done.
+4. When the document goes to approvers or to a team that was not in the conversation, run the reader test in `references/reader-test.md` with questions a developer and a QA engineer would ask (thresholds and their boundaries, error branches, what is out of scope). Report how it was run.
 
 ### 5. Hand-off
 
+### Charts, comparisons & HTML artifacts
+
+Read `references/presentation-and-charts.md` when the document contains numbers that show a ranking, trend, gap or share, or compares options. Typical uses here:
+- PRD/BRD goals: baseline vs target per metric → `dumbbell`; option comparison in a BRD → comparison table with ✓ ✗ ◐ and ★ on the recommended option (only if a recommendation was asked for).
+- Metric definitions: a small worked example chart only from data the user provided.
+- Chart only measured or user-given numbers, with `source:`. A target or threshold that is still [TO CONFIRM] is never drawn as if decided.
+- Metric definitions, A/B-test specs and success criteria that compare numbers: follow `references/research-rigor.md` (design → allowed verbs, sample size, uncertainty) and compute intervals with `scripts/stats_check.py`; a success threshold needs its sample size and decision rule, or a [TO CONFIRM].
+- User asks for an artifact / web page / a report with charts → render `--to html` (and publish it if your environment has an artifact/page publishing tool).
+
 ### Export formats & visual check
 
-Markdown is the source. When the user needs PDF/DOCX/XLSX (sending to an approver/client, printing, "a Word file", "Excel to filter"), or says the document will be shared, read `references/visual-style.md`, then render:
+Markdown is the source. When the user needs PDF/DOCX/XLSX/HTML (sending to an approver/client, printing, "a Word file", "Excel to filter"), or says the document will be shared, read `references/visual-style.md`, then render:
 ```bash
 python <skill-dir>/scripts/render_doc.py <file.md> --to pdf,docx,xlsx --out-dir <output dir> --qa
 ```
@@ -99,3 +109,7 @@ AC-007.2  Given the user has 499 available points
 - `scripts/lint_doc.py` — linter that detects vague terms, placeholders, duplicate IDs, inconsistent terminology.
 - `scripts/render_doc.py` + `assets/` — designed HTML/PDF/DOCX/XLSX export; `--qa` renders page images for checking.
 - `references/visual-style.md` — rules for writing Markdown that renders well, and the visual QA process.
+- `references/presentation-and-charts.md` + `scripts/charts.py` — when to chart, chart chooser, takeaway titles, comparison layouts (KPI tiles, side-by-side, ✓ ✗ ◐ tables), validated colour palette.
+- `references/research-rigor.md` + `scripts/stats_check.py` — rules and statistics for claims made from data (CIs, paired tests, seeds, Sharpe, overclaim flags).
+- `references/reader-test.md` — optional final check for documents read by people outside the conversation: a reader with only the document answers 5–8 questions; fix what they get wrong.
+- `references/agent-assisted-research.md` — when the document reports work an agent helped produce: what evidence must exist (plan, run log, checked citations), failure modes to look for, responsibility and disclosure.

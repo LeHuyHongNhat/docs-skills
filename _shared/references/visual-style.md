@@ -11,6 +11,8 @@ Correct content with messy layout still gets skipped by readers. This file defin
 | "read on my phone", "view on mobile" (VI: "đọc trên điện thoại", "xem trên mobile") | `.md` + `.pdf` with `--page mobile`: page size ~108×192 mm, tables with ≥ 4 columns automatically become "label: value" cards |
 | "Word", "docx", "so the team can keep editing" (VI: "để team sửa tiếp") | `.md` + `.docx` |
 | Data dictionary, traceability matrix, findings list, metrics table — "Excel", "to filter/sort" (VI: "để lọc/sort") | `.md` + `.xlsx` (one sheet per table) |
+| "artifact", "web page", "dashboard-style report", "link to share", a report with several charts (VI: "trang web", "báo cáo có biểu đồ") | `.md` + `.html` (self-contained: fonts, charts and styles embedded). If your environment has a tool to publish HTML artifacts/pages, publish that file; otherwise deliver the `.html` |
+| Charts needed as separate images (forum post, slides, chat) | `--to charts` → one `.svg` + 2× `.png` per chart |
 | Several audiences | combine, e.g. `--to pdf,xlsx` |
 
 Markdown is always the single source of truth: edit the content in the `.md` and re-render; never hand-edit the PDF/DOCX files.
@@ -55,12 +57,16 @@ Place the metadata table **directly after the H1** — the theme renders it as a
 - Short labels (≤ 5 words); avoid the characters `;` `"` `{}` in labels — they break the syntax (most common error: `BEGIN; INSERT...` in a sequence diagram).
 - Each diagram has one lead-in sentence directly before it saying what the diagram shows.
 
+**Charts, KPI tiles, comparisons**: when the document contains numbers that show a ranking, trend, gap or share, or compares options, read `references/presentation-and-charts.md`. Charts are written as ```` ```chart ```` YAML blocks (rendered to SVG/PNG by the script), KPI tiles as `::: {.kpis}`, side-by-side as `::: {.compare}`, comparison tables with ✓ ✗ ◐ and a ★ recommended column.
+
 **Code blocks**: always specify the language (```` ```bash ````, ```` ```sql ````). Code lines ≤ 100 characters so they are not cut off in the PDF.
 
 ## 3. Render & check (visual QA)
 
 ```bash
 python <skill-dir>/scripts/render_doc.py <doc.md> --to pdf,docx,xlsx --out-dir <output dir> --qa
+# shareable web page / artifact (charts are interactive: hover shows values):
+python <skill-dir>/scripts/render_doc.py <doc.md> --to html,pdf --out-dir <output dir> --qa
 # for reading on a phone:
 python <skill-dir>/scripts/render_doc.py <doc.md> --to pdf --page mobile --out-dir <output dir> --qa
 ```
@@ -70,11 +76,11 @@ Need both A4 (print/approval) and a mobile version: render twice into two direct
 
 The script prints JSON containing `outputs`, `warnings`, `qa`. Then:
 
-1. **Read the warnings**: Mermaid failed to render, table with ≥ 7 columns, missing tools (pandoc/Chrome/mmdc). Fix the `.md` source and re-render.
+1. **Read the warnings**: chart spec errors or a chart without `source:`, Mermaid failed to render, table with ≥ 7 columns, missing tools (pandoc/Chrome/mmdc). Fix the `.md` source and re-render.
 2. **Look at the page images** in `qa.preview_pages` (the Read tool displays images). At minimum look at page 1, the page with the largest table and the page with a diagram. Check:
    - accented characters display correctly (no empty boxes);
    - tables do not overflow the margin, the ID column does not break mid-value;
-   - diagrams render as images and their labels are readable;
+   - diagrams and charts render as images and their labels are readable and do not collide;
    - no near-empty pages caused by bad page breaks.
 3. **DOCX**: if you need to inspect it, convert it to PDF to view images: `soffice --headless --convert-to pdf <file.docx>` then `pdftoppm -r 60 -png`.
 4. **XLSX**: one sheet per table, with frozen header and filter; an index sheet ("Index"; "Mục lục" for Vietnamese documents) lists the sheets. Generated labels — figure captions, index sheet, Word footer "Page x/y" — follow the document language automatically. Check that sheet names are meaningful (taken from the nearest heading — put a clear heading before each table).
@@ -85,4 +91,5 @@ If the environment lacks a tool → the script skips that format and reports a w
 
 - Font: Inter (PDF/HTML), Arial (DOCX — available on every machine, full Vietnamese diacritics). Tabular figures in tables.
 - One accent colour (blue `#2A4FB8`) for links/notes; yellow only for [TO CONFIRM] / [CẦN XÁC NHẬN]; red only for risks. Colour carries meaning, not decoration.
+- Charts use a fixed, validated 6-colour categorical order plus sequential/diverging ramps (`scripts/charts.py`); text and status colours meet 4.5:1 contrast, chart marks 3:1. Details: `presentation-and-charts.md` §5.
 - A4, 16–20 mm margins, footer: document name + page number `x / y`. Table headers repeat when a table continues onto the next page.

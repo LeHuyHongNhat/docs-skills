@@ -1,0 +1,6 @@
+schema_version: "1.1"
+name: content-plan-linkedin-reddit
+expected_outcome: |
+  content_plan.md with 3–6 distinct angles (reader, type, one-sentence takeaway, evidence); a LinkedIn post in plain text (no Markdown symbols, ≤ 3,000 characters, hook in the first two lines) and a Reddit post in Markdown with TL;DR, method, results table, limitations and disclosure that the author built the harness. Numbers match the notes; the vendor's 99% claim and the fine-tuning guess are not presented as facts; the dataset limits (400 invoices, 3 SMEs, single run, private data) are stated.
+context:
+  scaffold_script: place-files.sh

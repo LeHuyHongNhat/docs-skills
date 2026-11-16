@@ -1,0 +1,6 @@
+schema_version: "1.1"
+name: audit-agent-experiment-report
+expected_outcome: |
+  audit.md đối chiếu báo cáo với code và log, tìm đủ các lỗi cài sẵn: (1) trích dẫn "Lam và Pham (2025)" không xác minh được/không tồn tại; (2) "5 seed, trung bình 0.912" không khớp log (baseline 4 seed, label smoothing 5 seed, trung bình 0.8814); (3) 0.842 → 0.883 là seed 3, seed có chênh lệch lớn nhất (cherry-picking), trung bình chênh lệch theo cặp là +0.012 với khoảng tin cậy chứa 0; (4) chọn checkpoint và learning rate theo test set; (5) validation bị gộp vào train; (6) so sánh không công bằng: 12 giá trị learning rate cho label smoothing, 1 cho baseline; (7) "tăng 4,1%" thực ra là 4,1 điểm, và "chứng minh"/"luôn"/khuyến nghị cho mọi mô hình vượt quá bằng chứng. Mỗi lỗi có vị trí, bằng chứng đã kiểm và mức độ; số liệu được tự tính lại từ log; file gốc không bị sửa.
+context:
+  scaffold_script: place-files.sh

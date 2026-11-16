@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+
+<html lang="" xml:lang="" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta charset="utf-8"/>
+<meta content="pandoc" name="generator"/>
+<meta content="width=device-width, initial-scale=1.0, user-scalable=yes" name="viewport"/>
+<title>Báo cáo: Kiểm định bộ skill viết tài liệu (bản trình
+bày)</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+</style>
+<style type="text/css">
+:root {
+--ink: #1b2130;
+--ink-2: #4a5263;
+--ink-3: #6b7385;
+--line: #e3e6ec;
+--line-strong: #c9ced8;
+--bg: #ffffff;
+--bg-soft: #f6f7f9;
+--accent: #2a4fb8;
+--accent-soft: #eef2fc;
+--confirm: #8a5a00;
+--confirm-bg: #fff6e0;
+--confirm-line: #f0c36a;
+--risk: #a3261d;
+--risk-bg: #fdf0ee;
+--code-bg: #f3f4f7;
+--font: "Inter", "Noto Sans", "DejaVu Sans", "Segoe UI", Arial, sans-serif;
+--mono: "JetBrains Mono", "DejaVu Sans Mono", Consolas, monospace;
+}
+html { font-size: 10.5pt; }
+body {
+font-family: var(--font);
+color: var(--ink);
+background: var(--bg);
+line-height: 1.6;
+max-width: 820px;
+margin: 40px auto;
+padding: 0 24px;
+font-feature-settings: "cv11", "ss01", "tnum"; 
+-webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4 { line-height: 1.25; letter-spacing: -0.01em; break-after: avoid; }
+h1 { font-size: 2rem; font-weight: 700; margin: 0 0 .4rem; }
+h1 + p, h1 + table { margin-top: .6rem; }
+h2 {
+font-size: 1.35rem; font-weight: 650; margin: 2.2rem 0 .8rem;
+padding-bottom: .35rem; border-bottom: 1px solid var(--line);
+}
+h3 { font-size: 1.1rem; font-weight: 650; margin: 1.6rem 0 .5rem; }
+h4 { font-size: 1rem; font-weight: 600; margin: 1.2rem 0 .4rem; color: var(--ink-2); }
+p, ul, ol { margin: 0 0 .8rem; }
+li { margin: .2rem 0; }
+li > p { margin: 0; }
+strong { font-weight: 650; }
+a { color: var(--accent); text-decoration: none; border-bottom: 1px solid var(--accent-soft); }
+hr { border: 0; border-top: 1px solid var(--line); margin: 2rem 0; }
+
+table {
+width: 100%; border-collapse: collapse; margin: .6rem 0 1.2rem;
+font-size: .9rem; line-height: 1.45; table-layout: auto;
+}
+thead { display: table-header-group; } 
+tr { break-inside: avoid; }
+th {
+text-align: left; font-weight: 600; color: var(--ink-2);
+background: var(--bg-soft); border-bottom: 1.5px solid var(--line-strong);
+padding: .45rem .6rem; vertical-align: bottom;
+}
+td { padding: .45rem .6rem; border-bottom: 1px solid var(--line); vertical-align: top; }
+td code, th code { white-space: nowrap; }
+.nb { white-space: nowrap; }
+td.id, th.id { white-space: nowrap; font-variant-numeric: tabular-nums; }
+
+h1 + table { font-size: .85rem; width: auto; }
+h1 + table th, h1 + table td { padding: .25rem .9rem .25rem 0; background: none; border: 0; }
+h1 + table th { color: var(--ink-3); font-weight: 500; }
+
+code { font-family: var(--mono); font-size: .86em; background: var(--code-bg); padding: .1em .35em; border-radius: 4px; }
+pre {
+font-family: var(--mono); font-size: .82rem; line-height: 1.5;
+background: var(--code-bg); border: 1px solid var(--line);
+border-radius: 6px; padding: .8rem 1rem; overflow-x: auto; white-space: pre-wrap; word-break: break-word;
+break-inside: avoid;
+}
+pre code { background: none; padding: 0; font-size: inherit; }
+
+blockquote {
+margin: 1rem 0; padding: .6rem 1rem; border-left: 3px solid var(--accent);
+background: var(--accent-soft); color: var(--ink-2); border-radius: 0 6px 6px 0;
+}
+blockquote p:last-child { margin-bottom: 0; }
+
+.confirm {
+background: var(--confirm-bg); color: var(--confirm);
+border: 1px solid var(--confirm-line); border-radius: 4px;
+padding: 0 .3em; font-size: .92em; font-weight: 500; white-space: normal;
+}
+.risk { color: var(--risk); background: var(--risk-bg); border-radius: 4px; padding: 0 .3em; font-weight: 500; }
+
+figure.diagram { margin: 1.2rem 0; text-align: center; break-inside: avoid; }
+figure.diagram img { max-width: 100%; height: auto; }
+figure.diagram figcaption { font-size: .8rem; color: var(--ink-3); margin-top: .3rem; }
+
+nav#TOC { border: 1px solid var(--line); border-radius: 8px; padding: .8rem 1.2rem; margin: 1.2rem 0 2rem; font-size: .9rem; }
+
+nav#TOC #toc-title, nav#TOC h2 { display: block; font-size: .9rem; font-weight: 600; margin: 0 0 .4rem; padding: 0; border: 0; color: var(--ink-2); }
+nav#TOC ul { list-style: none; padding-left: 1rem; margin: 0; }
+nav#TOC > ul { padding-left: 0; }
+nav#TOC a { border: 0; color: var(--ink); }
+
+.doc-kicker { font-size: .78rem; text-transform: uppercase; letter-spacing: .08em; color: var(--accent); font-weight: 600; margin-bottom: .3rem; }
+
+@page { size: A4; margin: 18mm 16mm 20mm; }
+@media print {
+html { font-size: 9.5pt; }
+body { max-width: none; margin: 0; padding: 0; }
+a { border: 0; color: var(--ink); }
+h2 { break-before: auto; }
+table.wide { font-size: .8rem; }
+}
+
+@media (max-width: 640px) {
+body { margin: 16px auto; padding: 0 16px; }
+table { display: block; overflow-x: auto; }
+}
+
+body.mobile { max-width: none; margin: 0; padding: 0; font-size: 10.5pt; line-height: 1.55; }
+body.mobile h1 { font-size: 1.55rem; }
+body.mobile h2 { font-size: 1.2rem; margin-top: 1.6rem; }
+body.mobile pre { font-size: .75rem; }
+body.mobile table { font-size: .85rem; }
+.cards { display: flex; flex-direction: column; gap: .5rem; margin: .5rem 0 1rem; }
+.card { border: 1px solid var(--line); border-radius: 8px; padding: .5rem .7rem; break-inside: avoid; background: var(--bg); }
+.card-title { font-weight: 650; margin-bottom: .25rem; }
+.card-row { display: flex; gap: .5rem; font-size: .88rem; padding: .12rem 0; border-top: 1px dashed var(--line); }
+.card-label { flex: 0 0 34%; color: var(--ink-3); font-size: .8rem; }
+.card-value { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+
+body.mobile * { max-width: 100%; box-sizing: border-box; }
+body.mobile code, body.mobile .nb, body.mobile td code, body.mobile td.id { white-space: normal; overflow-wrap: anywhere; }
+body.mobile table { table-layout: fixed; width: 100%; }
+body.mobile td, body.mobile th { overflow-wrap: anywhere; }
+body.mobile figure.diagram img { width: 100%; height: auto; }
+@media print {
+html:has(body.mobile) { font-size: 11pt; }
+body.mobile { font-size: 11pt; line-height: 1.5; }
+body.mobile .card-row { font-size: .9rem; }
+body.mobile .card-label { font-size: .82rem; }
+}
+
+:root {
+--good: #1e7b4a; --good-bg: #ecf6f0;
+--bad: #b42318; --bad-bg: #fdf0ee;
+--part: #9a5b00; --part-bg: #fff6e0;
+}
+figure.chart { margin: 1.4rem 0 1.6rem; break-inside: avoid; }
+figure.chart svg { display: block; width: 100%; height: auto; }
+figure.chart svg text { font-family: var(--font); }
+figure.chart svg rect[fill]:hover, figure.chart svg circle:hover { opacity: .85; }
+details.chart-data { margin-top: .3rem; font-size: .85rem; color: var(--ink-3); }
+details.chart-data summary { cursor: pointer; }
+details.chart-data table { margin-top: .4rem; }
+
+
+div.compare { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: .8rem; margin: 1rem 0 1.4rem; }
+div.compare > * { border: 1px solid var(--line); border-radius: 8px; padding: .7rem .9rem; background: var(--bg); break-inside: avoid; }
+div.compare > * > h3, div.compare > * > h4 { margin-top: 0; }
+div.compare > .rec, div.compare > section.rec { border: 1.5px solid var(--accent); box-shadow: inset 0 3px 0 var(--accent); }
+
+div.kpis ul { list-style: none; padding: 0; margin: 1rem 0 1.4rem; display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: .6rem; }
+li.kpi { border: 1px solid var(--line); border-radius: 8px; padding: .6rem .8rem; margin: 0; background: var(--bg-soft); font-size: .85rem; color: var(--ink-2); line-height: 1.4; break-inside: avoid; }
+strong.kpi-value { display: block; font-size: 1.6rem; font-weight: 700; color: var(--ink); letter-spacing: -0.02em; line-height: 1.2; font-variant-numeric: tabular-nums; }
+
+td.mark-yes { color: var(--good); font-weight: 600; }
+td.mark-no { color: var(--bad); font-weight: 600; }
+td.mark-part { color: var(--part); font-weight: 600; }
+
+th.rec { background: var(--accent-soft); color: var(--accent); }
+td.rec { background: #f7f9fe; }
+
+.good { color: var(--good); background: var(--good-bg); border-radius: 4px; padding: 0 .3em; font-weight: 600; }
+.bad { color: var(--bad); background: var(--bad-bg); border-radius: 4px; padding: 0 .3em; font-weight: 600; }
+.neutral { color: var(--ink-2); background: var(--bg-soft); border-radius: 4px; padding: 0 .3em; }
+@media print {
+details.chart-data { display: none; } 
+div.compare { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
+}
+body.mobile div.compare, body.mobile div.kpis ul { grid-template-columns: 1fr; }
+body.mobile figure.chart svg { width: 100%; }
+</style>
+</head>
+<body>
+<h1 id="báo-cáo-kiểm-định-bộ-skill-viết-tài-liệu-bản-trình-bày">Báo cáo:
+Kiểm định bộ skill viết tài liệu (bản trình bày)</h1>
+<table>
+<thead>
+<tr class="header">
+<th>Phiên bản</th>
+<th>Ngày</th>
+<th>Owner</th>
+<th>Trạng thái</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1.0</td>
+<td>2026-11-16</td>
+<td>Le Nhat</td>
+<td>Mẫu minh họa</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>Tóm tắt:</strong> Có skill, agent đạt 92,5% assertion so với
+72,0% khi không có skill (10 case). Chênh lệch đến chủ yếu từ việc không
+bịa giá trị và tách đề xuất khỏi đặc tả. Rủi ro còn lại: case ERD → PDF
+mobile thua 2 lần chấm blind và bản sửa v2.2 chưa được chấm lại.</p>
+</blockquote>
+<div class="kpis">
+<ul>
+<li class="kpi"><strong class="kpi-value">92,5%</strong> tỉ lệ đạt assertion khi có skill (không
+skill: 72,0%)</li>
+<li class="kpi"><strong class="kpi-value">8/8</strong> case nội dung thắng blind A/B ở vòng 1</li>
+<li class="kpi"><strong class="kpi-value">52/52</strong> lượt routing chọn đúng skill</li>
+<li class="kpi"><strong class="kpi-value">−32%</strong> độ dài tài liệu v2 so với v1</li>
+</ul>
+</div>
+<h2 id="1-kết-quả-chính">1. Kết quả chính</h2>
+<p>Chỉ số chính là tỉ lệ assertion đạt: mỗi case có 7–13 câu kiểm tra
+khách quan, chấm bởi LLM grader và script.</p>
+<figure class="chart" id="chart-1"><svg aria-label="Có skill, tỉ lệ đạt assertion cao hơn 20,5 điểm phần trăm" font-family="Inter, 'Noto Sans', 'DejaVu Sans', 'Segoe UI', Arial, sans-serif" height="163" role="img" style="max-width:100%;height:auto" viewbox="0 0 720 163" width="720" xmlns="http://www.w3.org/2000/svg"><title>Có skill, tỉ lệ đạt assertion cao hơn 20,5 điểm phần trăm</title><rect fill="#FFFFFF" height="163" width="720"></rect><text fill="#1B2130" font-size="16" font-weight="650" text-anchor="start" x="16.0" y="20.0">Có skill, tỉ lệ đạt assertion cao hơn 20,5 điểm phần trăm</text><text fill="#6B7385" font-size="12.5" font-weight="400" text-anchor="start" x="16.0" y="38.0">Tỉ lệ đạt assertion, 10 case, vòng 2 (%)</text><line stroke="#E6E9EF" stroke-width="1" x1="102.8" x2="102.8" y1="56" y2="110.0"></line><text fill="#6B7385" font-size="11" font-weight="400" text-anchor="middle" x="102.8" y="124.0">0</text><line stroke="#E6E9EF" stroke-width="1" x1="242.1" x2="242.1" y1="56" y2="110.0"></line><text fill="#6B7385" font-size="11" font-weight="400" text-anchor="middle" x="242.1" y="124.0">25</text><line stroke="#E6E9EF" stroke-width="1" x1="381.4" x2="381.4" y1="56" y2="110.0"></line><text fill="#6B7385" font-size="11" font-weight="400" text-anchor="middle" x="381.4" y="124.0">50</text><line stroke="#E6E9EF" stroke-width="1" x1="520.7" x2="520.7" y1="56" y2="110.0"></line><text fill="#6B7385" font-size="11" font-weight="400" text-anchor="middle" x="520.7" y="124.0">75</text><line stroke="#E6E9EF" stroke-width="1" x1="660.0" x2="660.0" y1="56" y2="110.0"></line><text fill="#6B7385" font-size="11" font-weight="400" text-anchor="middle" x="660.0" y="124.0">100</text><text fill="#1B2130" font-size="12.5" font-weight="600" text-anchor="end" x="92.8" y="69.0">Có skill (v2)</text><rect fill="#2A4FB8" height="18" rx="3" width="515.5" x="102.8" y="56.0"><title>Có skill (v2) · Tỉ lệ đạt assertion, 10 case, vòng 2 (%): 92,5%</title></rect><text fill="#1B2130" font-size="12" font-weight="600" text-anchor="start" x="624.2" y="69.0">92,5%</text><text fill="#6B7385" font-size="12.5" font-weight="400" text-anchor="end" x="92.8" y="99.0">Không skill</text><rect fill="#C4CAD4" height="18" rx="3" width="401.2" x="102.8" y="86.0"><title>Không skill · Tỉ lệ đạt assertion, 10 case, vòng 2 (%): 72,0%</title></rect><text fill="#6B7385" font-size="12" font-weight="400" text-anchor="start" x="510.0" y="99.0">72,0%</text><text fill="#6B7385" font-size="11" font-weight="400" text-anchor="start" x="16.0" y="153.0">Nguồn: docs/bao-cao-kiem-dinh-doc-skills.md §3.2</text></svg><details class="chart-data"><summary>Số liệu của biểu đồ</summary><table><thead><tr><th>Hạng mục</th><th>Tỉ lệ đạt assertion, 10 case, vòng 2 (%)</th></tr></thead><tbody><tr><td>Có skill (v2)</td><td>92,5%</td></tr><tr><td>Không skill</td><td>72,0%</td></tr></tbody></table></details></figure>
+<p>Cách đọc: thanh dài hơn là tốt hơn; trục bắt đầu từ 0 nên độ dài
+thanh tỉ lệ thuận với giá trị.</p>
+<h2 id="2-so-sánh-giữa-hai-vòng">2. So sánh giữa hai vòng</h2>
+<p>Vòng 2 dùng bộ assertion chặt hơn, nên tỉ lệ đạt của <em>cả hai</em>
+cấu hình đều giảm. Khoảng cách giữa hai cấu hình mới là điều đáng
+xem.</p>
+<figure class="chart" id="chart-2"><svg aria-label="Assertion chặt hơn kéo cả hai xuống, nhưng khoảng cách nới rộng từ 12 lên 20,5 điểm" font-family="Inter, 'Noto Sans', 'DejaVu Sans', 'Segoe UI', Arial, sans-serif" height="344" role="img" style="max-width:100%;height:auto" viewbox="0 0 720 344" width="720" xmlns="http://www.w3.org/2000/svg"><title>Assertion chặt hơn kéo cả hai xuống, nhưng khoảng cách nới rộng từ 12 lên 20,5 điểm</title><rect fill="#FFFFFF" height="344" width="720"></rect><text fill="#1B2130" font-size="16" font-weight="650" text-anchor="start" x="16.0" y="20.0">Assertion chặt hơn kéo cả hai xuống, nhưng khoảng cách nới rộng từ 12 lên 20,5 điểm</text><text fill="#6B7385" font-size="12.5" font-weight="400" text-anchor="start" x="16.0" y="38.0">Tỉ lệ đạt assertion (%)</text><text fill="#4A5263" font-size="12" font-weight="600" text-anchor="middle" x="129.0" y="66.0">Vòng 1 (8 case)</text><text fill="#4A5263" font-size="12" font-weight="600" text-anchor="middle" x="591.0" y="66.0">Vòng 2 (10 case)</text><line stroke="#C9CED8" x1="129.0" x2="129.0" y1="78" y2="278"></line><line stroke="#C9CED8" x1="591.0" x2="591.0" y1="78" y2="278"></line><line stroke="#2A4FB8" stroke-width="2.5" x1="129.0" x2="591.0" y1="78.0" y2="117.2"><title>Có skill: 97,5% → 92,5%</title></line><circle cx="129.0" cy="78.0" fill="#2A4FB8" r="4.5" stroke="#FFFFFF" stroke-width="2"></circle><circle cx="591.0" cy="117.2" fill="#2A4FB8" r="4.5" stroke="#FFFFFF" stroke-width="2"></circle><line stroke="#AD7400" stroke-width="2.5" x1="129.0" x2="591.0" y1="172.1" y2="278.0"><title>Không skill: 85,5% → 72,0%</title></line><circle cx="129.0" cy="172.1" fill="#AD7400" r="4.5" stroke="#FFFFFF" stroke-width="2"></circle><circle cx="591.0" cy="278.0" fill="#AD7400" r="4.5" stroke="#FFFFFF" stroke-width="2"></circle><text fill="#1B2130" font-size="12" font-weight="400" text-anchor="end" x="119.0" y="82.0">Có skill 97,5%</text><text fill="#1B2130" font-size="12" font-weight="400" text-anchor="end" x="119.0" y="176.1">Không skill 85,5%</text><text fill="#1B2130" font-size="12" font-weight="400" text-anchor="start" x="601.0" y="121.2">92,5% Có skill</text><text fill="#1B2130" font-size="12" font-weight="400" text-anchor="start" x="601.0" y="282.0">72,0% Không skill</text><text fill="#6B7385" font-size="11" font-weight="400" text-anchor="start" x="16.0" y="319.0">Ghi chú: Bộ assertion và số case khác nhau giữa hai vòng; không so sánh trực tiếp giá trị tuyệt đối giữa hai vòng.</text><text fill="#6B7385" font-size="11" font-weight="400" text-anchor="start" x="16.0" y="334.0">Nguồn: docs/bao-cao-kiem-dinh-doc-skills.md §3.1–3.2</text></svg><details class="chart-data"><summary>Số liệu của biểu đồ</summary><table><thead><tr><th>Hạng mục</th><th>Có skill</th><th>Không skill</th></tr></thead><tbody><tr><td>Vòng 1 (8 case)</td><td>97,5%</td><td>85,5%</td></tr><tr><td>Vòng 2 (10 case)</td><td>92,5%</td><td>72,0%</td></tr></tbody></table></details></figure>
+<h2 id="3-thẩm-mỹ--định-dạng">3. Thẩm mỹ &amp; định dạng</h2>
+<figure class="chart" id="chart-3"><svg aria-label="Case ERD → PDF mobile vẫn thua; case PRD → Word thắng ở cả hai lần chạy" font-family="Inter, 'Noto Sans', 'DejaVu Sans', 'Segoe UI', Arial, sans-serif" height="253" role="img" style="max-width:100%;height:auto" viewbox="0 0 720 253" width="720" xmlns="http://www.w3.org/2000/svg"><title>Case ERD → PDF mobile vẫn thua; case PRD → Word thắng ở cả hai lần chạy</title><rect fill="#FFFFFF" height="253" width="720"></rect><text fill="#1B2130" font-size="16" font-weight="650" text-anchor="start" x="16.0" y="20.0">Case ERD → PDF mobile vẫn thua; case PRD → Word thắng ở cả hai lần chạy</text><text fill="#6B7385" font-size="12.5" font-weight="400" text-anchor="start" x="16.0" y="38.0">Điểm blind A/B (thang 10)</text><circle cx="22" cy="58" fill="#2A4FB8" r="6"></circle><text fill="#4A5263" font-size="12" font-weight="400" text-anchor="start" x="34.0" y="62.0">Không skill</text><circle cx="119.44" cy="58" fill="#AD7400" r="6"></circle><text fill="#4A5263" font-size="12" font-weight="400" text-anchor="start" x="131.4" y="62.0">Có skill</text><line stroke="#E6E9EF" x1="233.7" x2="233.7" y1="78" y2="198"></line><text fill="#6B7385" font-size="11" font-weight="400" text-anchor="middle" x="233.7" y="212.0">6</text><line stroke="#E6E9EF" x1="438.8" x2="438.8" y1="78" y2="198"></line><text fill="#6B7385" font-size="11" font-weight="400" text-anchor="middle" x="438.8" y="212.0">8</text><line stroke="#E6E9EF" x1="644.0" x2="644.0" y1="78" y2="198"></line><text fill="#6B7385" font-size="11" font-weight="400" text-anchor="middle" x="644.0" y="212.0">10</text><text fill="#1B2130" font-size="12.5" font-weight="400" text-anchor="end" x="119.1" y="97.0">PRD → Word v2</text><line stroke="#C9CED8" stroke-linecap="round" stroke-width="5" x1="285.0" x2="541.4" y1="93.0" y2="93.0"></line><circle cx="285.0" cy="93.0" fill="#2A4FB8" r="6" stroke="#FFFFFF" stroke-width="2"><title>PRD → Word v2 · Không skill: 6,5</title></circle><circle cx="541.4" cy="93.0" fill="#AD7400" r="6" stroke="#FFFFFF" stroke-width="2"><title>PRD → Word v2 · Có skill: 9,0</title></circle><text fill="#1B2130" font-size="11.5" font-weight="600" text-anchor="start" x="553.4" y="97.0">+2,5</text><text fill="#1B2130" font-size="12.5" font-weight="400" text-anchor="end" x="119.1" y="127.0">PRD → Word v2.1</text><line stroke="#C9CED8" stroke-linecap="round" stroke-width="5" x1="264.5" x2="490.1" y1="123.0" y2="123.0"></line><circle cx="264.5" cy="123.0" fill="#2A4FB8" r="6" stroke="#FFFFFF" stroke-width="2"><title>PRD → Word v2.1 · Không skill: 6,3</title></circle><circle cx="490.1" cy="123.0" fill="#AD7400" r="6" stroke="#FFFFFF" stroke-width="2"><title>PRD → Word v2.1 · Có skill: 8,5</title></circle><text fill="#1B2130" font-size="11.5" font-weight="600" text-anchor="start" x="502.1" y="127.0">+2,2</text><text fill="#1B2130" font-size="12.5" font-weight="400" text-anchor="end" x="119.1" y="157.0">ERD → mobile v2</text><line stroke="#C9CED8" stroke-linecap="round" stroke-width="5" x1="541.4" x2="408.1" y1="153.0" y2="153.0"></line><circle cx="541.4" cy="153.0" fill="#2A4FB8" r="6" stroke="#FFFFFF" stroke-width="2"><title>ERD → mobile v2 · Không skill: 9,0</title></circle><circle cx="408.1" cy="153.0" fill="#AD7400" r="6" stroke="#FFFFFF" stroke-width="2"><title>ERD → mobile v2 · Có skill: 7,7</title></circle><text fill="#1B2130" font-size="11.5" font-weight="600" text-anchor="start" x="553.4" y="157.0">−1,3</text><text fill="#1B2130" font-size="12.5" font-weight="400" text-anchor="end" x="119.1" y="187.0">ERD → mobile v2.1</text><line stroke="#C9CED8" stroke-linecap="round" stroke-width="5" x1="541.4" x2="233.7" y1="183.0" y2="183.0"></line><circle cx="541.4" cy="183.0" fill="#2A4FB8" r="6" stroke="#FFFFFF" stroke-width="2"><title>ERD → mobile v2.1 · Không skill: 9,0</title></circle><circle cx="233.7" cy="183.0" fill="#AD7400" r="6" stroke="#FFFFFF" stroke-width="2"><title>ERD → mobile v2.1 · Có skill: 6,0</title></circle><text fill="#1B2130" font-size="11.5" font-weight="600" text-anchor="start" x="553.4" y="187.0">−3,0</text><text fill="#6B7385" font-size="11" font-weight="400" text-anchor="start" x="16.0" y="243.0">Nguồn: docs/bao-cao-kiem-dinh-doc-skills.md §3.3</text></svg><details class="chart-data"><summary>Số liệu của biểu đồ</summary><table><thead><tr><th>Hạng mục</th><th>Không skill</th><th>Có skill</th></tr></thead><tbody><tr><td>PRD → Word v2</td><td>6,5</td><td>9,0</td></tr><tr><td>PRD → Word v2.1</td><td>6,3</td><td>8,5</td></tr><tr><td>ERD → mobile v2</td><td>9,0</td><td>7,7</td></tr><tr><td>ERD → mobile v2.1</td><td>9,0</td><td>6,0</td></tr></tbody></table></details></figure>
+<table>
+<thead>
+<tr class="header">
+<th>Tiêu chí</th>
+<th>Không skill</th>
+<th class="rec">Có skill v2.2 ★</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Không bịa giá trị vào AC</td>
+<td class="mark-no">✗ bịa enum, ngưỡng</td>
+<td class="mark-yes rec">✓ đánh dấu <span class="confirm" data-custom-style="Confirm">⚑ CẦN
+XÁC NHẬN</span></td>
+</tr>
+<tr class="even">
+<td>Tách đề xuất khỏi đặc tả</td>
+<td class="mark-no">✗ trộn lẫn</td>
+<td class="mark-yes rec">✓ mục riêng</td>
+</tr>
+<tr class="odd">
+<td>PDF đọc trên điện thoại</td>
+<td class="mark-yes">✓ chữ ≥ 9pt</td>
+<td class="mark-part rec">◐ đã sửa (16,9pt), chưa chấm lại</td>
+</tr>
+<tr class="even">
+<td>Thời gian chạy</td>
+<td class="mark-yes">✓ 1×</td>
+<td class="mark-no rec">✗ 2–2,5×</td>
+</tr>
+</tbody>
+</table>
+<div class="compare">
+<section class="{}" id="trước-v21">
+<h4>Trước (v2.1)</h4>
+<ul>
+<li>PDF mobile: chữ thực tế 5–6pt</li>
+<li>Không có cảnh báo tự động</li>
+</ul>
+</section>
+<section class="rec" id="sau-v22">
+<h4>Sau (v2.2)</h4>
+<ul>
+<li>Chữ đo được <span class="good">16,9pt</span></li>
+<li>Cảnh báo khi chữ &lt; 7,5pt</li>
+</ul>
+</section>
+</div>
+<h2 id="4-độ-tin-cậy-của-đánh-giá">4. Độ tin cậy của đánh giá</h2>
+<p>Ba kiểm tra đều đạt tối đa, nên bảng đủ rõ — biểu đồ không thêm thông
+tin khi mọi giá trị bằng nhau.</p>
+<table>
+<thead>
+<tr class="header">
+<th>Kiểm tra</th>
+<th>Phát hiện đúng</th>
+<th>Tổng có đáp án</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Flowchart (cạnh)</td>
+<td>16</td>
+<td>16</td>
+</tr>
+<tr class="even">
+<td>ERD (cột)</td>
+<td>25</td>
+<td>25</td>
+</tr>
+<tr class="odd">
+<td>Review (lỗi cài sẵn)</td>
+<td>13</td>
+<td>13</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>Lưu ý:</strong> mỗi cấu hình mới chạy 1 lần cho mỗi case;
+chênh 1–2 điểm ở judge nằm trong biên nhiễu.</p>
+</blockquote>
+</body>
+</html>

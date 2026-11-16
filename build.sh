@@ -4,14 +4,30 @@
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")" && pwd)"
 SC=/mnt/skills/examples/skill-creator
-SKILLS=(product-spec-writer codebase-doc-writer diagram-to-doc doc-clarity-review)
+DOC_SKILLS=(product-spec-writer codebase-doc-writer diagram-to-doc doc-clarity-review)
+POST_SKILLS=(community-post-writer)
+SKILLS=("${DOC_SKILLS[@]}" "${POST_SKILLS[@]}")
 mkdir -p "$ROOT/dist"
-for s in "${SKILLS[@]}"; do
-  mkdir -p "$ROOT/$s/scripts" "$ROOT/$s/references"
-  cp "$ROOT/_shared/scripts/lint_doc.py" "$ROOT/_shared/scripts/render_doc.py" "$ROOT/$s/scripts/"
-  cp "$ROOT/_shared/references/writing-standards.md" "$ROOT/_shared/references/visual-style.md" "$ROOT/$s/references/"
-  mkdir -p "$ROOT/$s/assets"
+
+sync_common() {  # renderer, charts, stats, presentation + rigor guides, theme — every skill
+  local s=$1
+  mkdir -p "$ROOT/$s/scripts" "$ROOT/$s/references" "$ROOT/$s/assets"
+  cp "$ROOT/_shared/scripts/render_doc.py" "$ROOT/_shared/scripts/charts.py" "$ROOT/_shared/scripts/stats_check.py" "$ROOT/$s/scripts/"
+  cp "$ROOT/_shared/references/visual-style.md" "$ROOT/_shared/references/presentation-and-charts.md" \
+     "$ROOT/_shared/references/research-rigor.md" "$ROOT/_shared/references/reader-test.md" \
+     "$ROOT/_shared/references/agent-assisted-research.md" "$ROOT/$s/references/"
   cp "$ROOT/_shared/assets/doc-theme.css" "$ROOT/_shared/assets/reference.docx" "$ROOT/$s/assets/"
+}
+
+for s in "${DOC_SKILLS[@]}"; do
+  sync_common "$s"
+  cp "$ROOT/_shared/scripts/lint_doc.py" "$ROOT/$s/scripts/"
+  cp "$ROOT/_shared/references/writing-standards.md" "$ROOT/$s/references/"
+done
+for s in "${POST_SKILLS[@]}"; do
+  sync_common "$s"
+done
+for s in "${SKILLS[@]}"; do
   (cd "$SC" && python3 -m scripts.quick_validate "$ROOT/$s")
 done
 if [[ "${1:-}" == "--package" ]]; then

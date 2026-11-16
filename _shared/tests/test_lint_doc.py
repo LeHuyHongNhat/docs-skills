@@ -156,3 +156,8 @@ def test_english_gaps_found_in_smoke_run() -> None:
     r = rules("FR-040. When the user clicks Export, the system shall return the file right away. Users can export a lot of rows.")
     kinds = {(x[0], x[2]) for x in r}
     assert ("R04", "right away") in kinds and ("R04", "a lot of") in kinds and ("R05", "can") in kinds
+
+
+def test_confidence_interval_is_a_term_not_a_vague_word() -> None:
+    assert not [x for x in rules("Chênh lệch 14 điểm, khoảng tin cậy 95% từ -4 đến +31. Khoảng này chứa 0.") if x[0] == "R04"]
+    assert ("R04", "medium", "khoảng") in rules("Hệ thống xử lý khoảng 100 đơn mỗi ngày.")

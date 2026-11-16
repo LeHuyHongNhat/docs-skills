@@ -1,0 +1,33 @@
+# Claim ledger — McLean & Pontiff (2016), Journal of Finance 71(1). Table II, column 1.
+# Monthly long-short returns in %, coefficient with ±1.96·SE interval computed by us from the reported SE.
+claims:
+  - id: C1
+    text: "Decline after the original sample, before publication (coef 0.150, SE 0.077; base 0.582 → 26%)"
+    type: comparative
+    design: panel of 97 published predictors, predictor fixed effects, observational
+    test: reported
+    verified: tool-extract   # read through a text-extraction tool, not line by line
+    estimate: 0.150
+    ci: [-0.001, 0.301]
+    unit: " pp/month"
+  - id: C2
+    text: "Decline after publication (coef 0.337, SE 0.090; base 0.582 → 58%)"
+    type: comparative
+    design: same
+    test: reported
+    verified: tool-extract   # read through a text-extraction tool, not line by line
+    estimate: 0.337
+    ci: [0.161, 0.513]
+    unit: " pp/month"
+  - id: C3
+    text: "32% of the in-sample return is lost because investors trade on published research"
+    type: causal
+    test: none
+    verified: tool-extract   # read through a text-extraction tool, not line by line
+    why: "A residual (58% − 26%), not a separately identified effect; observational design. The paper tests the difference between the two declines (p = 0.024) but publication is not randomised."
+  - id: C4
+    text: "Any single published anomaly will lose 58% of its return"
+    type: predictive
+    test: none
+    verified: tool-extract   # read through a text-extraction tool, not line by line
+    why: "The 58% is an average over 97 predictors; the paper reports heterogeneity (stronger in-sample predictors decay more)."

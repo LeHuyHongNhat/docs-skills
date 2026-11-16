@@ -73,9 +73,19 @@ Things you **MUST NOT guess** — if the code does not tell you, write [TO CONFI
    The linter skips code blocks; fix the `high` findings in the prose.
 4. In the hand-off reply: briefly list the [TO CONFIRM] / [CẦN XÁC NHẬN] items and what was / was not verified by running it.
 
+For a README or runbook written for developers new to the repository, finish with the reader test in `references/reader-test.md`: questions such as "what do I run first?", "which env vars are required?", "how do I know it worked?" answered from the document alone.
+
+### Charts, comparisons & HTML artifacts
+
+Read `references/presentation-and-charts.md` when the document compares options or reports numbers. Typical uses here:
+- ADR / architecture options → comparison table (options as columns, ✓ ✗ ◐ with a reason, ★ on the chosen option) plus a `::: {.compare}` block for current vs proposed.
+- Benchmarks, coverage, endpoint/latency figures found in the repo → a chart whose `source:` is the `file:line` or command output. Never chart numbers you did not read or measure.
+- Benchmark or performance claims in READMEs/ADRs: follow `references/research-rigor.md` §4 (systems benchmarks: same hardware/load, percentiles, repeated runs, versions) and report spread with `scripts/stats_check.py seeds`.
+- User asks for an artifact / web page → render `--to html` (and publish it if your environment has an artifact/page publishing tool).
+
 ### Export formats & visual check
 
-Markdown is the source. When the user needs PDF/DOCX/XLSX (sending to an approver/client, printing, "a Word file", "Excel to filter"), or says the document will be shared, read `references/visual-style.md` and then render:
+Markdown is the source. When the user needs PDF/DOCX/XLSX/HTML (sending to an approver/client, printing, "a Word file", "Excel to filter"), or says the document will be shared, read `references/visual-style.md` and then render:
 ```bash
 python <skill-dir>/scripts/render_doc.py <file.md> --to pdf,docx,xlsx --out-dir <output dir> --qa
 ```
@@ -89,3 +99,7 @@ If the user says they will read on a phone/mobile → add `--page mobile` (narro
 - `references/code-doc-templates.md` — templates for README, API reference, architecture, ADR, runbook, module doc.
 - `references/writing-standards.md` — shared writing standard (including §7b proportional length).
 - `scripts/render_doc.py` + `assets/` + `references/visual-style.md` — designed PDF/DOCX/XLSX export and visual QA.
+- `references/presentation-and-charts.md` + `scripts/charts.py` — when to chart, chart chooser, takeaway titles, comparison layouts (KPI tiles, side-by-side, ✓ ✗ ◐ tables), validated colour palette.
+- `references/research-rigor.md` + `scripts/stats_check.py` — rules and statistics for claims made from data (CIs, paired tests, seeds, Sharpe, overclaim flags).
+- `references/reader-test.md` — optional final check for documents read by people outside the conversation: a reader with only the document answers 5–8 questions; fix what they get wrong.
+- `references/agent-assisted-research.md` — when the document reports work an agent helped produce: what evidence must exist (plan, run log, checked citations), failure modes to look for, responsibility and disclosure.

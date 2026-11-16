@@ -25,7 +25,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 
 SKILLS_ROOT = Path(__file__).resolve().parents[1]
-SKILLS = ["product-spec-writer", "codebase-doc-writer", "diagram-to-doc", "doc-clarity-review", "community-post-writer"]
+SKILLS = ["product-spec-writer", "codebase-doc-writer", "diagram-to-doc", "doc-clarity-review", "community-post-writer", "agent-research-workflow"]
 
 
 def read_description(skill: str) -> str:

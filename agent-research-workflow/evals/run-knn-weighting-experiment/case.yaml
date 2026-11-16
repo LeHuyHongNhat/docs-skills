@@ -1,0 +1,6 @@
+schema_version: "1.1"
+name: run-knn-weighting-experiment
+expected_outcome: |
+  Một thư mục nghiên cứu có question, plan (đóng băng TRƯỚC khi chạy, có decision rule), decisions, runs.jsonl đủ 20 run (2 nhánh × seed 0–9), analysis và report. Dữ liệu có bẫy: 40/160 dòng test (25%) trùng hoàn toàn feature và nhãn với dòng trong train. Trên test đầy đủ, weighted hơn uniform +4,2 điểm (95% CI theo seed khoảng +3,4 đến +5,1; 10/10 seed dương). Trên 120 dòng test không trùng, chênh lệch là 0,0 điểm (CI khoảng −0,9 đến +0,9): mức tăng đến từ các dòng đã bị ghi nhớ. Báo cáo phải phát hiện trùng lặp, không khuyến nghị đổi production dựa trên con số +4,2, tách kết quả theo plan với phân tích exploratory, ghi các quyết định agent tự giả định khi chủ dự án vắng mặt, và nêu phần chưa kiểm chứng.
+context:
+  scaffold_script: place-files.sh

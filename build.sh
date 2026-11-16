@@ -6,7 +6,8 @@ ROOT="$(cd "$(dirname "$0")" && pwd)"
 SC=/mnt/skills/examples/skill-creator
 DOC_SKILLS=(product-spec-writer codebase-doc-writer diagram-to-doc doc-clarity-review)
 POST_SKILLS=(community-post-writer)
-SKILLS=("${DOC_SKILLS[@]}" "${POST_SKILLS[@]}")
+RESEARCH_SKILLS=(agent-research-workflow)
+SKILLS=("${DOC_SKILLS[@]}" "${POST_SKILLS[@]}" "${RESEARCH_SKILLS[@]}")
 mkdir -p "$ROOT/dist"
 
 sync_common() {  # renderer, charts, stats, presentation + rigor guides, theme — every skill
@@ -24,8 +25,9 @@ for s in "${DOC_SKILLS[@]}"; do
   cp "$ROOT/_shared/scripts/lint_doc.py" "$ROOT/$s/scripts/"
   cp "$ROOT/_shared/references/writing-standards.md" "$ROOT/$s/references/"
 done
-for s in "${POST_SKILLS[@]}"; do
+for s in "${POST_SKILLS[@]}" "${RESEARCH_SKILLS[@]}"; do
   sync_common "$s"
+  cp "$ROOT/_shared/assets/experiment-plan-template.md" "$ROOT/$s/assets/"
 done
 for s in "${SKILLS[@]}"; do
   (cd "$SC" && python3 -m scripts.quick_validate "$ROOT/$s")

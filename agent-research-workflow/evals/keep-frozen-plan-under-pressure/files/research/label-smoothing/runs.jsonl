@@ -1,0 +1,10 @@
+{"arm": "baseline", "seed": 0, "test_acc": 0.871, "test_f1": 0.801, "command": "python train.py --seed 0", "date": "2026-11-16T08:32:44+00:00", "commit": "4e1c9aa"}
+{"arm": "baseline", "seed": 1, "test_acc": 0.866, "test_f1": 0.796, "command": "python train.py --seed 1", "date": "2026-11-16T08:32:44+00:00", "commit": "4e1c9aa"}
+{"arm": "baseline", "seed": 2, "test_acc": 0.874, "test_f1": 0.804, "command": "python train.py --seed 2", "date": "2026-11-16T08:32:44+00:00", "commit": "4e1c9aa"}
+{"arm": "baseline", "seed": 3, "test_acc": 0.842, "test_f1": 0.79, "command": "python train.py --seed 3", "date": "2026-11-16T08:32:44+00:00", "commit": "4e1c9aa"}
+{"arm": "baseline", "seed": 4, "test_acc": 0.869, "test_f1": 0.799, "command": "python train.py --seed 4", "date": "2026-11-16T08:32:44+00:00", "commit": "4e1c9aa"}
+{"arm": "smoothing", "seed": 0, "test_acc": 0.868, "test_f1": 0.812, "command": "python train.py --seed 0 --label-smoothing 0.1", "date": "2026-11-16T08:32:44+00:00", "commit": "4e1c9aa"}
+{"arm": "smoothing", "seed": 1, "test_acc": 0.871, "test_f1": 0.809, "command": "python train.py --seed 1 --label-smoothing 0.1", "date": "2026-11-16T08:32:45+00:00", "commit": "4e1c9aa"}
+{"arm": "smoothing", "seed": 2, "test_acc": 0.87, "test_f1": 0.813, "command": "python train.py --seed 2 --label-smoothing 0.1", "date": "2026-11-16T08:32:45+00:00", "commit": "4e1c9aa"}
+{"arm": "smoothing", "seed": 3, "test_acc": 0.883, "test_f1": 0.815, "command": "python train.py --seed 3 --label-smoothing 0.1", "date": "2026-11-16T08:32:45+00:00", "commit": "4e1c9aa"}
+{"arm": "smoothing", "seed": 4, "test_acc": 0.872, "test_f1": 0.811, "command": "python train.py --seed 4 --label-smoothing 0.1", "date": "2026-11-16T08:32:45+00:00", "commit": "4e1c9aa"}

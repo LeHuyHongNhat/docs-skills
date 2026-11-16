@@ -1,6 +1,6 @@
 # docs-skills — Agent Skills for writing professional product & technical documentation
 
-Five [Agent Skills](https://github.com/agentskills/agentskills) that help AI agents (Claude, Codex, Cursor, Gemini CLI, …) write documentation for BAs, PMs, POs, data analysts and developers that is **precise, unambiguous and never invented**, turn research into **accessible community posts**, and present both with **charts, comparison layouts and a contrast-checked palette** — exported as well-designed HTML pages, PDF (A4 or phone-sized), Word and Excel files.
+Six [Agent Skills](https://github.com/agentskills/agentskills) that help AI agents (Claude, Codex, Cursor, Gemini CLI, …) write documentation for BAs, PMs, POs, data analysts and developers that is **precise, unambiguous and never invented**, turn research into **accessible community posts**, run **agent-assisted research with evidence gates**, and present both with **charts, comparison layouts and a contrast-checked palette** — exported as well-designed HTML pages, PDF (A4 or phone-sized), Word and Excel files.
 
 | Skill | Use it for |
 |---|---|
@@ -8,6 +8,7 @@ Five [Agent Skills](https://github.com/agentskills/agentskills) that help AI age
 | [`codebase-doc-writer`](codebase-doc-writer/) | READMEs, API references, architecture overviews (C4/arc42), ADRs, runbooks — written from source code, every fact traceable to `file:line` |
 | [`diagram-to-doc`](diagram-to-doc/) | Turning images of flowcharts / BPMN / sequence diagrams / ERDs / state machines / wireframes into specifications and data dictionaries |
 | [`doc-clarity-review`](doc-clarity-review/) | Reviewing and rewriting existing docs: vague wording, contradictions, untestable requirements, inconsistent terminology, misleading charts |
+| [`agent-research-workflow`](agent-research-workflow/) | Running a research question with an agent from idea to reviewed result: literature and novelty check, a plan frozen before the first run, a run log, analysis by the pre-written rule, report and review. ML experiments, ablations, benchmarks, quant backtests |
 | [`community-post-writer`](community-post-writer/) | Forum / community posts (Viblo, dev.to, Reddit, Discourse, Facebook groups, LinkedIn, X threads) from research, experiments and experience: explainers, tutorials, research summaries, lessons learned, comparisons, content plans and series |
 
 The skill instructions are written in English. Output follows the user's language; **English and Vietnamese** are both first-class — writing standards, the linter (e.g. *"quickly"* / *"nhanh chóng"*, *"etc."* / *"v.v."*), open-item markers and generated labels (figure captions, Excel index, Word footer) all work in both.
@@ -21,7 +22,7 @@ The skill instructions are written in English. Output follows the user's languag
 
 ## Install
 
-All five skills follow the open Agent Skills format (`SKILL.md` + `scripts/` + `references/` + `assets/`), so the same folders work across agents — only the install location differs.
+All six skills follow the open Agent Skills format (`SKILL.md` + `scripts/` + `references/` + `assets/`), so the same folders work across agents — only the install location differs.
 
 | Platform | How | Notes |
 |---|---|---|
@@ -94,6 +95,24 @@ python scripts/stats_check.py claims claims.yaml --strict    # every claim of a 
 
 [`samples/rebuild-comparison/`](samples/rebuild-comparison/) rebuilds three real articles (METR's AI-productivity study, McLean & Pontiff on anomaly decay, Discord's Go→Rust post) and scores originals and rebuilds on the rubric. The comparison is self-graded with n = 3, and the skill's own tool reports it as inconclusive.
 
+## Agent-assisted research
+
+`agent-research-workflow` keeps one folder per question and slows the agent down in four places — the question, the plan, the conclusion and the review — where a person decides.
+
+```bash
+python scripts/research_gate.py init research/label-smoothing --title "Label smoothing on ticket triage"
+python scripts/research_gate.py dupes train.csv test.csv --ignore id --label y     # duplicates across splits
+python scripts/research_gate.py freeze research/label-smoothing --arms baseline,smoothing --seeds 0-9 --metric test_acc
+python scripts/research_gate.py log research/label-smoothing --arm baseline --seed 0 --metric test_acc=0.871 --command "python train.py --seed 0"
+python scripts/stats_check.py runs research/label-smoothing/runs.jsonl --metric test_acc --group arm --treat smoothing --control baseline --pair seed
+python scripts/research_gate.py check research/label-smoothing --stage all       # exits 1 on a blocking finding
+```
+
+- **Frozen plan:** `freeze` refuses a plan with placeholders or with runs already logged; `check` detects any later edit above `## Amendments`.
+- **Append-only log:** a planned run cannot be overwritten; reruns and extra variants go to a separate exploratory log that never enters the comparison.
+- **Gates:** missing planned runs, runs dated before the freeze, numbers in the report that trace to no run, "nobody has done this" wording, paper cards read as abstract only, and a missing review are reported; the first two block.
+- **Refusals:** the skill declines to report the best seed, to switch the metric after seeing results, or to edit the plan to match what was done — and records the request instead.
+
 ## Export & visual QA
 
 ```bash
@@ -118,13 +137,13 @@ python scripts/render_doc.py doc.md --to pdf --page mobile --out-dir out --qa
 ## Repository layout
 
 ```
-.claude-plugin/     marketplace.json — install all five skills as one Claude Code plugin
+.claude-plugin/     marketplace.json — install all six skills as one Claude Code plugin
 _shared/            single source of truth for shared files
   references/       writing-standards.md, visual-style.md, presentation-and-charts.md, research-rigor.md, reader-test.md, agent-assisted-research.md
   scripts/          lint_doc.py, render_doc.py, charts.py, stats_check.py
   assets/           doc-theme.css, reference.docx
-  tests/            111 unit tests (pytest)
-<skill>/            the five skills; scripts/references/assets are synced from _shared by build.sh
+  tests/            124 unit tests (pytest)
+<skill>/            the six skills; scripts/references/assets are synced from _shared by build.sh
   evals/            test cases in `claude plugin eval` format
 _eval_tools/        evaluation tooling: automated checks, blind A/B prep, real `claude -p` routing eval
 dist/               packaged .skill files (for claude.ai upload)
@@ -136,7 +155,7 @@ samples/            sample outputs produced by the skills (Word, A4/mobile PDF, 
 ## Development
 
 ```bash
-./build.sh              # sync _shared → the five skills, then validate
+./build.sh              # sync _shared → the six skills, then validate
 ./build.sh --package    # also package into dist/
 cd _shared && python -m pytest -q tests
 ```
@@ -154,7 +173,7 @@ The four documentation skills were evaluated with 7 methods over two iterations 
 | Correct skill routing (`claude -p`, 72 runs, Vietnamese + English queries, 3 competing skills installed) | **100%** | – |
 | Ground-truth fidelity (flowchart edges / ERD columns / planted review issues) | 16/16 · 25/25 · 13/13 | – |
 
-**Evaluated on 2026-11-16 (see [`docs/eval-results-2026-11-16.md`](docs/eval-results-2026-11-16.md)):** four cases, one run per configuration, graded by AI subagents on label-shuffled outputs. On the 34 assertions that can be judged from the output files, runs with the skill passed 33 and runs without it passed 27. Two of the four cases showed no or almost no difference. A routing proxy (a model choosing a skill from the five descriptions) matched the expected skill on 45 of 45 requests after one description fix. Not done: repeated runs, human grading, the real `claude -p` routing run, and any benchmark of the chart layer by itself.
+**Evaluated on 2026-11-16 (see [`docs/eval-results-2026-11-16.md`](docs/eval-results-2026-11-16.md)):** four cases, one run per configuration, graded by AI subagents on label-shuffled outputs. On the 34 assertions that can be judged from the output files, runs with the skill passed 33 and runs without it passed 27. Two of the four cases showed no or almost no difference. A routing proxy (a model choosing a skill from the five descriptions) matched the expected skill on 45 of 45 requests after one description fix. For `agent-research-workflow` (two cases, same method) the runs with the skill passed 23 of 23 assertions and the runs without it 15 of 23; both reached the same conclusion, and the difference is the audit trail (plan, log, labelled departures). Not done: repeated runs, human grading, the real `claude -p` routing run, and any benchmark of the chart layer by itself.
 
 **Known limitations:**
 - Output for very short inputs is still longer than ideal.

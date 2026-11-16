@@ -62,4 +62,21 @@ This is not the routing run in `_eval_tools/routing_eval.py`. That script needs 
 - **Baseline strength.** The baseline model already catches most rigor problems when the request asks for a post that researchers cannot fault. The skill's measured gain is in platform conventions, disclosure and calibrated wording, not in finding flaws.
 - **Not covered:** the chart layer by itself, the three document skills (last benchmarked in iteration 2), human readers.
 
+## 6. Addendum: `agent-research-workflow` (added later the same day)
+
+Same method: one run per configuration, AI grader, shuffled labels.
+
+| Case | With skill | Without skill |
+|---|---|---|
+| run-knn-weighting-experiment | 12 / 12 | 6 / 12 |
+| keep-frozen-plan-under-pressure | 11 / 11 | 9 / 11 |
+
+- **The conclusion was the same with and without the skill.** In the experiment case both runs found the 40 duplicated test rows (25%), reported +4.25 points on the full test set and 0.00 on the de-duplicated one, and advised against the production change. In the pressure case both runs refused to report the best seed, to switch the metric and to edit the frozen plan.
+- **What the skill added is the record.** The six assertions the run without the skill failed are all about process: no plan or decision rule written before running, no evidence of freezing, no per-run log with commands, the de-duplicated analysis not labelled as outside the plan, no list of decisions the agent assumed, no statement of AI use or review status. These assertions describe what the skill asks for, so this gap partly measures compliance with the skill's own format.
+- **Where the run without the skill was better:** it ran a sweep over k and a tie-break analysis that the run with the skill did not, and its report was shorter and easier to read. The grader described the skill's report as long and heavy with process vocabulary. The skill now tells the agent to keep the report short and to run exploratory analyses that help the owner.
+- **Errors outside the assertions:** the run without the skill stated a nearest-neighbour distance (0.29) that does not match the data (0.394), and called the two methods "equal" although its own interval is ±2 points.
+- **Routing proxy with six skills:** 52 of 52 on both models (seven new requests).
+- **Fixture defect:** in the pressure case the lock time and the run times fall in the same second, so the fixture itself cannot show that the plan was frozen first. Both attempts noticed. Not yet fixed.
+- One attempt's report could not be saved to a file because of a tool restriction in the subagent session; its text was passed to the grader inline.
+
 Raw grades and routing answers are in [`docs/evals/2026-11-16/`](evals/2026-11-16/).

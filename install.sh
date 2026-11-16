@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# install.sh — install the 5 skills into the skill directory of agents that support Agent Skills (SKILL.md).
+# install.sh — install the 6 skills into the skill directory of agents that support Agent Skills (SKILL.md).
 #
 # Usage:
 #   ./install.sh                      # default: Claude Code, user scope (~/.claude/skills)
@@ -11,7 +11,7 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")" && pwd)"
-SKILLS=(product-spec-writer codebase-doc-writer diagram-to-doc doc-clarity-review community-post-writer)
+SKILLS=(product-spec-writer codebase-doc-writer diagram-to-doc doc-clarity-review community-post-writer agent-research-workflow)
 SCOPE=user
 MODE=copy
 TARGETS=()

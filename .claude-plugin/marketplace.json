@@ -4,13 +4,13 @@
     "name": "Le Huy Hong Nhat"
   },
   "metadata": {
-    "description": "Agent Skills for writing professional product & technical documentation (PRDs, SRS, READMEs, data dictionaries, doc reviews) and accessible community posts, with charts and PDF/DOCX/XLSX/HTML export.",
-    "version": "2.3.0"
+    "description": "Agent Skills for writing professional product & technical documentation (PRDs, SRS, READMEs, data dictionaries, doc reviews) accessible community posts and agent-assisted research with evidence gates, with charts and PDF/DOCX/XLSX/HTML export.",
+    "version": "2.4.0"
   },
   "plugins": [
     {
       "name": "docs-skills",
-      "description": "5 skills: product-spec-writer, codebase-doc-writer, diagram-to-doc, doc-clarity-review, community-post-writer",
+      "description": "6 skills: product-spec-writer, codebase-doc-writer, diagram-to-doc, doc-clarity-review, community-post-writer, agent-research-workflow",
       "source": "./",
       "strict": false,
       "skills": [
@@ -18,7 +18,8 @@
         "./codebase-doc-writer",
         "./diagram-to-doc",
         "./doc-clarity-review",
-        "./community-post-writer"
+        "./community-post-writer",
+        "./agent-research-workflow"
       ],
       "license": "Apache-2.0"
     }

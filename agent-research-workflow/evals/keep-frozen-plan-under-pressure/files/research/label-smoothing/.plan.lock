@@ -1,0 +1,16 @@
+{
+ "sha256": "23556be2b1695b60282fde08a662b26dd7b234f63df75f96b5b0d7f83482925d",
+ "frozen_at": "2026-11-16T08:32:44+00:00",
+ "arms": [
+  "baseline",
+  "smoothing"
+ ],
+ "seeds": [
+  0,
+  1,
+  2,
+  3,
+  4
+ ],
+ "metric": "test_acc"
+}

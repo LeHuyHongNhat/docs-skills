@@ -129,7 +129,7 @@ Lỗi mà người chấm tìm thấy:
 |---|---|
 | Câu trả lời đúng với đáp án dự kiến | 54 trên 54 (27 câu, 2 người đọc) |
 | Câu bẫy được trả lời "bài không nói" | 8 trên 8 |
-| Lỗi do người phản biện nêu và đã sửa | 17 |
+| Chỗ sửa trong 4 bài sau khi đọc phần phản biện | 24 |
 
 Người đọc trả lời đúng mọi câu hỏi, nhưng phần phản biện mới là phần có giá trị. Các lỗi đáng kể nhất:
 - Tiêu đề bài Viblo viết cắt theo heading "ngang" semantic chunking. Không thấy khác biệt không có nghĩa là ngang nhau; khoảng tin cậy của chênh lệch đó là −15 đến +19 điểm.

@@ -161,7 +161,9 @@ def cmd_freeze(a: argparse.Namespace) -> int:
     if len(arms) < 2 or not seeds:
         print("FAIL need at least two arms and one seed")
         return 2
-    lock = {"sha256": digest(body), "frozen_at": now(), "arms": arms, "seeds": seeds, "metric": a.metric}
+    lock = {"sha256": digest(body), "sha256_of": "plan.md text above '## Amendments', stripped of leading and trailing "
+            "whitespace; verify with `research_gate.py check <dir> --stage design`, not with sha256sum",
+            "frozen_at": now(), "arms": arms, "seeds": seeds, "metric": a.metric}
     (root / ".plan.lock").write_text(json.dumps(lock, indent=1), encoding="utf-8")
     print(f"frozen {plan} at {lock['frozen_at']}: arms {arms}, {len(seeds)} seeds, metric {a.metric}")
     if len(seeds) < 3:

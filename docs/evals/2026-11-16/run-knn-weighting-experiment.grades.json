@@ -1,0 +1,107 @@
+{
+ "A": {
+  "01": {
+   "pass": true,
+   "evidence": "A/research/knn-weighting/plan.md: H1/H2 hypotheses, arms table 'uniform'/'weighted', 'Primary metric (H1): test_acc', 'Seeds: 0–9', section 'Decision rule (written before any result)' with 'Interval above 0: supported / below 0: counts against / includes 0: inconclusive'."
+  },
+  "02": {
+   "pass": true,
+   "evidence": ".plan.lock frozen_at 2026-11-16T08:36:20+00:00; earliest run date in runs.jsonl 08:36:24, latest 08:36:28. research_gate.py check --stage all: 'high=0 medium=0 low=0 -> pass' (plan hash unchanged)."
+  },
+  "03": {
+   "pass": true,
+   "evidence": "runs.jsonl has exactly 20 lines, arms x seeds 0-9 complete, every line has a 'command' field. All 20 test_acc values (and all 20 test_acc_clean) equal my reruns of inputs/experiment.py. Caveat: the command field is a template folding three --test-file calls into one string ('--test-file <test.csv | .../test_clean.csv | .../test_dup.csv>'), not the literal command; A's own review.md F6 admits this."
+  },
+  "04": {
+   "pass": true,
+   "evidence": "report.md Result box: '40 trong 160 ticket test trùng hoàn toàn với ticket train'; section 2: '40 trong 160 ticket test (25,0%)'. My count: 40 of 160 test rows match a train row on all 6 features and label."
+  },
+  "05": {
+   "pass": true,
+   "evidence": "report.md: '+4,25 điểm phần trăm (khoảng t 95% theo seed: +3,36 đến +5,14; 10 seed)'. Recomputed: mean +4.25, t interval +3.36 to +5.14."
+  },
+  "06": {
+   "pass": true,
+   "evidence": "report.md H2 row: '0,00 ... −0,89 đến +0,89 ... inconclusive'; 'Toàn bộ chênh lệch ròng đó đến từ 40 ticket trùng train (338 so với 270 trên 400)'. Recomputed on 120 clean rows: 0.00, -0.89 to +0.89."
+  },
+  "07": {
+   "pass": true,
+   "evidence": "Duplicate check and handling are in the frozen plan: plan.md Data section 'Checked for duplicates ... trước mọi lần chạy' and H2 on test_clean.csv with the same rule; Amendments section empty; gate reports no PLAN-CHANGED. Mechanism check is put under report section 5 'Exploratory observations ... không có quy tắc viết trước'."
+  },
+  "08": {
+   "pass": true,
+   "evidence": "report.md: 'Khuyến nghị của agent theo quy tắc viết trước (owner quyết định): chưa đổi production dựa trên thí nghiệm này.' Next step proposes re-splitting so test has no train duplicates."
+  },
+  "09": {
+   "pass": true,
+   "evidence": "report.md section 3: 'Khoảng theo seed chỉ bao phủ nhiễu do lấy lại mẫu train; ... Không khoảng nào nói về dữ liệu khác, giá trị k khác hay ticket production.'"
+  },
+  "10": {
+   "pass": true,
+   "evidence": "report.md top: 'Các quyết định agent đã tự giả định khi owner vắng mặt — owner có thể đảo lại từng mục' with 7 numbered items; decisions.md 'Decided by' column marks 'assumed by agent'."
+  },
+  "11": {
+   "pass": true,
+   "evidence": "report.md section 8 'Not verified' ('not independently reviewed', baseline not checked against production), section 6 threats table ('Chỉ một giá trị k và một bộ dữ liệu', 'Tập test nhỏ'); header row 'How AI was used | Một AI coding agent (Claude) soạn plan, chạy experiment.py ...'."
+  },
+  "12": {
+   "pass": true,
+   "evidence": "cmp inputs/{experiment.py,train.csv,test.csv} vs A/ copies: identical; sha256 values match those recorded in decisions.md."
+  }
+ },
+ "B": {
+  "01": {
+   "pass": false,
+   "evidence": "No plan file in B/ (only run_experiment.py, results.csv, results_by_k.csv, summary.json, test_clean.csv, test_leaked.csv). The report has no hypothesis statement and no decision rule defining supported / counts against / inconclusive."
+  },
+  "02": {
+   "pass": false,
+   "evidence": "No .plan.lock and no freeze timestamp anywhere in B/ or the report; nothing shows a plan was fixed before running."
+  },
+  "03": {
+   "pass": false,
+   "evidence": "Values are right: B/results.csv 'full' rows give acc_uniform/acc_weighted for seeds 0-9 and all 20 match my reruns. But there is no run log with one entry per run and the command run: results.csv has 10 rows per subset (two arms per row), no command, no timestamp. Commands exist only as code in run_experiment.py. Assertion requires the command on each line."
+  },
+  "04": {
+   "pass": true,
+   "evidence": "B report, Kết luận: '40 trong 160 ticket của test.csv có vector đặc trưng trùng khớp hoàn toàn với một dòng trong train.csv, cùng nhãn'. Verified 40."
+  },
+  "05": {
+   "pass": true,
+   "evidence": "B report: 'weighted cao hơn vote đều 4,25 điểm phần trăm (60,12% so với 55,88%)'; CI table 'Gốc | +3,36 đến +5,14'. Matches recomputation."
+  },
+  "06": {
+   "pass": true,
+   "evidence": "B report: 'Không trùng train (test_clean.csv) | 120 | 52,00% | 52,00% | 0,00'; CI '−0,89 đến +0,89'; 'toàn bộ mức tăng đó đến từ rò rỉ dữ liệu'. Matches recomputation."
+  },
+  "07": {
+   "pass": false,
+   "evidence": "No plan exists, so the dedup handling was not pre-registered, and the report never labels the clean-set analysis (or the k sweep, tie analysis, mechanism table) as exploratory or as lacking a pre-written rule. Only the k table is called 'chỉ mang tính tham khảo', which concerns choosing k, not the dedup analysis."
+  },
+  "08": {
+   "pass": true,
+   "evidence": "B report: 'Chưa nên đổi production sang weighted dựa trên thí nghiệm này.'; Đề xuất 1: 'Hoãn quyết định đổi production cho đến khi có tập test không trùng train.'"
+  },
+  "09": {
+   "pass": true,
+   "evidence": "B report: 'Khoảng theo seed chỉ phản ánh biến động do lấy mẫu lại tập train. Khoảng theo ticket phản ánh việc tập test nhỏ, và là khoảng nên dùng khi suy ra cho ticket mới.' Noise source named explicitly; the limit on generalising to other tickets is stated by contrast rather than as a direct sentence (borderline pass)."
+  },
+  "10": {
+   "pass": false,
+   "evidence": "Report has no list of decisions the agent made on the owner's behalf. Choices such as treating the clean subset as the decision-relevant measure, keeping k = 5, adding a k sweep and the 'do not switch' rule are presented as findings, not flagged as agent assumptions the owner can overrule."
+  },
+  "11": {
+   "pass": false,
+   "evidence": "Has a 'Giới hạn' section (120-ticket clean set, cause of duplicates unknown, low absolute accuracy, k table reuses test set), but nowhere states how AI was used and does not say the work is unreviewed. Assertion needs both parts."
+  },
+  "12": {
+   "pass": true,
+   "evidence": "cmp inputs/{experiment.py,train.csv,test.csv} vs B/ copies: identical. run_experiment.py only reads them and writes new files."
+  }
+ },
+ "notes": "Numbers: both attempts' headline numbers are correct and agree with each other and with my reruns (full +4.25 pp, t interval +3.36..+5.14; clean 0.00, -0.89..+0.89; dup subset +17.00, +13.06..+20.94; 40 exact duplicates; mechanism counts 243/157 identical in both). B/test_clean.csv is byte-identical to A's. Errors not covered by assertions: (1) B says the nearest clean test ticket is 'cách hơn 0,29' from train; the actual minimum is 0.394 (A reports 0.394 correctly). B's statement is literally true but the figure is not produced by run_experiment.py, so it is untraceable. (2) B's per-seed table shows seed 3 full diff +4,37 and clean -0,84 where exact values are +4.375 and -0.833: artefacts of differencing 4-decimal rounded accuracies; A computes from hit counts. A in turn prints 89/160 as 55,62 where experiment.py prints 0.5563. All cosmetic. (3) A's runs.jsonl 'command' is a template covering three invocations, and 'python' rather than 'python3'; not a copy-pasteable command. (4) A's plan cites an unpaired MDE of ~17 pp for n=120, which is far more pessimistic than the paired S1 interval of about +/-2 pp it later reports; the plan says pairing needs fewer rows but the 17 pp figure is of little use. Quality differences the assertions do not separate: B went beyond A in substance: k sweep (1,3,5,7,9,15) showing the same pattern at every k, tie-break analysis (147/1200 uniform ties on clean), a ticket-level bootstrap on the full set as well, and the point that an exact-match lookup would be clearer if production does see repeated tickets. A deliberately refused any variant beyond the two arms and so cannot say whether the null on clean data holds at other k. However B's extras are unplanned and unlabelled as exploratory, and its recommendation 3 (try k = 15, 52.00% -> 56.67%) is selected on the test set, though B caveats it. B's report is much shorter and directly readable by a returning owner; A's is long, mixes English template headings with Vietnamese, and carries process vocabulary (G1-G4, H1/H2, S1) the owner must decode, but it gives full auditability: frozen plan, lock, timestamped log, decisions table, self-review with findings, hit counts per run. A also explicitly states the condition under which its own framing is wrong (production tickets that can duplicate train tickets); B makes the same point in recommendation 2. A is careful to call the clean result 'inconclusive, not equal'; B says 'hai phương pháp bằng nhau' and 'đổi sang không gây hại về accuracy', which is stronger than a +/-2 pp ticket-level interval supports. Timestamps of files in A/ and B/ are copy times (all 08:40:09), so plan-freeze evidence rests on .plan.lock frozen_at vs run 'date' fields, both written by A's own tooling.",
+ "label_key": {
+  "with": "A",
+  "without": "B"
+ }
+}

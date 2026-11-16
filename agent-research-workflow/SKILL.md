@@ -85,6 +85,7 @@ python scripts/research_gate.py log research/<slug> --arm baseline --seed 0 --me
 
 - A failed or ugly run is logged with `--note`, not dropped. A rerun, an extra variant or an extra metric goes in with `--exploratory`.
 - Read the data-loading and metric code yourself and name, in `decisions.md`, the parts the owner should read. Model selection never reads the test split.
+- Exploratory work is welcome when it helps the owner decide (another value of a setting, a breakdown by subgroup, a mechanism check). Run it, log it as exploratory, and report it under its own heading with no verdict word.
 - Count what you try. Every variant, metric and subset examined is stated in the report, including the discarded ones.
 
 ### Stage 6 in detail: analysis
@@ -99,7 +100,7 @@ The output's `decision` field is the verdict of the pre-written rule; its `verdi
 
 ### Stages 7–8: report and review
 
-Write `report.md` from `assets/research-report-template.md`. Then:
+Write `report.md` from `assets/research-report-template.md`. The report is for a reader who wants the answer: lead with the verdict in plain words, keep the body short (about one page before the per-run table), and leave process detail — gate output, file lists, how the folder is organised — in the folder, not in the prose. Then:
 
 ```bash
 python scripts/research_gate.py check research/<slug> --stage all

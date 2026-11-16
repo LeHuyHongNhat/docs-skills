@@ -69,6 +69,7 @@ Read `references/presentation-and-charts.md` when the document contains numbers 
 - PRD/BRD goals: baseline vs target per metric → `dumbbell`; option comparison in a BRD → comparison table with ✓ ✗ ◐ and ★ on the recommended option (only if a recommendation was asked for).
 - Metric definitions: a small worked example chart only from data the user provided.
 - Chart only measured or user-given numbers, with `source:`. A target or threshold that is still [TO CONFIRM] is never drawn as if decided.
+- Metric definitions, A/B-test specs and success criteria that compare numbers: follow `references/research-rigor.md` (design → allowed verbs, sample size, uncertainty) and compute intervals with `scripts/stats_check.py`; a success threshold needs its sample size and decision rule, or a [TO CONFIRM].
 - User asks for an artifact / web page / a report with charts → render `--to html` (and publish it if your environment has an artifact/page publishing tool).
 
 ### Export formats & visual check
@@ -108,3 +109,4 @@ AC-007.2  Given the user has 499 available points
 - `scripts/render_doc.py` + `assets/` — designed HTML/PDF/DOCX/XLSX export; `--qa` renders page images for checking.
 - `references/visual-style.md` — rules for writing Markdown that renders well, and the visual QA process.
 - `references/presentation-and-charts.md` + `scripts/charts.py` — when to chart, chart chooser, takeaway titles, comparison layouts (KPI tiles, side-by-side, ✓ ✗ ◐ tables), validated colour palette.
+- `references/research-rigor.md` + `scripts/stats_check.py` — rules and statistics for claims made from data (CIs, paired tests, seeds, Sharpe, overclaim flags).

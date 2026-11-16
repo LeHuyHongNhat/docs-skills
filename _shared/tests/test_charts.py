@@ -21,6 +21,7 @@ SPECS = {
     "line": "type: line\n" + BASE + "series:\n  - {name: X, values: [100, 120, 90]}\n  - {name: T, values: [100, 100, 100], dashed: true}\n",
     "dumbbell": "type: dumbbell\n" + BASE + "series:\n  - {name: Before, values: [5, 6, 7]}\n  - {name: After, values: [8, 6.5, 6]}\n",
     "slope": "type: slope\ncategories: [Before, After]\nsource: s\ntitle: t\nseries:\n  - {name: X, values: [1, 2]}\n  - {name: Y, values: [3, 1]}\n",
+    "interval": "type: interval\n" + BASE + "values: [19, -18, -4]\nlow: [2, -38, -15]\nhigh: [39, 9, 9]\nunit: '%'\n",
     "heatmap": "type: heatmap\ncategories: [R1, R2]\ncolumns: [C1, C2]\nsource: s\ntitle: t\ndiverging: true\nmidpoint: 0\n"
                "series:\n  - {name: R1, values: [-1, 2]}\n  - {name: R2, values: [0, 1]}\n",
 }
@@ -134,3 +135,14 @@ def test_charts_export_and_docx(tmp_path: Path) -> None:
     assert (tmp_path / "c-chart-1.svg").exists() and (tmp_path / "c-chart-1.png").stat().st_size > 3000
     import docx
     assert docx.Document(str(tmp_path / "c.docx")).inline_shapes
+
+
+def test_interval_chart_marks_intervals_that_include_the_reference() -> None:
+    sp = charts.parse_spec(SPECS["interval"])
+    svg = charts.render_svg(sp, "en")
+    assert svg.count(f'fill="{charts.SURFACE}" stroke="{charts.CATEGORICAL[0]}"') == 3  # 2 hollow dots + legend
+    assert "19%  [2; 39]" in svg and "| Category | Estimate | Lower | Upper |" in charts.data_table_md(sp)
+    with pytest.raises(charts.ChartError, match="low <= estimate <= high"):
+        charts.parse_spec("type: interval\ncategories: [A]\nvalues: [5]\nlow: [6]\nhigh: [7]\n")
+    with pytest.raises(charts.ChartError, match="one bound per category"):
+        charts.parse_spec("type: interval\ncategories: [A, B]\nvalues: [5, 6]\nlow: [1]\nhigh: [7, 8]\n")

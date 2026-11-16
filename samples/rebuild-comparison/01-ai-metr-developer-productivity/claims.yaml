@@ -1,0 +1,37 @@
+# Claim ledger — METR (2025) "Measuring the Impact of Early-2025 AI on Experienced Open-Source Developer Productivity"
+# Sources: arXiv:2507.09089 (primary); METR blog 2026-02-24 "We are Changing our Developer Productivity Experiment Design"
+claims:
+  - id: C1
+    text: "AI-allowed issues took longer (change in completion time, early 2025)"
+    type: causal            # issue-level randomisation → causal within this population
+    design: randomised controlled trial, 16 developers, 246 issues
+    test: reported
+    estimate: 19
+    ci: [2, 39]
+    unit: "%"
+  - id: C2
+    text: "Follow-up, returning developers: 'speedup of -18%' (sign convention undefined in source)"
+    type: causal
+    design: randomised at task level, but strong self-selection of developers and tasks
+    test: reported
+    estimate: -18
+    ci: [-38, 9]
+    unit: "%"
+  - id: C3
+    text: "Follow-up, newly recruited developers: 'speedup of -4%'"
+    type: causal
+    design: same as C2
+    test: reported
+    estimate: -4
+    ci: [-15, 9]
+    unit: "%"
+  - id: C4
+    text: "Developers believed AI sped them up by 20% after the study"
+    type: descriptive
+    test: none
+    why: "Self-reported belief; the paper's section 3.1 gives the point value, no interval was extracted."
+  - id: C5
+    text: "AI tools slow developers down in general"
+    type: generalising
+    test: none
+    why: "Not claimed by the authors; explicitly listed among the things the study does not show."

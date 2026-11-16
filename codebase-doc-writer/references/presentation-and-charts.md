@@ -28,6 +28,7 @@ Rule of thumb: **one chart per claim**. If a section makes no comparative or tre
 | What is the total, and what makes it up? | `stacked` | ≤ 4 segments; put the most important segment at the bottom |
 | Before → after for several items? Who rose, who fell? | `slope` | Exactly 2 points per item |
 | Gap between two values per item (A vs B, target vs actual)? | `dumbbell` | Exactly 2 series; the diff is labelled |
+| How sure are we? Estimates with their confidence intervals, against a "no effect" line | `interval` | `values:` + `low:` + `high:`; `null:` sets the reference (default 0). Filled dot = interval excludes the reference, hollow = includes it |
 | Values across two dimensions (matrix, cohort, scorecard)? | `heatmap` | Same unit in every cell; `diverging: true` when values have a meaningful midpoint (0, target) |
 
 Never: pie/donut with > 3 slices (use `hbar`), dual-axis charts (two charts instead), 3D, a chart whose y-axis has two different units, truncated bar axes (bars always start at 0 — the renderer enforces this; lines may zoom).
@@ -49,6 +50,8 @@ Only claim what the chart shows. If the data shows correlation, the title says "
 **Lead-in + read-out.** One sentence before the chart says why it is here; one sentence after says what it means for the decision (the "so what"). For a chart type the audience may not know (slope, dumbbell, heatmap), add one "How to read:" line ("Cách đọc:" in Vietnamese).
 
 **Source is mandatory.** Every chart has `source:` (file, query, dashboard, paper, meeting). A chart without a source is flagged by the renderer: charts make numbers look authoritative, so invented or estimated numbers must never be charted as if measured. If data is illustrative, say so in `source:` ("Illustrative, not measured"). Caveats that change interpretation go in `note:` (different sample sizes, changed definitions, one run only).
+
+**Comparisons carry their uncertainty.** A bar that is taller is not a result that is better. When the chart compares measured values, either draw the intervals (`interval`), or state n and the CI in the read-out sentence. Rules and the calculator: `references/research-rigor.md`, `scripts/stats_check.py`.
 
 **Explain like a careful colleague, not a brochure.**
 - Every number has a unit and a comparison base: "72.0% → 92.5% (+20.5 points)", never "much better".
@@ -117,7 +120,7 @@ Custom colours (`colors: {Series: "#hex"}`) are validated at render time; a fail
 
 ````markdown
 ```chart
-type: grouped                 # bar | hbar | grouped | stacked | line | slope | dumbbell | heatmap
+type: grouped                 # bar | hbar | grouped | stacked | line | slope | dumbbell | heatmap | interval
 title: Android leads in every region except Hanoi     # takeaway sentence
 subtitle: Monthly active users, Oct 2026 (thousands)  # measure, unit, period
 categories: [Hanoi, HCMC, Da Nang]
@@ -138,7 +141,9 @@ source: dwh.mau_daily, query in appendix A            # REQUIRED
 note: Da Nang tracking started mid-month.             # caveats that change interpretation
 ```
 ````
+- The block is YAML: wrap a `title:` / `subtitle:` / `source:` / category in quotes when it contains `: `, `#`, a comma inside a list item, or starts with a quote. A spec that fails to parse is left as code and reported in `warnings` — read them.
 - Single series shortcut: `values: [...]` instead of `series:`.
+- Interval: `values:` = point estimates, `low:` / `high:` = interval bounds (one per category), `null: 0` = reference line. Use it whenever a comparison is reported with a CI — it shows at a glance which results are distinguishable from "no effect". Compute the bounds with `scripts/stats_check.py`, never by eye.
 - Heatmap: `categories:` = rows, `columns:` = column labels, one `series` entry per row; optional `diverging: true` + `midpoint: 0`.
 - Numbers follow the document language: `92,5%` in Vietnamese documents, `92.5%` in English.
 - Output: inline SVG with hover values and a collapsible data table (HTML), vector in PDF, 2× PNG in DOCX, one data sheet per chart in XLSX, standalone SVG + PNG with `--to charts`.

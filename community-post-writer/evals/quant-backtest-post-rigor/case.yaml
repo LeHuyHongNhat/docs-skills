@@ -1,0 +1,6 @@
+schema_version: "1.1"
+name: quant-backtest-post-rigor
+expected_outcome: |
+  Bài đăng trình bày backtest như một kết quả mô phỏng chưa đủ điều kiện kết luận, không phải một chiến lược có lãi: nêu Sharpe 1.8 kèm sai số chuẩn/khoảng tin cậy và số biến thể đã thử (300) với hiệu chỉnh chọn lọc (deflated Sharpe hoặc tương đương); chỉ ra survivorship bias (universe lấy theo danh sách hiện tại), look-ahead (tín hiệu và khớp lệnh cùng giá đóng cửa ngày T), không có out-of-sample, chưa trừ phí với turnover 35%/tuần, ràng buộc bán khống ở VN, thiếu giả thuyết kinh tế; không lặp lại nhận định "đủ đẹp để chạy tiền thật" như sự thật; nêu các bước cần làm tiếp; không phải lời khuyên đầu tư.
+context:
+  scaffold_script: place-files.sh

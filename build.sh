@@ -9,11 +9,12 @@ POST_SKILLS=(community-post-writer)
 SKILLS=("${DOC_SKILLS[@]}" "${POST_SKILLS[@]}")
 mkdir -p "$ROOT/dist"
 
-sync_common() {  # renderer, charts, presentation guide, theme — every skill
+sync_common() {  # renderer, charts, stats, presentation + rigor guides, theme — every skill
   local s=$1
   mkdir -p "$ROOT/$s/scripts" "$ROOT/$s/references" "$ROOT/$s/assets"
-  cp "$ROOT/_shared/scripts/render_doc.py" "$ROOT/_shared/scripts/charts.py" "$ROOT/$s/scripts/"
-  cp "$ROOT/_shared/references/visual-style.md" "$ROOT/_shared/references/presentation-and-charts.md" "$ROOT/$s/references/"
+  cp "$ROOT/_shared/scripts/render_doc.py" "$ROOT/_shared/scripts/charts.py" "$ROOT/_shared/scripts/stats_check.py" "$ROOT/$s/scripts/"
+  cp "$ROOT/_shared/references/visual-style.md" "$ROOT/_shared/references/presentation-and-charts.md" \
+     "$ROOT/_shared/references/research-rigor.md" "$ROOT/$s/references/"
   cp "$ROOT/_shared/assets/doc-theme.css" "$ROOT/_shared/assets/reference.docx" "$ROOT/$s/assets/"
 }
 

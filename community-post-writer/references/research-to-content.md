@@ -12,6 +12,8 @@ Build it before writing; the post may only use rows from it.
 | E2 | Semantic chunking is slower | ~4× indexing time | notes.md §3 | measured | single machine |
 | E3 | "Semantic chunking is best for everything" | — | notes.md §5 (author's guess) | opinion | not tested → do **not** use as a claim |
 
+For research-grade posts the ledger becomes a **claim ledger** with design, n and a computed verdict — see `research-rigor.md` §1–§3. The strength scale below is the minimum for every post; the verdict from `stats_check.py` overrides it when numbers are compared.
+
 Strength scale (use it to choose verbs):
 
 | Strength | Means | Verbs/hedges to use |

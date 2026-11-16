@@ -64,6 +64,7 @@ For a review report, read `references/presentation-and-charts.md` and consider:
 - Findings by severity × category → `stacked` or `heatmap` chart (source: the findings table in the same report), plus `::: {.kpis}` tiles (high / medium / low counts).
 - Each key rewrite as a `::: {.compare}` block (original vs proposed), same order on both sides.
 - When reviewing a document that already has charts: check takeaway titles, units, `source:`, truncated axes, dual axes, colour-only encoding and numbers that disagree with the text — report them with the rubric codes.
+- Claims from data ("A is better", "increased by 30%", backtests, eval results): check them against `references/research-rigor.md` (rubric R1–R12) and recompute with `scripts/stats_check.py` when the counts are in the document; report unsupported strength as UNSOURCED or VIS-CLAIM.
 - User asks for an artifact / web page → render `--to html`.
 
 ### Export formats (revised document) & visual check
@@ -82,4 +83,5 @@ If the document is already good: say plainly that it is good and list the few fi
 - `references/writing-standards.md` — shared wording standards.
 - `scripts/render_doc.py` + `assets/` + `references/visual-style.md` — export the revised document to PDF/DOCX and the findings table to XLSX.
 - `references/presentation-and-charts.md` + `scripts/charts.py` — when to chart, chart chooser, takeaway titles, comparison layouts (KPI tiles, side-by-side, ✓ ✗ ◐ tables), validated colour palette.
+- `references/research-rigor.md` + `scripts/stats_check.py` — rules and statistics for claims made from data (CIs, paired tests, seeds, Sharpe, overclaim flags).
 - `scripts/lint_doc.py` — surface linter (`--format json` for further processing; `--terms` to pass project-specific synonym groups).

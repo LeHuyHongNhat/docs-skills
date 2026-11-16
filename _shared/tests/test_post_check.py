@@ -93,3 +93,52 @@ def test_cli_json(tmp_path: Path, capsys) -> None:
     p.write_text(GOOD_VI, encoding="utf-8")
     assert pc.main([str(p), "--platform", "facebook", "--json"]) == 0
     assert '"words"' in capsys.readouterr().out
+
+
+RIGOROUS_EN = """In our test, heading-based chunking answered 38 of 50 questions and fixed-size chunking 31 of 50.
+The difference is +14 points (95% CI -4 to +31), so we could not tell the two apart.
+
+## Limits
+- One run per configuration, n = 50 questions, September 2026.
+- Scanned PDFs were not tested. The data is internal and cannot be published; versions: bge-m3, pgvector 0.7.
+
+Source: our own experiment. What sample size do you use?
+"""
+
+SLOPPY_QUANT = """Our momentum strategy beats the index: Sharpe 2.1 in the backtest, which proves the alpha is real.
+Returns increased 40% thanks to the new signal. The improvement is significant.
+"""
+
+
+def test_rigor_mode_passes_a_careful_post() -> None:
+    findings, _ = pc.check(RIGOROUS_EN, "forum", rigor=True)
+    assert not [f for f in findings if f.code.startswith("RIGOR")], findings
+
+
+def test_rigor_mode_catches_unsupported_claims() -> None:
+    c = codes(pc.check(SLOPPY_QUANT, "forum", rigor=True)[0])
+    assert {"RIGOR-N", "RIGOR-UNCERTAINTY", "RIGOR-ABSOLUTE", "RIGOR-SIGNIFICANT", "RIGOR-CAUSAL", "RIGOR-LIMITS",
+            "RIGOR-SOURCE", "RIGOR-QUANT-OOS", "RIGOR-QUANT-COSTS", "RIGOR-QUANT-TRIALS", "RIGOR-QUANT-LOOKAHEAD"} <= c
+
+
+def test_rigor_is_opt_in_and_ai_is_not_ai_cung() -> None:
+    assert not [f for f in pc.check(SLOPPY_QUANT, "forum")[0] if f.code.startswith("RIGOR")]
+    md = "AI cũng cần dữ liệu tốt. Nguồn: thử nghiệm nội bộ năm 2026, n = 50 câu, giới hạn: chạy 1 lần, không công bố dữ liệu.\n"
+    assert "RIGOR-ABSOLUTE" not in codes(pc.check(md, "forum", rigor=True)[0])
+    assert "RIGOR-ABSOLUTE" in codes(pc.check("Ai cũng nên dùng cách này, n = 50.\n", "forum", rigor=True)[0])
+
+
+def test_sources_section_proper_names_and_org_acronyms_are_not_flagged() -> None:
+    md = ("# Nghiên cứu METR đo gì\n\n"
+          "METR (Model Evaluation & Threat Research) đo 16 lập trình viên. Kết quả tăng 19%.\n\n"
+          "Bản tóm tắt của CXO Advisory ghi khác. Giới hạn: n = 16, năm 2025, không công bố dữ liệu.\n\n"
+          "## Nguồn\n\n- Jensen (2021), NBER Working Paper 28432, https://example.org/x\n")
+    findings, _ = pc.check(md, "forum", rigor=True)
+    c = codes(findings)
+    assert "TITLE-CAPS" not in c and "RIGOR-ML-RUNS" not in c
+    assert not [f for f in findings if f.code == "ACRONYM"], findings
+    assert [f.severity for f in findings if f.code == "UNSOURCED"] == ["info"]
+
+
+def test_shouting_title_is_still_flagged() -> None:
+    assert "TITLE-CAPS" in codes(pc.check("# Cách này SIÊU NHANH\n\nNội dung ngắn có nguồn.\n", "forum")[0])

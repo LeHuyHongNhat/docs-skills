@@ -4,7 +4,7 @@
 A chart block is YAML inside a fenced code block whose language is `chart`:
 
     ```chart
-    type: hbar                       # bar | hbar | grouped | stacked | line | slope | dumbbell | heatmap
+    type: hbar                       # bar | hbar | grouped | stacked | line | slope | dumbbell | heatmap | interval
     title: Skills raise the pass rate by 20.5 points   # the takeaway, as a sentence
     subtitle: Assertion pass rate, 10 eval cases (%)   # what / unit / period
     categories: [With skills, Without skills]
@@ -50,7 +50,7 @@ DIVERGING = ["#2A4FB8", "#7F98DD", "#C9D3EE", "#ECEDF0", "#F2CDB4", "#DE8B57", "
 STATUS = {"good": "#1E7B4A", "warning": "#9A5B00", "bad": "#B42318"}
 
 FONT = "Inter, 'Noto Sans', 'DejaVu Sans', 'Segoe UI', Arial, sans-serif"
-TYPES = {"bar", "hbar", "grouped", "stacked", "line", "slope", "dumbbell", "heatmap"}
+TYPES = {"bar", "hbar", "grouped", "stacked", "line", "slope", "dumbbell", "heatmap", "interval"}
 MAX_SERIES = 6
 
 
@@ -190,6 +190,9 @@ class Spec:
     colors: dict[str, str] = field(default_factory=dict)
     diverging: bool = False
     midpoint: float | None = None
+    low: list[float] = field(default_factory=list)       # interval chart: lower bounds
+    high: list[float] = field(default_factory=list)      # interval chart: upper bounds
+    null: float | None = 0.0                              # interval chart: "no effect" reference line
     warnings: list[str] = field(default_factory=list)
 
 
@@ -214,7 +217,9 @@ def parse_spec(text: str) -> Spec:
              highlight=[str(h) for h in (hl if isinstance(hl, list) else [hl])],
              source=str(raw.get("source", "") or ""), note=str(raw.get("note", "") or ""),
              min=raw.get("min"), max=raw.get("max"), colors=dict(raw.get("colors") or {}),
-             diverging=bool(raw.get("diverging", False)), midpoint=raw.get("midpoint"))
+             diverging=bool(raw.get("diverging", False)), midpoint=raw.get("midpoint"),
+             low=list(raw.get("low") or []), high=list(raw.get("high") or []),
+             null=raw.get("null", 0.0))
     if "values" in raw and "series" not in raw:
         s.series = [{"name": str(raw.get("name", s.subtitle or "")), "values": raw["values"]}]
     else:
@@ -244,6 +249,15 @@ def _check(s: Spec) -> None:
             raise ChartError("heatmap: one series (row) per category")
         if any(len(se["values"]) != n for se in s.series):  # type: ignore[arg-type]
             raise ChartError("heatmap: every row needs one value per column")
+    if s.type == "interval":
+        vals = s.series[0]["values"]
+        if len(s.series) != 1:
+            raise ChartError("interval: one `values:` list of estimates, plus `low:` and `high:`")
+        if len(s.low) != n or len(s.high) != n:
+            raise ChartError("interval: `low:` and `high:` need one bound per category")
+        for v, lo, hi in zip(vals, s.low, s.high):  # type: ignore[arg-type]
+            if not all(isinstance(x, (int, float)) for x in (v, lo, hi)) or not lo <= v <= hi:
+                raise ChartError(f"interval: need low <= estimate <= high (got {lo}, {v}, {hi})")
     if s.type == "dumbbell" and len(s.series) != 2:
         raise ChartError("dumbbell compares exactly 2 series (e.g. before/after)")
     if s.type == "slope" and len(s.categories) != 2:
@@ -283,7 +297,7 @@ def fmt_num(v: float | None, s: Spec, lang: str = "en", unit: bool = True) -> st
 
 
 def _auto_decimals(s: Spec) -> int:
-    vals = [v for se in s.series for v in se["values"] if v is not None]  # type: ignore[union-attr]
+    vals = [v for se in s.series for v in se["values"] if v is not None] + list(s.low) + list(s.high)  # type: ignore[union-attr]
     dec = 0
     for v in vals:
         txt = f"{float(v):.4f}".rstrip("0").rstrip(".")
@@ -706,6 +720,62 @@ def _heatmap(svg: _Svg, s: Spec, y: float, lang: str) -> float:
     return y + ch * len(s.categories) + 16
 
 
+def _interval(svg: _Svg, s: Spec, y: float, lang: str) -> float:
+    """Estimates with confidence intervals (forest-plot style). A filled dot = the interval excludes
+    the null line; a hollow dot = it includes it. Shape carries the verdict, colour only supports it."""
+    vals = s.series[0]["values"]
+    lo_d, hi_d = min(list(s.low) + ([s.null] if s.null is not None else [])), max(list(s.high) + ([s.null] if s.null is not None else []))
+    step = _nice_step(hi_d - lo_d)
+    lo = s.min if s.min is not None else math.floor(lo_d / step + 1e-9) * step
+    hi = s.max if s.max is not None else math.ceil(hi_d / step - 1e-9) * step
+    labels = [f"{fmt_num(v, s, lang)}  [{fmt_num(a, s, lang, unit=False)}; {fmt_num(b, s, lang, unit=False)}]"
+              for v, a, b in zip(vals, s.low, s.high)]  # type: ignore[arg-type]
+    label_w = min(max(_w(c, 12.5) for c in s.categories) + 14, W * 0.36)
+    val_w = max(_w(t, 12) for t in labels) + 14
+    x0, x1 = PAD + label_w, W - PAD - val_w
+    sx = lambda v: x0 + (v - lo) / (hi - lo) * (x1 - x0)  # noqa: E731
+    row = 34
+    y += 10
+    top, bottom = y, y + row * len(s.categories)
+    for t in _ticks(lo, hi):
+        xx = sx(t)
+        svg.add(f'<line x1="{xx:.1f}" y1="{top}" x2="{xx:.1f}" y2="{bottom}" stroke="{GRID}"/>')
+        svg.text(xx, bottom + 15, _tick(t, s, lang), 11, INK_3, "middle")
+    if s.null is not None and lo <= s.null <= hi:
+        xn = sx(s.null)
+        svg.add(f'<line x1="{xn:.1f}" y1="{top - 4}" x2="{xn:.1f}" y2="{bottom}" stroke="{INK_2}" stroke-width="1.5" '
+                f'stroke-dasharray="4 3"/>')
+    col = CATEGORICAL[0]
+    for i, cat in enumerate(s.categories):
+        cy = top + i * row + row / 2
+        v, a, b = vals[i], s.low[i], s.high[i]  # type: ignore[index]
+        excludes = s.null is None or a > s.null or b < s.null
+        hl = _is_hl(s, cat)
+        c = col if hl else INK_3
+        for li, line in enumerate(_wrap(cat, 12.5, label_w - 12, 2)):
+            svg.text(x0 - 12, cy + 4 + (li - (len(_wrap(cat, 12.5, label_w - 12, 2)) - 1) / 2) * 14, line, 12.5,
+                     INK if hl else INK_3, "end")
+        tip = f"{cat}: {labels[i]}"
+        svg.add(f'<line x1="{sx(a):.1f}" y1="{cy}" x2="{sx(b):.1f}" y2="{cy}" stroke="{c}" stroke-width="2.5">'
+                f'<title>{_e(tip)}</title></line>')
+        for xx in (sx(a), sx(b)):
+            svg.add(f'<line x1="{xx:.1f}" y1="{cy - 6}" x2="{xx:.1f}" y2="{cy + 6}" stroke="{c}" stroke-width="2.5"/>')
+        svg.add(f'<circle cx="{sx(v):.1f}" cy="{cy}" r="6" fill="{c if excludes else SURFACE}" stroke="{c}" '
+                f'stroke-width="2.5"><title>{_e(tip)}</title></circle>')
+        svg.text(x1 + 12, cy + 4, labels[i], 12, INK if hl else INK_3, weight=600 if excludes else 400)
+    if s.null is None:  # plain estimates with intervals: no reference line, so no filled/hollow legend
+        return bottom + 26
+    y = bottom + 30
+    filled = "khoảng tin cậy không chứa mốc" if lang == "vi" else "interval excludes the reference"
+    hollow = "khoảng tin cậy chứa mốc" if lang == "vi" else "interval includes the reference"
+    svg.add(f'<circle cx="{PAD + 6}" cy="{y - 4}" r="5" fill="{col}" stroke="{col}" stroke-width="2"/>')
+    svg.text(PAD + 18, y, filled, 11.5, INK_2)
+    x2 = PAD + 18 + _w(filled, 11.5) + 22
+    svg.add(f'<circle cx="{x2}" cy="{y - 4}" r="5" fill="{SURFACE}" stroke="{col}" stroke-width="2"/>')
+    svg.text(x2 + 12, y, hollow, 11.5, INK_2)
+    return y + 10
+
+
 def render_svg(s: Spec, lang: str = "en") -> str:
     """Return a self-contained <svg> (single line per element, no blank lines → safe as raw HTML in Markdown)."""
     svg = _Svg()
@@ -725,6 +795,8 @@ def render_svg(s: Spec, lang: str = "en") -> str:
         y = _dumbbell(svg, s, y, lang)
     elif s.type == "heatmap":
         y = _heatmap(svg, s, y, lang)
+    elif s.type == "interval":
+        y = _interval(svg, s, y, lang)
     y = _footer(svg, s, y, lang)
     h = math.ceil(y)
     title = _e(s.title or s.type)
@@ -739,6 +811,12 @@ def data_table_md(s: Spec, lang: str = "en") -> str:
     if s.type == "heatmap":
         head = [""] + s.columns
         rows = [[cat] + [fmt_num(v, s, lang) for v in se["values"]] for cat, se in zip(s.categories, s.series)]  # type: ignore[union-attr]
+    elif s.type == "interval":
+        vi = lang == "vi"
+        head = ["Hạng mục" if vi else "Category", "Ước lượng" if vi else "Estimate",
+                "Cận dưới" if vi else "Lower", "Cận trên" if vi else "Upper"]
+        rows = [[cat, fmt_num(v, s, lang), fmt_num(a, s, lang), fmt_num(b, s, lang)]
+                for cat, v, a, b in zip(s.categories, s.series[0]["values"], s.low, s.high)]  # type: ignore[arg-type]
     else:
         first = "Hạng mục" if lang == "vi" else "Category"
         names = [str(se["name"]) or (s.subtitle or "Value") for se in s.series]

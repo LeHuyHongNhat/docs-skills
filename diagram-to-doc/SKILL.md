@@ -108,3 +108,4 @@ If the user says they will read it on a phone/mobile → add `--page mobile` (na
 - `scripts/lint_doc.py` — vague-wording linter.
 - `scripts/render_doc.py` + `assets/` + `references/visual-style.md` — designed PDF/DOCX/XLSX export with visual QA (data dictionary → XLSX, one sheet per table).
 - `references/presentation-and-charts.md` + `scripts/charts.py` — when to chart, chart chooser, takeaway titles, comparison layouts (KPI tiles, side-by-side, ✓ ✗ ◐ tables), validated colour palette.
+- `references/research-rigor.md` + `scripts/stats_check.py` — only when the image is a chart/dashboard with numbers and the document draws conclusions from them.

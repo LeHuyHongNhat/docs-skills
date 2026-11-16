@@ -3,7 +3,7 @@
 
 Usage:
     python post_check.py post.md [--platform forum|viblo|devto|medium|reddit|facebook|linkedin|x]
-                                 [--title "..."] [--json] [--export post.txt]
+                                 [--title "..."] [--rigor] [--json] [--export post.txt]
 
 What it checks (severity high / medium / low / info):
 - platform: Markdown the platform cannot render (Facebook/LinkedIn/X), hard length limits,
@@ -15,6 +15,12 @@ What it checks (severity high / medium / low / info):
 - evidence: sentences with figures (%, ×, "lần", pp) in paragraphs with no link,
   citation or test-condition wording nearby                                      (low)
 - discussion: last paragraph without a question                                  (info)
+- --rigor (posts that compare, claim causes, summarise a study, show a backtest/benchmark):
+  sample size stated, uncertainty near comparative claims, "significant" with a test,
+  causal wording vs design, absolute words, limitations, sources, reproducibility, date of
+  evidence, backtest caveats (out-of-sample, costs, number of trials), ML eval caveats
+  (runs/seeds, baseline). Mechanical proxies for references/research-rigor.md — the
+  claims themselves are checked with stats_check.py.                             (medium/low)
 
 Design notes:
 - Heuristics, not a grade: every finding names the exact sentence so the writer decides.
@@ -65,8 +71,11 @@ COMMON_ACRONYMS = {"AI", "API", "APIs", "URL", "PDF", "CEO", "CTO", "USD", "VND"
                    "HTTP", "HTTPS", "CLI", "SDK", "IDE", "LLM", "LLMs", "NOTE", "TODO", "FYI", "NB", "VS", "ML"}
 EVIDENCE_HINT = re.compile(
     r"https?://|\]\(|\[\d+\]|\bsource\b|\baccording to\b|\bin (our|my) (test|experiment|benchmark)|"
-    r"\bwe measured\b|\bthe paper\b|\breports?\b|nguồn|theo |thử nghiệm|đo được|đo trên|mình đo|số liệu từ|paper", re.I)
-FIGURE_RE = re.compile(r"\d+(?:[.,]\d+)?\s?(?:%|pp\b|×|x\b|lần\b|điểm phần trăm|percentage points)", re.I)
+    r"\bwe measured\b|\bthe paper\b|\breports?\b|nguồn|theo |thử nghiệm|đo được|đo trên|mình đo|số liệu từ|paper|"
+    r"\b(table|section|appendix|figure)\s+[\dA-Z]|\b(bảng|mục|phụ lục|hình)\s+[\dA-Z]|§\s?\d|"
+    r"khoảng tin cậy|confidence interval|\bCI\b|\bn\s*=\s*\d|\b\d+\s*/\s*\d+\b", re.I)
+SOURCES_HEAD_RE = re.compile(r"^#{1,6}\s*(\d+[.)]?\s*)?(sources?|references?|nguồn|tài liệu tham khảo)\b", re.I)
+FIGURE_RE = re.compile(r"\d+(?:[.,]\d+)?\s?(?:%|pp\b|×|x\b|lần\b(?!\s*(?:chạy|đo|thử))|điểm phần trăm|percentage points)", re.I)
 
 
 @dataclass
@@ -176,7 +185,8 @@ def short(s: str, n: int = 90) -> str:
 
 
 # ----------------------------------------------------------------- checks
-def check(md: str, platform: str = "forum", title: str | None = None) -> tuple[list[Finding], dict[str, object]]:
+def check(md: str, platform: str = "forum", title: str | None = None,
+          rigor: bool = False) -> tuple[list[Finding], dict[str, object]]:
     md_body, meta = strip_front_matter(md)
     if title is None:
         title = meta.get("title")
@@ -185,6 +195,7 @@ def check(md: str, platform: str = "forum", title: str | None = None) -> tuple[l
         h1 = next((t for k, t in blocks if k == "heading" and re.match(r"^#\s", t)), None)
         title = re.sub(r"^#\s+", "", h1).strip() if h1 else None
     prose = "\n".join(t for k, t in blocks if k in ("para", "list", "heading"))
+    body_only = "\n".join(t for k, t in blocks if k in ("para", "list"))  # an acronym used in the body is not shouting
     lang = lang_of(prose)
     vi = lang == "vi"
     f: list[Finding] = []
@@ -223,7 +234,8 @@ def check(md: str, platform: str = "forum", title: str | None = None) -> tuple[l
         tmax = 90 if vi else 70
         if len(title) > tmax:
             f.append(Finding("medium", "TITLE-LEN", f"Title has {len(title)} characters (> {tmax}).", title))
-        caps = [w for w in re.findall(r"\b[A-ZÀ-Ỹ]{4,}\b", title) if w not in COMMON_ACRONYMS]
+        caps = [w for w in re.findall(r"\b[A-ZÀ-Ỹ]{4,}\b", title)
+                if w not in COMMON_ACRONYMS and not re.search(rf"(?<![\w-]){re.escape(w)}(?![\w-])", body_only)]
         if caps:
             f.append(Finding("medium", "TITLE-CAPS", f"ALL-CAPS words in title: {', '.join(caps)}.", title))
         if re.search(r"!{2,}|\?!|!\?", title):
@@ -264,33 +276,47 @@ def check(md: str, platform: str = "forum", title: str | None = None) -> tuple[l
         f.append(Finding("medium", "NO-HEADINGS", f"{words} words without any ## heading: readers cannot skim."))
     first = next((t for k, t in blocks if k == "para"), "")
     if first:
-        if n_words(clean(first)) > 60:
-            f.append(Finding("medium", "HOOK-LONG", "Opening paragraph > 60 words: the hook should fit in 2 lines.",
+        hook_max = 85 if vi else 60
+        if n_words(clean(first)) > hook_max:
+            f.append(Finding("medium", "HOOK-LONG", f"Opening paragraph > {hook_max} {'syllables' if vi else 'words'}: "
+                             "the hook should fit in 2–3 lines.",
                              short(first)))
         if FILLER_OPEN.search(clean(first)):
             f.append(Finding("medium", "HOOK-FILLER", "Opening starts with a greeting/announcement — lead with the "
                              "result, the problem or the question.", short(first)))
 
-    # --- acronyms
+    # --- acronyms (not inside the sources/references section; not part of a proper name like "NBER Working Paper")
+    src_idx = next((i for i, (k, t) in enumerate(blocks) if k == "heading" and SOURCES_HEAD_RE.search(t)), None)
+    has_sources = src_idx is not None
+    pre_src = blocks[:src_idx] if has_sources else blocks
+    post_src = []
+    if has_sources:  # the section ends at the next heading
+        end = next((j for j in range(src_idx + 1, len(blocks)) if blocks[j][0] == "heading"), len(blocks))
+        post_src = blocks[end:]
+    acr_txt = clean("\n".join(t for k, t in pre_src + post_src if k in ("para", "list") or (k == "heading" and not t.startswith("# "))))
     seen: set[str] = set()
-    for m in re.finditer(r"(?<![\w-])[A-Z][A-Z0-9]{1,5}s?(?![\w-])", body_txt):
+    for m in re.finditer(r"(?<![\w-])[A-Z][A-Z0-9]{1,5}s?(?![\w-])", acr_txt):
+        if re.match(r"\s[A-Z][a-z]+", acr_txt[m.end(): m.end() + 14]):
+            continue
         a = m.group(0)
         base = a[:-1] if a.endswith("s") and a[:-1].isupper() else a
         if base in COMMON_ACRONYMS or a in seen or base.isdigit() or re.fullmatch(r"H[1-6]", a):
             continue
         seen.add(a)
-        win = body_txt[max(0, m.start() - 80): m.end() + 100]
-        defined = (body_txt[m.start() - 1: m.start()] == "(" or f"({base})" in win or f"({a})" in win or re.search(rf"{re.escape(a)}\s*(\(|—|–|:|là\b|stands for|"
+        win = acr_txt[max(0, m.start() - 80): m.end() + 100]
+        defined = (acr_txt[m.start() - 1: m.start()] == "(" or f"({base})" in win or f"({a})" in win or re.search(rf"{re.escape(a)}\s*(\(|—|–|:|là\b|stands for|"
                    rf"means|viết tắt)", win))
         if not defined:
             f.append(Finding("medium", "ACRONYM", f"“{a}” is not spelled out or explained at first use.",
-                             short(body_txt[max(0, m.start() - 40): m.end() + 40])))
+                             short(acr_txt[max(0, m.start() - 40): m.end() + 40])))
 
     # --- evidence near figures
-    for k, t in blocks:
-        if k not in ("para", "list"):
-            continue
-        if FIGURE_RE.search(t) and not EVIDENCE_HINT.search(t):
+    unsourced = [t for k, t in blocks if k in ("para", "list") and FIGURE_RE.search(t) and not EVIDENCE_HINT.search(t)]
+    if unsourced and has_sources:
+        f.append(Finding("info", "UNSOURCED", f"{len(unsourced)} paragraph(s) with figures rely on the Sources section: "
+                         "check that each number can be located there (section/table)."))
+    else:
+        for t in unsourced:
             f.append(Finding("low", "UNSOURCED", "Figure with no source, link or test conditions in this "
                              "paragraph — add where it comes from (or confirm it is cited nearby).", short(clean(t))))
 
@@ -300,11 +326,127 @@ def check(md: str, platform: str = "forum", title: str | None = None) -> tuple[l
         f.append(Finding("info", "NO-QUESTION", "The post does not end with a question to the community "
                          "(fine for tutorials/announcements)."))
 
+    if rigor:
+        f.extend(rigor_checks(blocks, title))
+
     stats = {"platform": platform, "lang": lang, "words": words, "characters": len(md_body),
              "reading_minutes": round(words / (200 if vi else 230), 1), "sentences": len(lens),
              "avg_sentence_len": round(avg, 1), "max_sentence_len": max(lens) if lens else 0,
              "headings": sum(1 for k, t in blocks if k == "heading"), "title": title}
     return f, stats
+
+
+# ----------------------------------------------------------------- rigor mode
+N_RE = re.compile(
+    r"\bn\s*=\s*\d|\b\d[\d.,]*\s+(?:questions?|tasks?|issues?|developers?|users?|samples?|items?|runs?|seeds?|trials?|"
+    r"participants?|predictors?|stocks?|firms?|requests?|documents?|examples?|observations?|months|years|"
+    r"câu|mẫu|người|lần chạy|tác vụ|lập trình viên|nhà phát triển|biến|cổ phiếu|tháng|năm|tài liệu|quan sát)\b|"
+    r"\b\d+\s*/\s*\d+\b", re.I)
+COMPARE_RE = re.compile(
+    r"\b(beats?|outperform\w*|better than|worse than|faster than|slower than|higher than|lower than|more accurate|"
+    r"wins?|won|improv\w+|reduc\w+|increas\w+)\b|thắng|thua|tốt hơn|kém hơn|nhanh hơn|chậm hơn|cao hơn|thấp hơn|"
+    r"vượt|cải thiện|giảm|tăng", re.I)
+UNCERT_RE = re.compile(
+    r"\bCI\b|confidence interval|khoảng tin cậy|±|\+/-|standard error|sai số chuẩn|độ lệch chuẩn|standard deviation|"
+    r"\bSD\b|\bSE\b|\bp\s*[=<>≈]\s*0?[.,]\d|p-value|t-stat|t\s*=\s*\d|not (statistically )?significant|inconclusive|"
+    r"could not tell|chưa phân biệt được|chưa đủ (mẫu|dữ liệu)|không có ý nghĩa thống kê|chưa kết luận được|"
+    r"biên nhiễu|McNemar|bootstrap|Wilson", re.I)
+SIG_RE = re.compile(r"\bsignificant(ly)?\b|có ý nghĩa thống kê|đáng kể", re.I)
+CAUSAL_RE = re.compile(
+    r"\b(because of|caused?|causes|leads? to|led to|thanks to|due to|results? in|drives?|makes? \w+ (faster|slower|better))\b|"
+    r"\bnhờ\b|khiến|làm cho|dẫn đến|gây ra|là do|vì vậy mà", re.I)
+DESIGN_RE = re.compile(r"randomi[sz]|\bRCT\b|controlled (trial|experiment)|A/B|ngẫu nhiên|đối chứng|ablation|"
+                       r"tách riêng từng yếu tố", re.I)
+ABSOLUTE_RE = re.compile(
+    r"\b(proves?|proven|always|never|guarantees?|definitely|undeniabl\w+|it'?s official|everyone)\b|"
+    r"chứng minh rằng|đã chứng minh|luôn luôn|chắc chắn|tất cả mọi|mọi trường hợp|không bao giờ", re.I)
+ABSOLUTE_CS_RE = re.compile(r"(?<![\w])(?:ai|Ai) cũng (?:nên|phải|cần|biết)")  # case-sensitive: "AI cũng" is not "ai cũng"
+LIMIT_RE = re.compile(r"limitation|caveat|threats? to validity|does not show|doesn'?t show|did not test|not tested|"
+                      r"giới hạn|hạn chế|chưa chứng minh|chưa test|chưa kiểm|không cho thấy|chưa đo", re.I)
+SOURCE_RE = re.compile(r"https?://|\]\(|\bdoi:|arXiv:\d|^source:\s*\S|our own (data|experiment|measurement)|"
+                       r"internal (data|experiment)|số liệu (từ|của)|thử nghiệm nội bộ|dữ liệu nội bộ", re.I | re.M)
+REPRO_RE = re.compile(r"github|gitlab|\brepo\b|dataset|\bcode\b|\bversion\b|\bv\d+\.\d+|phiên bản|\bseed\b|dữ liệu|"
+                      r"mã nguồn|không công bố|cannot be published|not public|không thể chia sẻ", re.I)
+DATE_RE = re.compile(r"\b(19|20)\d{2}\b")
+QUANT_RE = re.compile(r"backtest|sharpe|\balpha\b|drawdown|long-short|long/short|factor returns?|hedge portfolio|"
+                      r"chiến lược giao dịch|lợi nhuận chiến lược", re.I)
+OOS_RE = re.compile(r"out-of-sample|out of sample|\bOOS\b|ngoài mẫu|walk-forward|live trading|paper trading|"
+                    r"post-publication|sau khi công bố", re.I)
+COST_RE = re.compile(r"transaction cost|trading cost|slippage|commission|net of|gross of|phí giao dịch|chi phí giao dịch|"
+                     r"trượt giá|trước phí|sau phí", re.I)
+TRIALS_RE = re.compile(r"multiple testing|data[- ]mining|data snooping|overfit|number of (trials|strategies|signals)|"
+                       r"deflated|khai phá dữ liệu|quá khớp|số (lần|chiến lược|tín hiệu) (đã )?thử", re.I)
+LOOKAHEAD_RE = re.compile(r"look-?ahead|point-in-time|survivorship|nhìn trước|dữ liệu tương lai", re.I)
+ML_RE = re.compile(r"\baccuracy\b|\bF1\b|\bBLEU\b|\bbenchmark(s|ed)?\b|fine-?tun|độ chính xác|test set|tập test", re.I)
+RUNS_RE = re.compile(r"\bseeds?\b|\bruns?\b|lần chạy|chạy \d+ lần|repeated|lặp lại", re.I)
+BASELINE_RE = re.compile(r"baseline|compared (with|to)|so với|đối chứng|control", re.I)
+
+
+def rigor_checks(blocks: list[tuple[str, str]], title: str | None) -> list[Finding]:
+    """Mechanical proxies for the research-rigor rubric. Each finding names what a reviewer would ask."""
+    f: list[Finding] = []
+    paras = [t for k, t in blocks if k in ("para", "list", "table")]
+    text = "\n".join(t for k, t in blocks if k in ("para", "list", "table", "heading", "chart"))
+    if title:
+        text = title + "\n" + text
+
+    if not N_RE.search(text):
+        f.append(Finding("medium", "RIGOR-N", "No sample size found (n, number of items/runs/participants/period). "
+                         "State n and the unit of analysis."))
+    has_compare = False
+    for p in paras:
+        c = clean(p)
+        if COMPARE_RE.search(c) and re.search(r"\d", c):
+            has_compare = True
+            break
+    if has_compare and not UNCERT_RE.search(text):
+        f.append(Finding("medium", "RIGOR-UNCERTAINTY", "Comparative claims with numbers but no uncertainty anywhere "
+                         "(CI, SD/SE, p-value, or an explicit 'could not tell apart'). Run stats_check.py and report it."))
+    for p in paras:
+        c = clean(p)
+        m = SIG_RE.search(c)
+        if m and not UNCERT_RE.search(c):
+            f.append(Finding("medium", "RIGOR-SIGNIFICANT", f"“{m.group(0)}” without a test, p-value or CI in the same "
+                             "paragraph: give the statistic or use a neutral word.", short(c)))
+        m = ABSOLUTE_RE.search(c) or ABSOLUTE_CS_RE.search(c)
+        if m:
+            f.append(Finding("medium", "RIGOR-ABSOLUTE", f"Absolute wording “{m.group(0)}”: data supports claims within "
+                             "a sample and a scope, rarely an absolute.", short(c)))
+    if title and (ABSOLUTE_RE.search(title) or ABSOLUTE_CS_RE.search(title)):
+        f.append(Finding("high", "RIGOR-TITLE", "Title makes an absolute/universal claim.", title))
+    if not DESIGN_RE.search(text):
+        for p in paras:
+            c = clean(p)
+            m = CAUSAL_RE.search(c)
+            if m and re.search(r"\d", c):
+                f.append(Finding("low", "RIGOR-CAUSAL", f"Causal wording “{m.group(0)}” next to a number, but no "
+                                 "randomised/controlled design is mentioned: confirm the design supports causation "
+                                 "or write 'after' / 'associated with'.", short(c)))
+                break
+    if not LIMIT_RE.search(text):
+        f.append(Finding("medium", "RIGOR-LIMITS", "No limitations / 'what this does not show' found. Add ≥ 2 specific "
+                         "limits of this evidence."))
+    if not SOURCE_RE.search("\n".join(t for _, t in blocks)):
+        f.append(Finding("medium", "RIGOR-SOURCE", "No link or citation to a primary source or to the data."))
+    if not REPRO_RE.search(text):
+        f.append(Finding("low", "RIGOR-REPRO", "No reproducibility information (code, data, versions) and no statement "
+                         "that it cannot be shared."))
+    if not DATE_RE.search(text):
+        f.append(Finding("low", "RIGOR-DATE", "No year/date for the evidence: results expire, state when the data is from."))
+    if QUANT_RE.search(text):
+        for rx, code, msg in ((OOS_RE, "RIGOR-QUANT-OOS", "in-sample vs out-of-sample (or live) is not distinguished"),
+                              (COST_RE, "RIGOR-QUANT-COSTS", "no statement on transaction costs (gross or net?)"),
+                              (TRIALS_RE, "RIGOR-QUANT-TRIALS", "number of strategies/parameters tried and "
+                               "overfitting/multiple testing not addressed"),
+                              (LOOKAHEAD_RE, "RIGOR-QUANT-LOOKAHEAD", "look-ahead / survivorship bias not addressed")):
+            if not rx.search(text):
+                f.append(Finding("medium", code, f"Trading/backtest content: {msg}."))
+    if ML_RE.search(text):
+        if not RUNS_RE.search(text):
+            f.append(Finding("low", "RIGOR-ML-RUNS", "Model/eval results: number of runs or seeds not stated."))
+        if not BASELINE_RE.search(text):
+            f.append(Finding("low", "RIGOR-ML-BASELINE", "Model/eval results: no baseline or comparison described."))
+    return f
 
 
 # ----------------------------------------------------------------- export
@@ -342,11 +484,13 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("post")
     ap.add_argument("--platform", choices=sorted(PLATFORMS), default="forum")
     ap.add_argument("--title", default=None)
+    ap.add_argument("--rigor", action="store_true",
+                    help="research-grade checks: sample size, uncertainty, limitations, sources, backtest/eval caveats")
     ap.add_argument("--json", action="store_true")
     ap.add_argument("--export", default=None, help="write a platform-safe plain-text version to this path")
     a = ap.parse_args(argv)
     md = Path(a.post).read_text(encoding="utf-8")
-    findings, stats = check(md, a.platform, a.title)
+    findings, stats = check(md, a.platform, a.title, a.rigor)
     if a.export:
         Path(a.export).write_text(to_plain(md, a.platform), encoding="utf-8")
         stats["exported"] = a.export

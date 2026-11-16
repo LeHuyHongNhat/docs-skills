@@ -78,6 +78,7 @@ Things you **MUST NOT guess** — if the code does not tell you, write [TO CONFI
 Read `references/presentation-and-charts.md` when the document compares options or reports numbers. Typical uses here:
 - ADR / architecture options → comparison table (options as columns, ✓ ✗ ◐ with a reason, ★ on the chosen option) plus a `::: {.compare}` block for current vs proposed.
 - Benchmarks, coverage, endpoint/latency figures found in the repo → a chart whose `source:` is the `file:line` or command output. Never chart numbers you did not read or measure.
+- Benchmark or performance claims in READMEs/ADRs: follow `references/research-rigor.md` §4 (systems benchmarks: same hardware/load, percentiles, repeated runs, versions) and report spread with `scripts/stats_check.py seeds`.
 - User asks for an artifact / web page → render `--to html` (and publish it if your environment has an artifact/page publishing tool).
 
 ### Export formats & visual check
@@ -97,3 +98,4 @@ If the user says they will read on a phone/mobile → add `--page mobile` (narro
 - `references/writing-standards.md` — shared writing standard (including §7b proportional length).
 - `scripts/render_doc.py` + `assets/` + `references/visual-style.md` — designed PDF/DOCX/XLSX export and visual QA.
 - `references/presentation-and-charts.md` + `scripts/charts.py` — when to chart, chart chooser, takeaway titles, comparison layouts (KPI tiles, side-by-side, ✓ ✗ ◐ tables), validated colour palette.
+- `references/research-rigor.md` + `scripts/stats_check.py` — rules and statistics for claims made from data (CIs, paired tests, seeds, Sharpe, overclaim flags).

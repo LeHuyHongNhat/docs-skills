@@ -21,6 +21,7 @@ Contents: 1 Explainer · 2 Tutorial / how-to · 3 Research summary · 4 Lessons 
 **Use when** the material is someone else's research and the audience will not read the original.
 **Structure**: one-sentence finding in plain words → the question the authors asked and why it matters → what they did (data, method, scale) → key results (numbers with units; a chart if comparing) → limits the authors state + limits you notice → what it means for practitioners → link to the original.
 **Titles**: "<Finding> — what the <venue/year> paper actually shows" · "Tóm tắt paper <tên ngắn>: <phát hiện chính>".
+**Rigor**: always research-grade — follow `research-rigor.md` §5 (primary-source tables, intervals, authors' non-claims, follow-ups and versions, undefined sign conventions).
 **Pitfalls**: reporting the abstract's spin instead of the tables; dropping the conditions under which a result holds; implying causation; quoting > 1–2 short sentences verbatim (paraphrase and link instead).
 
 ## 4. Lessons learned / experience report

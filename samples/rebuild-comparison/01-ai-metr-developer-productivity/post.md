@@ -95,6 +95,7 @@ Phần này là ý kiến của mình.
 - Mình đọc paper (bản PDF trên arXiv) và bài cập nhật của METR qua công cụ trích văn bản, chưa đối chiếu từng bảng; phần từ cuối Phụ lục E trở đi chưa đọc được. Khoảng tin cậy +2% đến +39% lấy từ bài cập nhật năm 2026 của METR.
 - Mình chưa xác minh được METR có công bố dữ liệu và code phân tích hay không.
 - Bài chỉ nói về hai nghiên cứu của METR, không tổng hợp các nghiên cứu khác về năng suất khi dùng AI.
+- Bài này do một AI agent soạn từ các nguồn nêu bên dưới. Chưa có người nào đối chiếu từng con số với bản gốc.
 
 ## Nguồn
 

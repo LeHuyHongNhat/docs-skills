@@ -88,6 +88,7 @@ python scripts/stats_check.py claims claims.yaml --strict    # every claim of a 
 - **Threat checklists by domain**: ML evaluation (leakage, baseline parity, seeds, judge validity), data science (selection, confounders, peeking), quant (economic hypothesis, look-ahead, survivorship, multiple testing, costs, decay), systems benchmarks (same load, percentiles, confounded rewrites).
 - **Reporting other people's studies**: tables over abstracts, intervals with estimates, the authors' own non-claims, follow-ups and versions, undefined sign conventions quoted verbatim.
 - Each claim carries an evidence state (`verified: primary | own-data | tool-extract | secondary | …`); a snippet or a summary does not verify a claim, and only the first two can carry strong wording.
+- For work an agent helped produce, [`agent-assisted-research.md`](_shared/references/agent-assisted-research.md) asks for the evidence first: a plan frozen before the first run with its decision rule, a run log, a reproduced baseline, checked citations. `stats_check.py runs` computes the comparison straight from the log (paired by seed) and warns about single-seed results; `fwer`, `ppv` and `winners-curse` show what trying many variants produces by luck alone.
 - A reader test ([`reader-test.md`](_shared/references/reader-test.md)) puts the finished text in front of a reader who has only the text.
 - `post_check.py --rigor` flags the mechanical gaps (including reasoning from overlapping intervals and misdescribed confidence intervals); the `interval` chart type draws estimates with their confidence intervals; a 12-point rubric (R1–R12) is used for self-review.
 
@@ -119,10 +120,10 @@ python scripts/render_doc.py doc.md --to pdf --page mobile --out-dir out --qa
 ```
 .claude-plugin/     marketplace.json — install all five skills as one Claude Code plugin
 _shared/            single source of truth for shared files
-  references/       writing-standards.md, visual-style.md, presentation-and-charts.md, research-rigor.md, reader-test.md
+  references/       writing-standards.md, visual-style.md, presentation-and-charts.md, research-rigor.md, reader-test.md, agent-assisted-research.md
   scripts/          lint_doc.py, render_doc.py, charts.py, stats_check.py
   assets/           doc-theme.css, reference.docx
-  tests/            107 unit tests (pytest)
+  tests/            110 unit tests (pytest)
 <skill>/            the five skills; scripts/references/assets are synced from _shared by build.sh
   evals/            test cases in `claude plugin eval` format
 _eval_tools/        evaluation tooling: automated checks, blind A/B prep, real `claude -p` routing eval
@@ -153,7 +154,7 @@ The four documentation skills were evaluated with 7 methods over two iterations 
 | Correct skill routing (`claude -p`, 72 runs, Vietnamese + English queries, 3 competing skills installed) | **100%** | – |
 | Ground-truth fidelity (flowchart edges / ERD columns / planted review issues) | 16/16 · 25/25 · 13/13 | – |
 
-**Not yet evaluated (v2.3):** the chart/presentation layer, the research-rigor layer and `community-post-writer` have unit tests (palette validation, every chart type, statistics against scipy reference values, post checker) and three eval cases in `community-post-writer/evals/`, but no with/without-skill benchmark, routing run or independent (human or other-model) grading yet. The rebuild comparison in `samples/rebuild-comparison/` is self-graded.
+**Not yet evaluated (v2.3):** the chart/presentation layer, the research-rigor layer and `community-post-writer` have unit tests (palette validation, every chart type, statistics against scipy reference values, post checker) and four eval cases (three in `community-post-writer/evals/`, one report audit in `doc-clarity-review/evals/`), but no with/without-skill benchmark, routing run or independent (human or other-model) grading yet. The rebuild comparison in `samples/rebuild-comparison/` is self-graded.
 
 **Known limitations:**
 - Output for very short inputs is still longer than ideal.
@@ -163,7 +164,7 @@ The four documentation skills were evaluated with 7 methods over two iterations 
 
 ## Credits
 
-Several ideas were adapted from public skills after a review recorded in [`docs/external-skills-review.md`](docs/external-skills-review.md): structural tells of machine-written prose ([blader/humanizer](https://github.com/blader/humanizer), MIT), engineering-blog standards ([getsentry/skills](https://github.com/getsentry/skills), Apache-2.0), the reader test ([anthropics/skills](https://github.com/anthropics/skills)), evidence binding and statistical pitfalls ([K-Dense-AI/claude-scientific-skills](https://github.com/K-Dense-AI/claude-scientific-skills), MIT), editing passes ([coreyhaines31/marketingskills](https://github.com/coreyhaines31/marketingskills), MIT) and skill-authoring guidance ([obra/superpowers](https://github.com/obra/superpowers), MIT). The ideas were re-expressed in this project's own words and examples; no text was copied.
+Several ideas were adapted from public skills after a review recorded in [`docs/external-skills-review.md`](docs/external-skills-review.md): structural tells of machine-written prose ([blader/humanizer](https://github.com/blader/humanizer), MIT), engineering-blog standards ([getsentry/skills](https://github.com/getsentry/skills), Apache-2.0), the reader test ([anthropics/skills](https://github.com/anthropics/skills)), evidence binding and statistical pitfalls ([K-Dense-AI/claude-scientific-skills](https://github.com/K-Dense-AI/claude-scientific-skills), MIT), editing passes ([coreyhaines31/marketingskills](https://github.com/coreyhaines31/marketingskills), MIT) and skill-authoring guidance ([obra/superpowers](https://github.com/obra/superpowers), MIT). The agent-assisted-research guide adapts the course handout "AI Vibe-Researcher" by Nguyễn Thanh Huy (AI VIET NAM, AIO2026). The ideas were re-expressed in this project's own words and examples; no text was copied.
 
 ## License
 

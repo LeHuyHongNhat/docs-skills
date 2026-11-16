@@ -41,6 +41,8 @@ Questions:
 1. …
 ```
 
+When the text reports an experiment, give the critical reader the plan, the code and the run log as well, and add to the prompt: "Recompute the key numbers from the data. List numbers that do not match, conclusions stronger than the evidence, departures from the plan and code errors, each with location and severity. Where you find nothing, say what you checked. Do not change any file." Ask for defects, never for a score: reviewer scores move with presentation.
+
 For a post with a mixed audience, run two readers: a newcomer ("you are new to this topic") and a critical specialist ("you review such work for a living; also list every claim that is stronger than its evidence").
 
 **If you cannot start a fresh agent:** do a cold read yourself. Answer each question by quoting lines from the text only; where you cannot quote, the answer is "the text does not say", even if you know it. Tell the user this was a self-test (weaker: you share the writer's context) and offer the questions so they can try them in a fresh chat or with a colleague.

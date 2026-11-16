@@ -68,6 +68,7 @@ Phần này là ý kiến của mình. Hãy trích bài như một ví dụ th�
 - Mình đọc bài gốc ở dạng văn bản nên không đọc được giá trị trên các biểu đồ.
 - Mình không kiểm tra hành vi GC của các phiên bản Go mới hơn.
 - Discord không công bố code, cấu hình thử tải hay thông số phần cứng, nên kết quả không tái lập được từ bên ngoài.
+- Bài này do một AI agent soạn từ các nguồn nêu bên dưới. Chưa có người nào đối chiếu từng con số với bản gốc.
 
 ## Nguồn
 

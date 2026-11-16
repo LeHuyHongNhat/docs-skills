@@ -23,6 +23,8 @@ Strength scale (use it to choose verbs):
 | experience | the user's observation, not measured | "in my experience", "mình thấy" |
 | opinion | belief, prediction, preference | "I think", "mình nghĩ", framed as opinion |
 
+When the sources are papers, keep one **paper card** per paper (format in `agent-assisted-research.md` §7): read depth (full text or abstract only), each number with its location, the authors' conclusion separated from what the evidence shows, date opened and version. A card marked "abstract only" cannot carry a number into the post.
+
 Rules:
 - Numbers are copied exactly from the source with their unit; rounding is fine if consistent and does not change a comparison.
 - Keep the conditions with the number (dataset, sample size, version, date). A number without conditions is not usable in a comparison.

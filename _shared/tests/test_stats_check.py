@@ -138,3 +138,57 @@ def test_evidence_state_gates_strong_wording(tmp_path: Path) -> None:
     assert "| Evidence |" in sc.claims_markdown(rows) and "secondary" in sc.claims_markdown(rows)
     f.write_text(json.dumps({"claims": [{"id": "X", **base, "verified": "trust-me"}]}), encoding="utf-8")
     assert sc.main(["claims", str(f)]) == 2
+
+
+def _write_runs(tmp_path: Path, rows: list[dict]) -> Path:
+    f = tmp_path / "runs.jsonl"
+    f.write_text("\n".join(json.dumps(r) for r in rows), encoding="utf-8")
+    return f
+
+
+def test_runs_paired_by_seed_and_single_seed_warning(tmp_path: Path) -> None:
+    diffs = [0.059, 0.004, -0.006, 0.012, 0.003, -0.004, 0.010, 0.002, 0.008, 0.003]
+    rows = []
+    for seed, d in enumerate(diffs):
+        rows += [{"method": "baseline", "seed": seed, "test_auc": 0.87},
+                 {"method": "mixup", "seed": seed, "test_auc": round(0.87 + d, 4)}]
+    r = sc.runs(_write_runs(tmp_path, rows), "test_auc", "method", "mixup", "baseline", "seed", planned=20)
+    assert r.n == 10 and r.estimate == pytest.approx(0.0091, abs=1e-4)
+    assert r.ci[0] < 0 < r.ci[1] and r.extra["decision"] == "inconclusive" and r.verdict == "INCONCLUSIVE"
+    assert r.extra["largest_single_difference"] == {"seed": 0, "difference": pytest.approx(0.059)}
+    assert r.extra["treat_higher_in"] == 8
+    notes = " ".join(r.notes)
+    assert "Single-seed warning" in notes and "10 of 20 planned" in notes and "test-set noise" in notes
+
+
+def test_runs_decisions_missing_seeds_and_errors(tmp_path: Path) -> None:
+    rows = [{"m": "a", "seed": i, "acc": 0.80 + 0.001 * (i % 3)} for i in range(8)]
+    rows += [{"m": "b", "seed": i, "acc": 0.83 + 0.001 * ((i + 1) % 3)} for i in range(7)]
+    f = _write_runs(tmp_path, rows)
+    up = sc.runs(f, "acc", "m", "b", "a", "seed")
+    assert up.extra["decision"] == "supported" and up.n == 7 and any("one arm only" in n for n in up.notes)
+    assert sc.runs(f, "acc", "m", "a", "b", "seed").extra["decision"] == "counts against"
+    one = sc.runs(_write_runs(tmp_path, rows[:1] + rows[8:9]), "acc", "m", "b", "a", "seed")
+    assert one.ci is None and any("no variance" in n for n in one.notes)
+    with pytest.raises(ValueError, match="share seed"):
+        sc.runs(_write_runs(tmp_path, rows + [{"m": "a", "seed": 0, "acc": 0.9}]), "acc", "m", "b", "a", "seed")
+    f = _write_runs(tmp_path, rows)
+    with pytest.raises(ValueError, match="no runs found"):
+        sc.runs(f, "acc", "m", "zzz", "a", "seed")
+    csv = tmp_path / "r.csv"
+    csv.write_text("m,seed,acc\n" + "\n".join(f"{r['m']},{r['seed']},{r['acc']}" for r in rows), encoding="utf-8")
+    assert sc.runs(csv, "acc", "m", "b", "a", "seed").extra["decision"] == "supported"
+    assert sc.main(["runs", str(tmp_path / "missing.jsonl"), "--metric", "acc", "--group", "m", "--treat", "b",
+                    "--control", "a"]) == 2
+
+
+def test_selection_effect_calculators_match_textbook_values() -> None:
+    assert [round(sc.fwer(n).estimate * 100, 1) for n in (1, 5, 10, 20, 50, 100)] == [5.0, 22.6, 40.1, 64.2, 92.3, 99.4]
+    assert sc.fwer(20).extra["bonferroni_alpha"] == pytest.approx(0.0025)
+    assert sc.ppv(0.1).estimate == pytest.approx(0.64) and sc.ppv(0.01).estimate == pytest.approx(0.139, abs=1e-3)
+    assert sc.ppv(0.01, power=0.3).estimate == pytest.approx(0.057, abs=1e-3)
+    assert sc.expected_max_normal(2) == pytest.approx(0.5642, abs=1e-4)   # 1/sqrt(pi)
+    assert sc.expected_max_normal(1) == pytest.approx(0.0, abs=1e-9)
+    assert sc.winners_curse(20, 2.19).estimate == pytest.approx(4.09, abs=0.01)
+    with pytest.raises(ValueError):
+        sc.ppv(1.2)

@@ -170,5 +170,13 @@
   {
     "query": "dịch đoạn này sang tiếng Anh giúp mình: 'Bài viết này chia sẻ kết quả thử nghiệm chunking'",
     "expected": "none"
+  },
+  {
+    "query": "agent của mình chạy thí nghiệm xong viết report.md, kèm runs.jsonl và train.py. Rà soát giúp xem báo cáo có số nào không khớp log hay kết luận nào nói quá không",
+    "expected": "doc-clarity-review"
+  },
+  {
+    "query": "mình cho Claude Code chạy 20 seed so mixup với baseline, log ở runs.jsonl. Viết bài chia sẻ kết quả lên group AI, viết sao cho dân nghiên cứu không bắt bẻ được",
+    "expected": "community-post-writer"
   }
 ]

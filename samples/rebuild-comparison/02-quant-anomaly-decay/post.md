@@ -94,6 +94,7 @@ Phần này là ý kiến của mình.
 - Số liệu lấy từ một bản working paper có phần tóm tắt trùng với bản đăng tạp chí, đọc qua công cụ trích văn bản; mình chưa đối chiếu từng bảng với bản in.
 - Khoảng tin cậy trong biểu đồ là phép tính xấp xỉ của mình, không phải của tác giả.
 - Dữ liệu CRSP là dữ liệu thương mại; mình không xác minh được tác giả có công bố code hay không.
+- Bài này do một AI agent soạn từ các nguồn nêu bên dưới. Chưa có người nào đối chiếu từng con số với bản gốc.
 
 ## Nguồn
 

@@ -54,6 +54,8 @@ Forecasts and recommendations are opinions: label them ("I think", "mình nghĩ"
 | Several comparisons in one piece | Correct for multiplicity, or name one primary comparison in advance | `claims file.yaml` (Holm) |
 | Planning / "is my test set big enough?" | Minimum detectable difference; sample size | `mde N P`, `power-prop P1 P2` |
 | Strategy performance | Sharpe with SE, number of trials, deflation | `sharpe SR N_OBS --trials N` |
+| Two arms recorded in a run log | Paired differences by seed, t interval, verdict by the pre-written rule | `runs LOG --metric … --group … --treat … --control … --pair seed` |
+| Many variants tried | What selection alone produces | `fwer N`, `ppv --prior … --power …`, `winners-curse N --sd …` |
 
 Rules that go with the numbers:
 - **Significance ≠ importance.** Always give the effect size in real units next to the p-value or CI. A CI that barely excludes zero supports the direction, not the size.
@@ -65,6 +67,7 @@ Rules that go with the numbers:
 - **Compare with the interval of the difference, never by overlap.** Two intervals can overlap while the difference between them is clear, and "the intervals overlap" proves nothing either way. Compute the difference and its interval (`diff-prop`, `mcnemar`, `paired`, `seeds --baseline`).
 - **Say what an interval is without overclaiming.** A 95% confidence interval is not "95% probability that the true value is inside". Plain wording that stays correct: "the range of values this data does not rule out" / "khoảng các giá trị mà dữ liệu này chưa loại trừ được".
 - **Borderline is a result.** p = 0.049 and p = 0.051 are the same evidence. When an interval's edge sits at the "no effect" line (`stats_check.py` marks it *borderline*), write "borderline", not "established" and not "no effect".
+- **Name the noise an interval covers** (seeds, test items, or both). More seeds do not shrink test-set noise.
 - **Planned vs found.** Say whether a comparison was chosen before looking at the data (confirmatory) or noticed afterwards (exploratory, post hoc). Found-afterwards results are leads for the next test, written as such.
 - **Report what did not work.** Null, negative and failed results from the same test belong in the text; leaving them out turns a fair test into a selected one.
 - **No power calculated from the observed result.** Use `mde` / `power-prop` to plan the next test, not to excuse the current one.
@@ -103,6 +106,8 @@ Name the ones that apply in the text, with what was done about each. "Not checke
 - Confounded rewrites: a port to another language usually also changes data structures, libraries and configuration — attribute the gain to "the rewrite", not to one factor, unless isolated.
 - Versions of everything (runtime, compiler, kernel, libraries) and the date: performance claims expire.
 - Production observation vs controlled load test: say which.
+
+**Work produced with an agent**: read `agent-assisted-research.md` — evidence intake, frozen plan and decision rule, run log, failure modes to check, and the whiteboard test.
 
 ## 5. Reporting someone else's study
 

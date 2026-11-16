@@ -15,6 +15,12 @@ Usage:
     stats_check.py reported 19 2 39 --unit %       # a source's estimate + CI → does it exclude 0? how wide?
     stats_check.py mde 50 0.7                      # smallest difference n items can detect (80% power)
     stats_check.py power-prop 0.62 0.76            # items per arm needed to detect p1 vs p2
+    stats_check.py runs runs.jsonl --metric test_auc --group method --treat mixup --control baseline --pair seed
+                                                   # straight from the run log: paired differences by seed, t interval,
+                                                   # verdict by the pre-written rule, single-seed (cherry-pick) warning
+    stats_check.py fwer 20                         # chance of ≥ 1 false positive after trying N variants
+    stats_check.py ppv --prior 0.1 --power 0.8     # how often a "significant" result is true
+    stats_check.py winners-curse 20 --sd 2.19      # illusory gain from keeping the best of N useless variants
     stats_check.py claims claims.yaml [--strict]   # batch: every claim of a post, Holm-corrected, Markdown table
                                                    # each claim may carry `verified: primary | own-data | tool-extract |
                                                    # secondary | memory | unverified` and `wording: strong`
@@ -402,6 +408,137 @@ def power_prop(p1: float, p2: float, power: float = 0.8, alpha: float = 0.05) ->
     return r
 
 
+# ----------------------------------------------------------------- run logs & selection effects
+def load_records(path: Path) -> list[dict[str, object]]:
+    """Read a run log: .jsonl (one JSON object per line), .json (a list) or .csv."""
+    text = path.read_text(encoding="utf-8")
+    if path.suffix.lower() == ".csv":
+        import csv
+        return [dict(r) for r in csv.DictReader(text.splitlines())]
+    if path.suffix.lower() == ".json":
+        data = json.loads(text)
+        return data if isinstance(data, list) else data.get("runs", [])
+    return [json.loads(line) for line in text.splitlines() if line.strip()]
+
+
+def runs(path: Path, metric: str, group: str, treat: str, control: str, pair: str | None = None,
+         planned: int | None = None, conf: float = 0.95) -> Result:
+    """Compare two arms straight from the run log, so every reported number traces to recorded runs.
+
+    With `pair` (usually the seed): paired differences treat − control, mean and t interval.
+    Decision wording follows the usual pre-written rule: interval above 0 → supported, below 0 →
+    counts against, includes 0 → inconclusive. Also reports the largest single-pair difference,
+    because one lucky seed is the easiest way to mislead oneself.
+    """
+    recs = load_records(path)
+    arms: dict[str, dict[object, float]] = {treat: {}, control: {}}
+    loose: dict[str, list[float]] = {treat: [], control: []}
+    for i, r in enumerate(recs):
+        g = str(r.get(group))
+        if g not in arms or r.get(metric) in (None, ""):
+            continue
+        v = float(r[metric])  # type: ignore[arg-type]
+        loose[g].append(v)
+        if pair:
+            k = r.get(pair)
+            if k in arms[g]:
+                raise ValueError(f"two '{g}' runs share {pair}={k}: keep one run per {pair}, or say which one counts and why")
+            arms[g][k] = v
+    if not loose[treat] or not loose[control]:
+        raise ValueError(f"no runs found for {group}={treat!r} and/or {control!r} with metric '{metric}'")
+    summary = {g: {"n": len(v), "mean": mean(v), "sd": stdev(v) if len(v) > 1 else None, "min": min(v), "max": max(v)}
+               for g, v in loose.items()}
+    if not pair:
+        r = seeds(loose[treat], loose[control] if len(loose[control]) > 1 else None, conf)
+        r.extra["arms"] = summary
+        r.notes.append("Unpaired comparison. If both arms used the same seeds, pass --pair seed: it is the correct design.")
+        return r
+    keys = sorted(set(arms[treat]) & set(arms[control]), key=str)
+    only = sorted((set(arms[treat]) ^ set(arms[control])), key=str)
+    if len(keys) < 2:
+        r = Result("paired runs", (arms[treat][keys[0]] - arms[control][keys[0]]) if keys else None, None, None, len(keys))
+        r.extra["arms"] = summary
+        r.notes.append(f"Only {len(keys)} paired {pair}: one pair has no variance estimate and supports no comparison. "
+                       "Run the planned seeds before reporting.")
+        return r
+    d = [arms[treat][k] - arms[control][k] for k in keys]
+    n, m, sd = len(d), mean(d), stdev(d)
+    tq = t_ppf(0.5 + conf / 2, n - 1)
+    se = sd / math.sqrt(n)
+    lo, hi = m - tq * se, m + tq * se
+    r = Result(f"paired differences by {pair} (t interval)", m, (lo, hi), t_sf2(m / se, n - 1) if se else None, n)
+    _verdict(r, 1 - conf)
+    decision = "supported" if lo > 0 else "counts against" if hi < 0 else "inconclusive"
+    if r.verdict == "SUPPORTED" and n < 5:
+        r.verdict = "WEAK"
+    best = max(range(n), key=lambda i: d[i])
+    worst = min(range(n), key=lambda i: d[i])
+    r.extra.update({"decision": decision, "arms": summary, "pairs": n, "sd_of_differences": sd,
+                    "treat_higher_in": sum(x > 0 for x in d),
+                    "largest_single_difference": {pair: keys[best], "difference": d[best]},
+                    "smallest_single_difference": {pair: keys[worst], "difference": d[worst]}})
+    if abs(d[best]) > 2 * abs(m) and abs(d[best] - m) > sd:
+        r.notes.append(f"Single-{pair} warning: {pair} {keys[best]} alone shows {d[best]:+.4g}, the mean over {n} is "
+                       f"{m:+.4g}. A result quoted from one {pair} would be this far off — report all of them.")
+    if only:
+        r.notes.append(f"{pair} present in one arm only (left out of the paired comparison): {', '.join(map(str, only))}. "
+                       "Every planned run is reported, including failed ones.")
+    if planned and n < planned:
+        r.notes.append(f"{n} of {planned} planned {pair}s are in the log: the comparison is not finished.")
+    r.notes.append(f"This interval reflects variation across {pair}s only. It says nothing about a different test set: "
+                   "more seeds do not shrink test-set noise (bootstrap over test items for that).")
+    return r
+
+
+def fwer(n: int, alpha: float = 0.05) -> Result:
+    """Chance of at least one false positive when n useless variants are each tested at alpha."""
+    p = 1 - (1 - alpha) ** n
+    r = Result("family-wise error rate", p, None, None, n)
+    r.extra.update({"alpha": alpha, "bonferroni_alpha": alpha / n})
+    r.notes.append(f"Trying {n} variants that do nothing, each at α = {alpha}, yields at least one 'significant' result "
+                   f"{p:.1%} of the time. Test each at α = {alpha / n:.4g} (Bonferroni) or use Holm, or confirm the best "
+                   "one on data it was not selected on.")
+    return r
+
+
+def ppv(prior: float, power: float = 0.8, alpha: float = 0.05) -> Result:
+    """Positive predictive value: share of 'significant' results that are true (Ioannidis 2005)."""
+    if not (0 < prior < 1 and 0 < power <= 1 and 0 < alpha < 1):
+        raise ValueError("prior, power and alpha must lie in (0, 1)")
+    v = power * prior / (power * prior + alpha * (1 - prior))
+    r = Result("positive predictive value", v, None, None, None)
+    r.extra.update({"prior": prior, "power": power, "alpha": alpha})
+    r.notes.append(f"If {prior:.0%} of the ideas tried are truly effective and the test has {power:.0%} power, "
+                   f"{v:.0%} of significant results are real. Cheap idea generation lowers the prior; small "
+                   "experiments lower the power; both lower this number.")
+    return r
+
+
+def expected_max_normal(n: int) -> float:
+    """E[max of n independent standard normals], by numerical integration."""
+    steps, lo, hi = 8000, -9.0, 9.0
+    h = (hi - lo) / steps
+    total = 0.0
+    for i in range(steps + 1):
+        x = lo + i * h
+        w = 0.5 if i in (0, steps) else 1.0
+        total += w * x * n * Z.pdf(x) * Z.cdf(x) ** (n - 1)
+    return total * h
+
+
+def winners_curse(n: int, sd: float) -> Result:
+    """Illusory gain from keeping the best of n variants that do nothing (one run each, noise SD = sd)."""
+    if n < 1 or sd <= 0:
+        raise ValueError("need n >= 1 and sd > 0")
+    gain = sd * expected_max_normal(n)
+    r = Result("winner's curse (best of N null variants)", gain, None, None, n)
+    r.extra["run_to_run_sd"] = sd
+    r.notes.append(f"Keeping the best of {n} variants that change nothing shows an average 'gain' of {gain:.3g} "
+                   f"(same unit as the SD, {sd:g}) over a single baseline run. Assumes independent variants, one run "
+                   "each, normal noise. Re-run the selected variant with fresh seeds before believing it.")
+    return r
+
+
 def holm(ps: list[float | None]) -> list[float | None]:
     """Holm step-down adjusted p-values (None entries are passed through)."""
     idx = sorted((i for i, p in enumerate(ps) if p is not None), key=lambda i: ps[i])  # type: ignore[arg-type,return-value]
@@ -441,6 +578,9 @@ def run_claim(c: dict[str, object]) -> Result:
     if t == "reported":
         lo, hi = c["ci"]  # type: ignore[misc]
         return reported(float(c["estimate"]), float(lo), float(hi), str(c.get("unit", "")), float(c.get("null", 0.0)))  # type: ignore[arg-type]
+    if t == "runs":
+        return runs(Path(str(c["file"])), str(c["metric"]), str(c["group"]), str(c["treat"]), str(c["control"]),
+                    str(c["pair"]) if c.get("pair") else None, int(c["planned"]) if c.get("planned") else None)  # type: ignore[arg-type]
     if t == "none":
         r = Result("no uncertainty available", verdict="UNQUANTIFIED")
         r.notes.append(str(c.get("why", "The source gives no sample size, variance or interval.")))
@@ -525,6 +665,13 @@ def main(argv: list[str] | None = None) -> int:
     s.add_argument("hi", type=float); s.add_argument("--unit", default=""); s.add_argument("--null", type=float, default=0.0)
     s = sub.add_parser("mde"); s.add_argument("n", type=int); s.add_argument("p_base", type=float)
     s = sub.add_parser("power-prop"); s.add_argument("p1", type=float); s.add_argument("p2", type=float)
+    s = sub.add_parser("runs"); s.add_argument("file"); s.add_argument("--metric", required=True)
+    s.add_argument("--group", required=True); s.add_argument("--treat", required=True)
+    s.add_argument("--control", required=True); s.add_argument("--pair"); s.add_argument("--planned", type=int)
+    s = sub.add_parser("fwer"); s.add_argument("n", type=int); s.add_argument("--alpha", type=float, default=0.05)
+    s = sub.add_parser("ppv"); s.add_argument("--prior", type=float, required=True)
+    s.add_argument("--power", type=float, default=0.8); s.add_argument("--alpha", type=float, default=0.05)
+    s = sub.add_parser("winners-curse"); s.add_argument("n", type=int); s.add_argument("--sd", type=float, required=True)
     s = sub.add_parser("claims"); s.add_argument("file"); s.add_argument("--strict", action="store_true")
     s.add_argument("--json", action="store_true")
     a = ap.parse_args(argv)
@@ -559,11 +706,19 @@ def main(argv: list[str] | None = None) -> int:
             r = sharpe(a.sr, a.n_obs, a.periods, a.trials, a.skew, a.kurt, a.trial_sr_std)
         elif a.cmd == "reported":
             r = reported(a.estimate, a.lo, a.hi, a.unit, a.null)
+        elif a.cmd == "runs":
+            r = runs(Path(a.file), a.metric, a.group, a.treat, a.control, a.pair, a.planned)
+        elif a.cmd == "fwer":
+            r = fwer(a.n, a.alpha)
+        elif a.cmd == "ppv":
+            r = ppv(a.prior, a.power, a.alpha)
+        elif a.cmd == "winners-curse":
+            r = winners_curse(a.n, a.sd)
         elif a.cmd == "mde":
             r = mde(a.n, a.p_base)
         else:
             r = power_prop(a.p1, a.p2)
-    except (ValueError, KeyError) as e:
+    except (ValueError, KeyError, OSError, json.JSONDecodeError) as e:
         print(json.dumps({"error": str(e)}, ensure_ascii=False))
         return 2
     print(json.dumps(r.to_dict(), ensure_ascii=False, indent=2))

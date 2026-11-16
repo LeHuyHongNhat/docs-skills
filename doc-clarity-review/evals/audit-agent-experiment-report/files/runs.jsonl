@@ -1,0 +1,9 @@
+{"method": "baseline", "seed": 0, "test_macro_f1": 0.871}
+{"method": "baseline", "seed": 1, "test_macro_f1": 0.880}
+{"method": "baseline", "seed": 2, "test_macro_f1": 0.875}
+{"method": "baseline", "seed": 3, "test_macro_f1": 0.842}
+{"method": "label_smoothing", "seed": 0, "test_macro_f1": 0.874}
+{"method": "label_smoothing", "seed": 1, "test_macro_f1": 0.879}
+{"method": "label_smoothing", "seed": 2, "test_macro_f1": 0.881}
+{"method": "label_smoothing", "seed": 3, "test_macro_f1": 0.883}
+{"method": "label_smoothing", "seed": 4, "test_macro_f1": 0.890}

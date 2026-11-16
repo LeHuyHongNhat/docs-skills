@@ -102,3 +102,4 @@ If the user says they will read on a phone/mobile → add `--page mobile` (narro
 - `references/presentation-and-charts.md` + `scripts/charts.py` — when to chart, chart chooser, takeaway titles, comparison layouts (KPI tiles, side-by-side, ✓ ✗ ◐ tables), validated colour palette.
 - `references/research-rigor.md` + `scripts/stats_check.py` — rules and statistics for claims made from data (CIs, paired tests, seeds, Sharpe, overclaim flags).
 - `references/reader-test.md` — optional final check for documents read by people outside the conversation: a reader with only the document answers 5–8 questions; fix what they get wrong.
+- `references/agent-assisted-research.md` — when the document reports work an agent helped produce: what evidence must exist (plan, run log, checked citations), failure modes to look for, responsibility and disclosure.

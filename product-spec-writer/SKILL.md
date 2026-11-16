@@ -63,9 +63,17 @@ Rules for filling in the template:
 
 ### 5. Hand-off
 
+### Charts, comparisons & HTML artifacts
+
+Read `references/presentation-and-charts.md` when the document contains numbers that show a ranking, trend, gap or share, or compares options. Typical uses here:
+- PRD/BRD goals: baseline vs target per metric → `dumbbell`; option comparison in a BRD → comparison table with ✓ ✗ ◐ and ★ on the recommended option (only if a recommendation was asked for).
+- Metric definitions: a small worked example chart only from data the user provided.
+- Chart only measured or user-given numbers, with `source:`. A target or threshold that is still [TO CONFIRM] is never drawn as if decided.
+- User asks for an artifact / web page / a report with charts → render `--to html` (and publish it if your environment has an artifact/page publishing tool).
+
 ### Export formats & visual check
 
-Markdown is the source. When the user needs PDF/DOCX/XLSX (sending to an approver/client, printing, "a Word file", "Excel to filter"), or says the document will be shared, read `references/visual-style.md`, then render:
+Markdown is the source. When the user needs PDF/DOCX/XLSX/HTML (sending to an approver/client, printing, "a Word file", "Excel to filter"), or says the document will be shared, read `references/visual-style.md`, then render:
 ```bash
 python <skill-dir>/scripts/render_doc.py <file.md> --to pdf,docx,xlsx --out-dir <output dir> --qa
 ```
@@ -99,3 +107,4 @@ AC-007.2  Given the user has 499 available points
 - `scripts/lint_doc.py` — linter that detects vague terms, placeholders, duplicate IDs, inconsistent terminology.
 - `scripts/render_doc.py` + `assets/` — designed HTML/PDF/DOCX/XLSX export; `--qa` renders page images for checking.
 - `references/visual-style.md` — rules for writing Markdown that renders well, and the visual QA process.
+- `references/presentation-and-charts.md` + `scripts/charts.py` — when to chart, chart chooser, takeaway titles, comparison layouts (KPI tiles, side-by-side, ✓ ✗ ◐ tables), validated colour palette.

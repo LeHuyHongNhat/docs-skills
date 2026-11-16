@@ -21,14 +21,17 @@
 | PH | Placeholder | TBD, TODO, ??? | "Threshold: TBD" |
 | UNSOURCED | Unsourced claim | number/benefit without a cited source | "increases revenue by 30%" |
 | STYLE | Style | marketing, exclamatory, wordy, misspelled, unnecessary language mixing | "a super awesome feature" |
+| VIS-MISLEAD | Misleading chart | bar axis not starting at 0, dual y-axes, 3D/pie with many slices, different scales for charts meant to be compared | revenue bars starting at 900 make +3% look like +60% |
+| VIS-CLAIM | Chart does not support its claim | title/text claims more than the data shows (causation from correlation), numbers in text ≠ chart, no unit or no source | "Feature X caused the uplift" over a before/after chart |
+| VIS-COLOR | Colour-only or low-contrast encoding | series told apart only by colour, red/green pairs, text below 4.5:1 contrast, the same entity in different colours across charts | legend with 6 similar blues |
 
 ## 2. Severity
 
 | Level | Definition | Example |
 |---|---|---|
 | **Critical** | Leads to different system behaviour depending on interpretation, or a direct conflict; will cause bugs/acceptance disputes | INC-NUM, INC-LOGIC, AMB-BOUND in a money/deadline rule, duplicate STRUCT-ID |
-| **Major** | Untestable, or missing an important handling branch | TEST, MISS-ERR, AMB-LEX in a requirement, PH |
-| **Minor** | Affects clarity/professionalism but carries little risk of misinterpretation | STYLE, AMB-LEX in background/context description, mild INC-TERM |
+| **Major** | Untestable, or missing an important handling branch; a chart that leads to a wrong conclusion | VIS-MISLEAD, VIS-CLAIM, TEST, MISS-ERR, AMB-LEX in a requirement, PH |
+| **Minor** | Affects clarity/professionalism but carries little risk of misinterpretation | VIS-COLOR, STYLE, AMB-LEX in background/context description, mild INC-TERM |
 
 One issue repeated in several places → **one finding** listing every location; do not split it into N findings.
 

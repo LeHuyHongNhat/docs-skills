@@ -1,0 +1,6 @@
+schema_version: "1.1"
+name: viblo-post-from-experiment-notes
+expected_outcome: |
+  Bài Viblo tiếng Việt, dễ hiểu cho người mới: hook nêu kết quả, giải thích chunking/RAG/embedding ở lần đầu, số liệu đúng 31/38/37 trên 50 câu và thời gian index 6/7/26 phút, nêu giới hạn (1 lần chạy, 50 câu, wiki có heading, PDF scan chưa test), không lặp lại khẳng định chưa kiểm chứng "semantic tốt nhất cho mọi loại tài liệu", có chart block có source và ảnh PNG xuất ra charts/, kết thúc bằng câu hỏi thảo luận, đưa 3 phương án tiêu đề.
+context:
+  scaffold_script: place-files.sh

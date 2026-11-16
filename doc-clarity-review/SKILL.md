@@ -58,9 +58,17 @@ python <skill-dir>/scripts/lint_doc.py <revised.md>
 The revised version must have no remaining `high` findings other than intentional [TO CONFIRM] / [CẦN XÁC NHẬN] locations.
 
 
+### Charts, comparisons & HTML artifacts
+
+For a review report, read `references/presentation-and-charts.md` and consider:
+- Findings by severity × category → `stacked` or `heatmap` chart (source: the findings table in the same report), plus `::: {.kpis}` tiles (high / medium / low counts).
+- Each key rewrite as a `::: {.compare}` block (original vs proposed), same order on both sides.
+- When reviewing a document that already has charts: check takeaway titles, units, `source:`, truncated axes, dual axes, colour-only encoding and numbers that disagree with the text — report them with the rubric codes.
+- User asks for an artifact / web page → render `--to html`.
+
 ### Export formats (revised document) & visual check
 
-Markdown is the source. When the user needs PDF/DOCX/XLSX (to send to an approver/client, to print, "a Word file", "Excel for filtering"), or says the document will be shared, read `references/visual-style.md` and then render:
+Markdown is the source. When the user needs PDF/DOCX/XLSX/HTML (to send to an approver/client, to print, "a Word file", "Excel for filtering"), or says the document will be shared, read `references/visual-style.md` and then render:
 ```bash
 python <skill-dir>/scripts/render_doc.py <file.md> --to pdf,docx,xlsx --out-dir <output dir> --qa
 ```
@@ -73,4 +81,5 @@ If the document is already good: say plainly that it is good and list the few fi
 - `references/review-rubric.md` — error code taxonomy, severity definitions, report format, example.
 - `references/writing-standards.md` — shared wording standards.
 - `scripts/render_doc.py` + `assets/` + `references/visual-style.md` — export the revised document to PDF/DOCX and the findings table to XLSX.
+- `references/presentation-and-charts.md` + `scripts/charts.py` — when to chart, chart chooser, takeaway titles, comparison layouts (KPI tiles, side-by-side, ✓ ✗ ◐ tables), validated colour palette.
 - `scripts/lint_doc.py` — surface linter (`--format json` for further processing; `--terms` to pass project-specific synonym groups).

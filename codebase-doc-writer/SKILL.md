@@ -73,9 +73,16 @@ Things you **MUST NOT guess** — if the code does not tell you, write [TO CONFI
    The linter skips code blocks; fix the `high` findings in the prose.
 4. In the hand-off reply: briefly list the [TO CONFIRM] / [CẦN XÁC NHẬN] items and what was / was not verified by running it.
 
+### Charts, comparisons & HTML artifacts
+
+Read `references/presentation-and-charts.md` when the document compares options or reports numbers. Typical uses here:
+- ADR / architecture options → comparison table (options as columns, ✓ ✗ ◐ with a reason, ★ on the chosen option) plus a `::: {.compare}` block for current vs proposed.
+- Benchmarks, coverage, endpoint/latency figures found in the repo → a chart whose `source:` is the `file:line` or command output. Never chart numbers you did not read or measure.
+- User asks for an artifact / web page → render `--to html` (and publish it if your environment has an artifact/page publishing tool).
+
 ### Export formats & visual check
 
-Markdown is the source. When the user needs PDF/DOCX/XLSX (sending to an approver/client, printing, "a Word file", "Excel to filter"), or says the document will be shared, read `references/visual-style.md` and then render:
+Markdown is the source. When the user needs PDF/DOCX/XLSX/HTML (sending to an approver/client, printing, "a Word file", "Excel to filter"), or says the document will be shared, read `references/visual-style.md` and then render:
 ```bash
 python <skill-dir>/scripts/render_doc.py <file.md> --to pdf,docx,xlsx --out-dir <output dir> --qa
 ```
@@ -89,3 +96,4 @@ If the user says they will read on a phone/mobile → add `--page mobile` (narro
 - `references/code-doc-templates.md` — templates for README, API reference, architecture, ADR, runbook, module doc.
 - `references/writing-standards.md` — shared writing standard (including §7b proportional length).
 - `scripts/render_doc.py` + `assets/` + `references/visual-style.md` — designed PDF/DOCX/XLSX export and visual QA.
+- `references/presentation-and-charts.md` + `scripts/charts.py` — when to chart, chart chooser, takeaway titles, comparison layouts (KPI tiles, side-by-side, ✓ ✗ ◐ tables), validated colour palette.

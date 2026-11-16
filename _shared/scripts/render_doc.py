@@ -2,7 +2,7 @@
 """render_doc.py — export a Markdown document to designed HTML / PDF / DOCX / XLSX, with visual QA.
 
 Usage:
-    python render_doc.py doc.md --to pdf,docx,xlsx [--out-dir dist] [--qa] [--landscape] [--toc auto|on|off]
+    python render_doc.py doc.md --to html,pdf,docx,xlsx,charts [--out-dir dist] [--qa] [--landscape] [--toc auto|on|off]
 
 Design notes:
 - Markdown is the *single source of truth*; every other format is generated from it, so content
@@ -15,6 +15,11 @@ Design notes:
   — useful for data dictionaries, traceability matrices and finding lists people filter/sort.
 - Generated labels (figure captions, index sheet, footer) follow the document language:
   Vietnamese documents get Vietnamese labels, everything else gets English.
+- ```chart blocks (YAML spec, see charts.py) become inline SVG in HTML/PDF (hover shows values,
+  a collapsible data table follows each chart), 2x PNG in DOCX, a data sheet in XLSX, and
+  standalone SVG+PNG files with `--to charts` (for forum posts / slides).
+- Comparison helpers: `::: {.compare}` side-by-side columns, `::: {.kpis}` stat tiles, ✓ ✗ ◐ in
+  tables are coloured *and* keep their glyph, a header containing ★ marks the recommended column.
 - Every external tool (pandoc, mmdc, Chrome) is optional: a missing one skips that format with a
   warning and never breaks the others.
 """
@@ -32,12 +37,15 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
+sys.path.insert(0, str(HERE))
+import charts  # noqa: E402  (sibling module: ```chart blocks → SVG)
 ASSETS = HERE.parent / "assets"
 THEME_CSS = ASSETS / "doc-theme.css"
 REFERENCE_DOCX = ASSETS / "reference.docx"
 
 FENCE_RE = re.compile(r"^(```|~~~)")
 MERMAID_RE = re.compile(r"^```mermaid\s*\n(.*?)^```\s*$", re.S | re.M)
+CHART_RE = re.compile(r"^```chart\s*\n(.*?)^```\s*$", re.S | re.M)
 CONFIRM_RE = re.compile(r"\[(CẦN XÁC NHẬN|TO CONFIRM)([^\[\]]*)\]")
 H1_RE = re.compile(r"^#\s+(.+)$", re.M)
 H2_RE = re.compile(r"^##\s+", re.M)
@@ -85,6 +93,100 @@ def render_mermaid(md: str, work: Path, fmt: str, rep: Report) -> str:
     return new
 
 
+def svgs_to_png(items: list[tuple[str, Path]], rep: Report) -> bool:
+    """Screenshot SVG strings to 2x PNG with headless Chromium (one browser for all charts)."""
+    if not items:
+        return True
+    try:
+        from playwright.sync_api import sync_playwright
+        chrome = find_chrome()
+        with sync_playwright() as p:
+            kw = {"executable_path": chrome} if chrome else {}
+            browser = p.chromium.launch(args=["--no-sandbox"], **kw)
+            page = browser.new_page(device_scale_factor=2, viewport={"width": charts.W + 20, "height": 800})
+            for svg, out in items:
+                page.set_content(f"<html><body style='margin:0'>{svg}</body></html>")
+                page.locator("svg").first.screenshot(path=str(out))
+            browser.close()
+        return True
+    except Exception as e:  # noqa: BLE001
+        rep.warnings.append(f"Chart → PNG failed ({type(e).__name__}): charts exported as data tables instead.")
+        return False
+
+
+def render_charts(md: str, work: Path, mode: str, rep: Report) -> str:
+    """Replace ```chart blocks. mode: 'html' (inline SVG + data table), 'png' (DOCX image),
+    'table' (heading + Markdown table: XLSX / fallback). Invalid specs stay as code + a warning."""
+    lang = doc_lang(md)
+    specs: list[tuple[re.Match[str], object]] = []
+    for i, m in enumerate(CHART_RE.finditer(md), 1):
+        try:
+            sp = charts.parse_spec(m.group(1))
+            for w in sp.warnings:
+                if w not in rep.warnings:
+                    rep.warnings.append(w)
+            specs.append((m, sp))
+        except charts.ChartError as e:
+            msg = f"Chart #{i} not rendered: {e}"
+            if msg not in rep.warnings:
+                rep.warnings.append(msg)
+            specs.append((m, None))
+    if not specs:
+        return md
+    pngs: dict[int, Path] = {}
+    if mode == "png":
+        items = [(charts.render_svg(sp, lang), work / f"chart-{i}.png") for i, (_, sp) in enumerate(specs, 1) if sp]
+        if svgs_to_png(items, rep):
+            pngs = {int(p.stem.split("-")[1]): p for _, p in items}
+        else:
+            mode = "table"
+    out, last = [], 0
+    for i, (m, sp) in enumerate(specs, 1):
+        out.append(md[last:m.start()])
+        last = m.end()
+        if sp is None:
+            out.append(m.group(0))
+            continue
+        cap = f"{label('chart', md)} {i}"
+        if mode == "html":
+            svg = charts.render_svg(sp, lang)
+            table = charts.data_table_html(sp, lang)
+            out.append(f'\n<figure class="chart" id="chart-{i}">{svg}'
+                       f'<details class="chart-data"><summary>{label("data", md)}</summary>{table}</details>'
+                       f'</figure>\n')
+        elif mode == "png" and i in pngs:
+            out.append(f"![{cap}: {sp.title}]({pngs[i].as_posix()}){{.chart width=100%}}\n")
+        elif mode == "xlsx":  # a heading so the sheet is named after the chart
+            prev = re.findall(r"^#{1,6}\s+.+$", md[:m.start()], re.M)  # restore the section heading so
+            back = f"\n{prev[-1]}\n" if prev else ""                   # later tables keep their own sheet name
+            out.append(f"#### {cap} {sp.title}\n\n{charts.data_table_md(sp, lang)}\n{back}")
+        else:
+            src = f"\n\n*{label('source', md)}: {sp.source}*" if sp.source else ""
+            out.append(f"**{cap}: {sp.title}**\n\n{charts.data_table_md(sp, lang)}{src}\n")
+    out.append(md[last:])
+    return "".join(out)
+
+
+def export_charts(md: str, out_dir: Path, stem: str, rep: Report) -> list[str]:
+    """--to charts: one SVG + 2x PNG per chart (attach to forum posts, slides, chat)."""
+    lang = doc_lang(md)
+    items, files = [], []
+    for i, m in enumerate(CHART_RE.finditer(md), 1):
+        try:
+            sp = charts.parse_spec(m.group(1))
+        except charts.ChartError as e:
+            rep.warnings.append(f"Chart #{i} not exported: {e}")
+            continue
+        svg = charts.render_svg(sp, lang)
+        f = out_dir / f"{stem}-chart-{i}.svg"
+        f.write_text(svg, encoding="utf-8")
+        files.append(str(f))
+        items.append((svg, out_dir / f"{stem}-chart-{i}.png"))
+    if svgs_to_png(items, rep):
+        files += [str(p) for _, p in items]
+    return files
+
+
 def mark_confirm(md: str) -> str:
     """Wrap open-item markers in a styled span; skip code fences and real inline code."""
     out: list[str] = []
@@ -94,7 +196,7 @@ def mark_confirm(md: str) -> str:
             in_fence = not in_fence
             out.append(line)
             continue
-        if in_fence:
+        if in_fence or line.lstrip().startswith(("<figure class=\"chart\"", "<svg")):
             out.append(line)
             continue
         line = re.sub(r"`(\[(?:CẦN XÁC NHẬN|TO CONFIRM)[^`]*\])`", r"\1", line)
@@ -113,9 +215,11 @@ def doc_title(md: str, fallback: str) -> str:
 VI_CHARS_RE = re.compile(r"[ăâđêôơưạảấầẩẫậắằẳẵặẹẻẽếềểễệỉịọỏốồổỗộớờởỡợụủứừửữựỳỵỷỹ]", re.I)
 LABELS = {
     "en": {"toc": "Contents", "figure": "Figure", "index": "Index", "section": "Section in document",
-           "rows": "Rows", "source": "Source", "exported": "Exported", "table": "Table", "page": "Page"},
+           "rows": "Rows", "source": "Source", "exported": "Exported", "table": "Table", "page": "Page",
+           "data": "Data behind this chart", "chart": "Chart"},
     "vi": {"toc": "Mục lục", "figure": "Hình", "index": "Mục lục", "section": "Mục trong tài liệu",
-           "rows": "Số dòng", "source": "Nguồn", "exported": "Xuất lúc", "table": "Bảng", "page": "Trang"},
+           "rows": "Số dòng", "source": "Nguồn", "exported": "Xuất lúc", "table": "Bảng", "page": "Trang",
+           "data": "Số liệu của biểu đồ", "chart": "Biểu đồ"},
 }
 
 
@@ -145,10 +249,10 @@ def to_html(md: str, src: Path, out: Path, toc: bool, title: str, rep: Report, m
     if not pandoc_ok(rep):
         return None
     work = Path(tempfile.mkdtemp(prefix="render-html-"))
-    body = mark_confirm(render_mermaid(md, work, "svg", rep))
+    body = mark_confirm(render_charts(render_mermaid(md, work, "svg", rep), work, "html", rep))
     tmp_md = work / "doc.md"
     tmp_md.write_text(body, encoding="utf-8")
-    cmd = ["pandoc", str(tmp_md), "-f", "gfm+attributes+bracketed_spans+implicit_figures+pipe_tables",
+    cmd = ["pandoc", str(tmp_md), "-f", "gfm+attributes+bracketed_spans+fenced_divs+implicit_figures+pipe_tables",
            "-t", "html5", "--standalone", "--embed-resources", "--css", str(THEME_CSS),
            "--metadata", f"pagetitle={title}", "--resource-path", f"{work}:{src.parent}", "-o", str(out)]
     if toc:
@@ -187,6 +291,34 @@ def _cardify(soup, table) -> None:
     table.replace_with(wrap)
 
 
+GLYPHS = {"✓": "yes", "✔": "yes", "✗": "no", "✘": "no", "◐": "part", "~": None}
+REC_RE = re.compile(r"★|\(recommended\)|\(khuyến nghị\)|\(đề xuất\)", re.I)
+
+
+def _comparison_helpers(soup) -> None:
+    """Comparison tables & tiles. Colour is always paired with a glyph or text, never alone."""
+    for td in soup.find_all("td"):
+        txt = td.get_text(strip=True)
+        if txt[:1] in ("✓", "✔", "✗", "✘", "◐"):
+            td["class"] = (td.get("class") or []) + [f"mark-{GLYPHS[txt[0]]}"]
+    for t in soup.find_all("table"):
+        heads = t.select("thead th")
+        rec = [i for i, th in enumerate(heads) if REC_RE.search(th.get_text())]
+        for i in rec:
+            heads[i]["class"] = (heads[i].get("class") or []) + ["rec"]
+            for tr in t.select("tbody tr"):
+                cells = tr.find_all(["td", "th"])
+                if i < len(cells):
+                    cells[i]["class"] = (cells[i].get("class") or []) + ["rec"]
+    # ::: {.kpis} with a list "**92,5%** assertion pass rate — vs 72,0% without" → stat tiles
+    for div in soup.select("div.kpis"):
+        for li in div.select("li"):
+            li["class"] = (li.get("class") or []) + ["kpi"]
+            strong = li.find("strong")
+            if strong:
+                strong["class"] = (strong.get("class") or []) + ["kpi-value"]
+
+
 def _post_html(path: Path, mobile: bool = False) -> None:
     """Mark wide tables (≥ 7 columns) so CSS shrinks them; wrap diagrams in figures."""
     try:
@@ -202,10 +334,13 @@ def _post_html(path: Path, mobile: bool = False) -> None:
         fig = img.find_parent("figure")
         if fig:
             fig["class"] = (fig.get("class") or []) + ["diagram"]
+    _comparison_helpers(soup)
     # IDs inside sentences (FR-004, AC-006.3) must not break at the hyphen
     id_re = re.compile(r"\b[A-ZĐ]{1,5}-\d{1,4}(?:\.\d+)*\b")
     for node in list(soup.find_all(string=id_re)):
         if node.parent and node.parent.name in ("code", "pre", "script", "style"):
+            continue
+        if node.find_parent("svg") is not None:
             continue
         parts, last, txt = [], 0, str(node)
         for m in id_re.finditer(txt):
@@ -300,10 +435,10 @@ def to_docx(md: str, src: Path, out: Path, toc: bool, rep: Report) -> Path | Non
     if not pandoc_ok(rep):
         return None
     work = Path(tempfile.mkdtemp(prefix="render-docx-"))
-    body = mark_confirm(render_mermaid(md, work, "png", rep))
+    body = mark_confirm(render_charts(render_mermaid(md, work, "png", rep), work, "png", rep))
     tmp_md = work / "doc.md"
     tmp_md.write_text(body, encoding="utf-8")
-    cmd = ["pandoc", str(tmp_md), "-f", "gfm+attributes+bracketed_spans+implicit_figures+pipe_tables",
+    cmd = ["pandoc", str(tmp_md), "-f", "gfm+attributes+bracketed_spans+fenced_divs+implicit_figures+pipe_tables",
            "-t", "docx", "--resource-path", f"{work}:{src.parent}", "-o", str(out)]
     if len(H1_RE.findall(md)) == 1:  # single H1 → Title, H2 → Heading 1 (correct Navigation Pane levels)
         cmd += ["--shift-heading-level-by=-1"]
@@ -643,6 +778,9 @@ def visual_qa(pdf: Path | None, md: str, out_dir: Path, rep: Report) -> None:
     if wide:
         qa["wide_tables"] = wide
         rep.warnings.append(f"{len(wide)} table(s) with ≥ 7 columns (cramped on portrait A4/mobile): {wide[:5]} — consider splitting them or --landscape.")
+    n_charts = len(CHART_RE.findall(md))
+    if n_charts:
+        qa["charts"] = n_charts
     if MERMAID_RE.search(md) and not shutil.which("mmdc"):
         qa["mermaid_unrendered"] = True
     if pdf and pdf.exists():
@@ -679,7 +817,7 @@ def visual_qa(pdf: Path | None, md: str, out_dir: Path, rep: Report) -> None:
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("doc")
-    ap.add_argument("--to", default="html,pdf,docx", help="html,pdf,docx,xlsx (comma-separated)")
+    ap.add_argument("--to", default="html,pdf,docx", help="html,pdf,docx,xlsx,charts (comma-separated)")
     ap.add_argument("--out-dir", default=None)
     ap.add_argument("--qa", action="store_true", help="Render every PDF page to PNG + automatic checks")
     ap.add_argument("--landscape", action="store_true")
@@ -714,8 +852,12 @@ def main(argv: list[str] | None = None) -> int:
         p = to_docx(md, src, out_dir / f"{src.stem}.docx", a.toc == "on", rep)
         if p:
             rep.outputs["docx"] = str(p)
+    if "charts" in fmts:
+        files = export_charts(md, out_dir, src.stem, rep)
+        if files:
+            rep.outputs["charts"] = files  # type: ignore[assignment]
     if "xlsx" in fmts:
-        p = to_xlsx(md, out_dir / f"{src.stem}.xlsx", title, src, rep)
+        p = to_xlsx(render_charts(md, out_dir, "xlsx", rep), out_dir / f"{src.stem}.xlsx", title, src, rep)
         if p:
             rep.outputs["xlsx"] = str(p)
     if a.qa:

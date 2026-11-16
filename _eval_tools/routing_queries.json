@@ -142,5 +142,33 @@
   {
     "query": "Write a cover letter for a senior BA position at a fintech company.",
     "expected": "none"
+  },
+  {
+    "query": "team mình vừa benchmark 3 cách chunking cho RAG, notes ở dưới. Viết giúp bài đăng Viblo cho người mới đọc cũng hiểu, có biểu đồ so sánh nhé:\n- fixed 500 token: 31/50 câu đúng\n- theo heading: 38/50\n- semantic: 37/50 nhưng chậm gấp 4",
+    "expected": "community-post-writer"
+  },
+  {
+    "query": "Turn this paper summary into a LinkedIn post and a short X thread for practitioners. Keep it accurate, no hype: [notes about a 2025 study on LLM-as-judge bias, 3 findings, sample of 1,200 pairwise comparisons]",
+    "expected": "community-post-writer"
+  },
+  {
+    "query": "từ tài liệu research về eval agent này, lên giúp mình vài hướng nội dung để đăng group AI Việt Nam, rồi viết bài đầu tiên cho dễ tiếp cận",
+    "expected": "community-post-writer"
+  },
+  {
+    "query": "I'm stuck: pandas merge silently drops rows when the key column has trailing spaces. Help me write a good question post for the Python Discourse forum with a minimal repro.",
+    "expected": "community-post-writer"
+  },
+  {
+    "query": "viết bài chia sẻ kinh nghiệm 6 tháng làm forward-deployed engineer để đăng lên Spiderum, giọng văn gần gũi",
+    "expected": "community-post-writer"
+  },
+  {
+    "query": "Write the release notes section of our README for v2.3 based on the CHANGELOG and the diff in src/",
+    "expected": "codebase-doc-writer"
+  },
+  {
+    "query": "dịch đoạn này sang tiếng Anh giúp mình: 'Bài viết này chia sẻ kết quả thử nghiệm chunking'",
+    "expected": "none"
   }
 ]

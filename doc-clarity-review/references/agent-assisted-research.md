@@ -136,4 +136,4 @@ Papers that decide the direction of the work are read by the human, not only by 
 
 ## Source
 
-Adapted, in this project's own words, from the course handout "AI Vibe-Researcher — Nghiên cứu AI trong kỷ nguyên Claude" by Nguyễn Thanh Huy (proofread by Đinh Quang Vinh), AI VIET NAM, AIO2026, November 2026: the evidence gate, the eight-stage loop with human decisions and required evidence, the frozen plan and decision rule, the failure-mode table, the whiteboard test and the checklist. The selection-effect formulas follow Ioannidis (2005), "Why Most Published Research Findings Are False", PLoS Medicine 2(8): e124.
+The selection-effect formulas follow Ioannidis (2005), "Why Most Published Research Findings Are False", PLoS Medicine 2(8): e124.

@@ -120,7 +120,7 @@ _shared/            single source of truth for shared files
   references/       writing-standards.md, visual-style.md, presentation-and-charts.md, research-rigor.md
   scripts/          lint_doc.py, render_doc.py, charts.py, stats_check.py
   assets/           doc-theme.css, reference.docx
-  tests/            100 unit tests (pytest)
+  tests/            101 unit tests (pytest)
 <skill>/            the five skills; scripts/references/assets are synced from _shared by build.sh
   evals/            test cases in `claude plugin eval` format
 _eval_tools/        evaluation tooling: automated checks, blind A/B prep, real `claude -p` routing eval

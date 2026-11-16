@@ -81,7 +81,7 @@ VAGUE_TERMS: list[Term] = [
     *_t(["một số", "vài", "đa số", "phần lớn", "hầu hết"], QTY),
     Term("nhiều", QTY, strong=False, exclude=("một hoặc nhiều", "nhiều nhất", "nhiều hơn", "nhiều-nhiều", "nhiều - nhiều",
                         "một-nhiều", "một - nhiều", "1-nhiều", "1 - nhiều", "1-n", "nhiều-một", "nhiều - một")),
-    Term("khoảng", APPROX, ("khoảng thời gian", "khoảng cách", "khoảng trắng", "khoảng giá trị", "khoảng ngày")),
+    Term("khoảng", APPROX, ("khoảng thời gian", "khoảng cách", "khoảng trắng", "khoảng giá trị", "khoảng ngày", "khoảng tin cậy", "khoảng này", "khoảng đó")),
     *_t(["tầm", "xấp xỉ", "chừng"], APPROX, ("tầm nhìn", "tầm quan trọng", "tầm ảnh hưởng")),
     *_t(["nếu cần", "khi cần", "khi cần thiết", "tùy trường hợp", "tuỳ trường hợp", "tùy tình huống", "tuỳ tình huống"], COND),
     *_t(["tối ưu", "hiệu quả", "mạnh mẽ", "linh hoạt", "ổn định", "hiệu năng cao", "mượt mà", "liền mạch"], METRIC),

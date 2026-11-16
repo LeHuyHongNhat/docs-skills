@@ -1,0 +1,99 @@
+{
+ "A": {
+  "01": {
+   "pass": true,
+   "evidence": "Title: 'Sharpe 1,8 trước phí, nhưng chưa phải bằng chứng là tín hiệu có lãi'; L3 'trước phí, chọn từ khoảng 300 biến thể, không có out-of-sample ... chắc chắn chưa đủ căn cứ để chạy tiền thật'; L22 'tune trên toàn bộ giai đoạn 2021–2026'."
+  },
+  "02": {
+   "pass": true,
+   "evidence": "Script run unobservable (no log/artefact in A/). Visible part present: L27 'sai số chuẩn của Sharpe annualized vào khoảng 1/√5,7 ≈ 0,42' and 'bản tốt nhất được kỳ vọng ra Sharpe khoảng 1,2 chỉ nhờ may mắn' (300 variants; 0.95 at 50 effective trials). I recomputed: both values correct. No confidence interval given, but SE satisfies the assertion."
+  },
+  "03": {
+   "pass": true,
+   "evidence": "L9 'chốt danh sách tại 30/09/2026 rồi kéo giá lịch sử'; L29-30 'Universe bị survivorship và look-ahead ... Cổ phiếu đã hủy niêm yết bị loại'."
+  },
+  "04": {
+   "pass": true,
+   "evidence": "L32-33 'Khớp lệnh tại đúng giá dùng để tính tín hiệu. Giá đóng cửa ngày T chỉ biết sau phiên ATC, nên không thể vừa tính tín hiệu vừa khớp ở giá đó'."
+  },
+  "05": {
+   "pass": true,
+   "evidence": "L26 'không có out-of-sample'; L22 'tune trên toàn bộ giai đoạn 2021–2026'."
+  },
+  "06": {
+   "pass": true,
+   "evidence": "L35-36 'Chưa trừ chi phí, trong khi turnover cao. 35%/tuần tương đương khoảng 18 lần danh mục mỗi năm'; L38-39 'Thị trường Việt Nam gần như không bán khống được cổ phiếu cơ sở'. Slippage named in L14 and L36."
+  },
+  "07": {
+   "pass": true,
+   "evidence": "L47-48 'Chưa có lý do kinh tế ... rủi ro data mining ở mục 1 càng nặng'; also asked as a question at L67."
+  },
+  "08": {
+   "pass": true,
+   "evidence": "PM friend's remark does not appear anywhere in the post; L3 states the opposite ('chưa đủ căn cứ để chạy tiền thật')."
+  },
+  "09": {
+   "pass": true,
+   "evidence": "L53-61 'Kế hoạch kiểm định lại': point-in-time universe, T+1 fill, costs, long leg vs VN-Index, fix config on 2021–2023 and run once on 2024–2026, publish Sharpe distribution of 300 variants."
+  },
+  "10": {
+   "pass": true,
+   "evidence": "All notes figures match (1,8; 11%; ~35%/tuần; ~300; 01/2021–09/2026; ~1.430 phiên; 500 mã; 30/09/2026; 6 tháng/20 ngày; top/bottom 10%). Derived figures carry their derivation or assumption inline: '1/√5,7 ≈ 0,42', 'Nếu cả 300 biến thể đều có Sharpe thật bằng 0 và độc lập ... khoảng 1,2', 'nếu chỉ tương đương 50 phép thử ... 0,95', '18 lần', '1,8%/năm'. Borderline: derivations are shown but never explicitly labelled as the writer's own additions beyond the notes; and three external facts are unlabelled and unsourced: 'thuế bán 0,1%' (L36), 'chu kỳ thanh toán T+2' (L42), '2021 tăng mạnh / 2022 giảm' (L51). Passed because no figure contradicts the notes and every computed figure is recognisable as a computation."
+  },
+  "11": {
+   "pass": false,
+   "evidence": "post_check.py run unobservable; the final reply is not in A/ and no file lists claims with WEAK/INCONCLUSIVE/UNQUANTIFIED verdicts (grep finds none). Evidence absent."
+  }
+ },
+ "B": {
+  "01": {
+   "pass": true,
+   "evidence": "L3 'bản tốt nhất trong khoảng 300 biến thể, chưa trừ phí và chưa có out-of-sample ... Đây chưa phải bằng chứng là tín hiệu có lãi'; L32 'đều là gộp (trước chi phí) và in-sample'; L72 'Chưa cho thấy tín hiệu có lãi sau chi phí'; L77 'chưa đủ để dùng tiền thật'."
+  },
+  "02": {
+   "pass": true,
+   "evidence": "Script run unobservable, though B/claims.yaml has a row 'test: sharpe, sr: 1.8, n_obs: 1430, trials: 300' consistent with the expected invocation. Visible part present: L7/L36 'Khoảng tin cậy 95% là 0,97 đến 2,63'; L44 '300 biến thể không có khả năng sinh lời thật vẫn cho bản tốt nhất đạt Sharpe khoảng 1,2 ... 92%'; L88 'sai số chuẩn ... 0,42'. I recomputed CI, 1.2, 92%, 98% (50 trials) and 56% (dispersion 0.6): all correct."
+  },
+  "03": {
+   "pass": true,
+   "evidence": "L52 'Universe chọn theo danh sách ngày 30/09/2026 (survivorship bias ...) Mã bị hủy niêm yết trong 2021–2026 không có trong mẫu'; L20 'sau đó kéo giá lịch sử'."
+  },
+  "04": {
+   "pass": true,
+   "evidence": "L54 'Khớp lệnh cùng phiên với tín hiệu (look-ahead bias ...) Giá đóng cửa ngày T chỉ biết sau khi phiên kết thúc'."
+  },
+  "05": {
+   "pass": true,
+   "evidence": "L56 'Chưa có out-of-sample ... Tham số được chọn trên toàn bộ 2021–2026'; L26 'Tách mẫu | Không có'."
+  },
+  "06": {
+   "pass": true,
+   "evidence": "L58 'Chưa trừ chi phí. Turnover 35%/tuần nghĩa là mỗi năm giao dịch khoảng 18 lần giá trị danh mục'; L24 'chưa tính trượt giá'; L62 'Thị trường Việt Nam gần như không cho bán khống cổ phiếu cơ sở'."
+  },
+  "07": {
+   "pass": true,
+   "evidence": "L64 'Chưa có giả thuyết kinh tế ... ứng viên điển hình của data mining'; step 6 at L86 'Viết giả thuyết kinh tế trước khi chạy lại'."
+  },
+  "08": {
+   "pass": true,
+   "evidence": "PM remark absent from the post; B/claims.yaml C4 records it as 'opinion ... not used in post, verified: unverified'. L77 gives the opposite view, labelled as the writer's own opinion."
+  },
+  "09": {
+   "pass": true,
+   "evidence": "L79-86: point-in-time universe incl. delisted, T+1 fill, hold-out OOS run once, subtract fees/tax/slippage, store Sharpe of all 300 variants, write hypothesis first."
+  },
+  "10": {
+   "pass": true,
+   "evidence": "All notes figures match. Computed figures are explicitly attributed: L92 'Các con số về khoảng tin cậy và deflated Sharpe tính từ ba đầu vào: Sharpe 1,8, 1.430 phiên, 300 lần thử', methods named at L28 (Lo 2002; Bailey & López de Prado 2014), L44 'Theo cách tính này'. Cost figure labelled: L60 'Mức 0,2% là giả định của mình để minh họa, chưa phải số đo'. '18 lần' shown as '35% × 52 tuần'. '5,7 năm' is an unlabelled but trivial conversion of 1.430 sessions. The baseline cross-variant dispersion behind the 92% is not stated (only the alternative 0,6 is). Unlabelled external claim: '2021–2026 gồm cả giai đoạn tăng nóng và giai đoạn giảm sâu' (L68), no number."
+  },
+  "11": {
+   "pass": false,
+   "evidence": "post_check.py run unobservable; the final reply is not in B/. B/claims.yaml is a claim ledger (4 claims, fields test/verified) which suggests the rigor workflow was followed, but it contains no WEAK/INCONCLUSIVE/UNQUANTIFIED verdicts and no file shows high findings being handled. Evidence absent."
+  }
+ },
+ "notes": "Result: A 10/11, B 10/11; both fail only 11, which is essentially ungradable from these folders because it concerns the final chat reply and a script run, neither of which is saved. 02 and 11 were graded on visible content only. The assertions therefore do not separate the two attempts; differences they miss: (1) B quantifies more and more carefully: 95% CI 0,97-2,63 with the i.i.d. caveat and autocorrelation warning, deflated-Sharpe probability 92% with two sensitivity cases (98% at 50 trials, 56% at dispersion 0,6), cites Lo 2002 and Bailey & López de Prado 2014 with DOIs (journal/issue/DOI match what I know of these papers; not re-fetched), states that 0,2% cost is an assumption, flags that notes do not say whether turnover is one-way or two-way, notes fewer than 1.430 return observations because of the 6-month warm-up, and computes that 2 years OOS gives SE about 0,7. A gives only SE 0,42 and expected max 1,2/0,95 and says deflated Sharpe was not computed. (2) A adds Vietnam-specific points B lacks: price limits (trần/sàn), T+2 settlement, capacity, liquidity filter, an explicit 2021-2023 / 2024-2026 split; but it states 'thuế bán 0,1%' and 'T+2' as facts with no source or label, which is exactly the kind of unlabelled number a research reader could challenge. (3) A's lead says 'ít nhất 6 lỗi phương pháp' while the body lists 9 numbered items: loose count. A says survivorship 'đẩy riêng chân long lên' (overstated; it can also affect the short leg) where B hedges. (4) B wording 'Xác suất Sharpe thật của bản mình chọn vượt mức 1,2 đó là 92%' reads a frequentist DSR as a posterior probability: minor imprecision. B lists Harvey, Liu & Zhu (2016) under sources but never uses it in the body (orphan reference). (5) B is longer and glosses basic terms (momentum, Sharpe, rebalance) for an audience of quant researchers, which is padding for that group; A is tighter and ends with three concrete questions versus B's one. (6) B produced extra files not requested (quant_post_facebook.txt plain-text version, claims.yaml); the Facebook version is content-identical to quant_post.md apart from formatting. Neither attempt altered momentum_backtest_notes.md (identical to inputs). (7) Neither post mentions the PM's remark, so 08 passes by omission for both. No number in either post contradicts the notes; all derived statistics in both were recomputed by me and are arithmetically correct.",
+ "label_key": {
+  "with": "B",
+  "without": "A"
+ }
+}

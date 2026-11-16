@@ -1,0 +1,83 @@
+{
+ "A": {
+  "01": {
+   "pass": true,
+   "evidence": "Notes figures all correct: L3 '38/50 ... 37/50 ... 31/50', L81 '26 phút ... fixed (6 phút) và heading (7 phút)', 9/19, 500/50, 800, 0,75, 1.200, top-k 5, 5% PDF. No external benchmark or software tool added. Non-note numbers are all derived from the notes and recompute correctly (see notes field): 62%/76%, +14/+12/+2 points, Newcombe CIs, ~4x, 171. CIs are labelled as the writer's ('Mình tính thêm khoảng tin cậy 95%'); 171 is not labelled and its power/alpha assumptions are unstated. Adds statistical method names 'Newcombe' and 'McNemar' (methods, not tools). Passes only on the reading that correct derivations are not 'added data'; a literal reading fails it."
+  },
+  "02": {
+   "pass": true,
+   "evidence": "L91: 'Trong team có ý kiến rằng semantic chunking sẽ tốt nhất cho mọi loại tài liệu nếu tune kỹ hơn. Đó là giả thuyết chưa kiểm chứng'. Title: 'cách tốn nhất không đứng đầu'."
+  },
+  "03": {
+   "pass": true,
+   "evidence": "L5 '50 câu hỏi, mỗi cấu hình chạy 1 lần, chưa đủ để xếp hạng'; L89 'wiki có heading rõ ràng, tức loại thuận lợi cho cách cắt theo heading'; L90 'PDF scan chiếm khoảng 5% wiki và chưa được test'; L92 'Mỗi cấu hình chạy 1 lần'."
+  },
+  "04": {
+   "pass": true,
+   "evidence": "L11 'RAG là cách làm bot hỏi đáp gồm hai bước'; L13 'Chunking là bước chia tài liệu dài thành các đoạn nhỏ'; L13 'embedding, tức một dãy số biểu diễn nội dung đoạn văn để máy so được hai đoạn giống nhau đến đâu'. Caveat: RAG and 'semantic chunking' appear in title/L3/L7 before the L11-13 definitions (L3 glosses as 'cách cắt tài liệu', L7 only expands the acronym); embedding is defined at its very first use."
+  },
+  "05": {
+   "pass": true,
+   "evidence": "L1 title 'cách tốn nhất không đứng đầu'; L3 opens with the result: 'cắt theo heading đúng 38/50 câu, semantic chunking 37/50, cắt cố định 31/50'. No greeting."
+  },
+  "06": {
+   "pass": true,
+   "evidence": "Last line L116: 'Các bạn đang chunk theo cách nào, và bộ test của các bạn có bao nhiêu câu hỏi?'"
+  },
+  "07": {
+   "pass": true,
+   "evidence": "work/charts_src.md has 3 ```chart blocks, each with a 'source:' field; charts/charts_src-chart-1..3.png exist (valid PNG, 1440px wide) plus SVGs. The post itself embeds them as images. Which renderer produced them is not observable."
+  },
+  "08": {
+   "pass": null,
+   "evidence": "unobservable: no post_check.py output or log in A/; a script run cannot be verified from the files."
+  },
+  "09": {
+   "pass": false,
+   "evidence": "No final reply to the user is present in A/ (only viblo_post.md, charts/, work/); no file lists 3 title options or a chosen one. Evidence absent."
+  }
+ },
+ "B": {
+  "01": {
+   "pass": true,
+   "evidence": "Notes figures all correct: results table L48-50 '31 ... 6 phút / 38 ... 7 phút / 37 ... 26 phút', 9 of 19, 500/50, 800, 0.75, 1.200, top-k 5, 5%. No benchmark or tool added. Non-note numbers are derivations that recompute correctly: 62/76/74%, +7/+6 câu, 3,7x and 4,3x, 12 câu sai, 2 điểm phần trăm per question; Wilson CI drawn in Hình 1 and labelled 'do mình tính thêm'. Percentages and ratios are not labelled as derived. Same caveat as A: literal reading fails. Separately invents a non-numeric fact, 'Team chọn cắt theo heading' (L3, L100), which the notes do not contain (see notes field)."
+  },
+  "02": {
+   "pass": true,
+   "evidence": "L94: 'Trong team có ý kiến rằng semantic chunking sẽ tốt nhất nếu tune kỹ hơn. Thử nghiệm này chưa kiểm chứng ý kiến đó ... chưa xác nhận và chưa bác bỏ'. Drops 'cho mọi loại tài liệu' but makes no such claim itself."
+  },
+  "03": {
+   "pass": true,
+   "evidence": "L3 'Bộ test chỉ có 50 câu và mỗi cấu hình chỉ chạy 1 lần'; L92 'Phần lớn wiki của team có heading H2/H3 rõ ràng, đây là điều kiện thuận lợi cho cách cắt theo heading'; L96 'PDF scan chưa được test'."
+  },
+  "04": {
+   "pass": false,
+   "evidence": "RAG (L9-12, two steps) and chunking (L14 'Chunking là bước cắt') are explained plainly, but embedding is only glossed with more jargon: L14 'mỗi chunk được chuyển thành một vector (bước embedding)' - 'vector' and 'vector store' are never explained. LLM is never expanded either. RAG/chunking also appear in title, L3, L5 before any explanation."
+  },
+  "05": {
+   "pass": true,
+   "evidence": "L1 title carries the result; L3 'Tóm tắt: ... Cắt theo heading đúng 38/50 câu, semantic chunking đúng 37/50'. No greeting."
+  },
+  "06": {
+   "pass": false,
+   "evidence": "Last line L115 is an invitation, not a question: 'Nếu bạn đã thử chunking trên loại tài liệu khác và có kết quả khác, mình rất muốn đọc ở phần bình luận.' No question mark anywhere at the end."
+  },
+  "07": {
+   "pass": false,
+   "evidence": "No ```chart block anywhere in B/ (grep count 0); charts come from make_charts.py (matplotlib). PNGs charts/accuracy.png, index_time.png, tradeoff.png do exist, but the assertion's first half (chart block with a source field) is unmet, and no chart carries a source line."
+  },
+  "08": {
+   "pass": null,
+   "evidence": "unobservable: no post_check.py output or log in B/; a script run cannot be verified from the files."
+  },
+  "09": {
+   "pass": false,
+   "evidence": "No final reply to the user is present in B/; no file lists 3 title options or a chosen one. Evidence absent."
+  }
+ },
+ "notes": "SCORING CAVEATS. (a) Assertion 09 concerns the final chat reply, which is not among the files; it is failed for both under the 'evidence absent -> fail' rule but is really unobservable, so it does not discriminate. (b) Assertion 01 is ambiguous: read literally ('no number not in the notes') BOTH fail, since both add derived numbers; I passed both because every added number is a correct derivation from the notes and nothing external was invented. (c) Assertion 04 'at first appearance' is unmet literally by both (terms appear in title/lead before the definitions); B fails on the separate ground that embedding is explained only as 'a vector'.\n\nNUMBERS NOT IN THE NOTES - A (all recomputed): 62% and 76% (31/50, 38/50) correct, unlabelled. +14/+12/+2 points correct. Newcombe 95% CIs -4,1..+30,9 / -6,2..+29,2 / -14,8..+18,7: recomputed exactly the same; labelled as writer's calculation (L51, L114) and as unpaired (L67). '19/50 fixed sai' = 50-31 correct (19 is in the notes). 'lâu hơn khoảng 4 lần' = 26/6=4,33 and 26/7=3,71, acceptable as approximate. 'index chỉ lâu hơn fixed 1 phút' correct. '171 câu cho mỗi cách' (L106): reproduces with the pooled two-proportion formula at alpha 0,05 two-sided and 80% power (170,1 -> 171), but the post states neither power nor alpha and does not label it as the writer's calculation. 'ít nhất 3 lần' is a recommendation, not data.\nNUMBERS NOT IN THE NOTES - B: 62/76/74% correct, unlabelled. 'nhiều hơn 7 câu và 6 câu' correct. '3,7 lần' (26/7=3,71) and '4,3 lần' (26/6=4,33) correct, unlabelled. '12 câu sai' of heading = 50-38 correct. 'mỗi câu chiếm 2 điểm phần trăm' correct. Wilson 95% CIs appear only as error bars (recomputed 48-74%, 63-86%, 60-84%, bars match), labelled 'do mình tính thêm'. Title 'nhanh gần gấp 4' = 3,7 ok.\n\nCHARTS. A: 3 PNGs, legible, titled with the finding, values labelled 38/37/31 and 6/7/26 phút, source and caveat lines on every chart; interval chart matches the table. Minor flaws: chart 1 x-axis ticks stop at 40 although the scale is out of 50; chart 2 legend includes an unused 'khoảng tin cậy không chứa mốc' entry and says 'mốc' without '0'. B: 3 PNGs, legible, axes labelled, values 31/50 38/50 37/50 and 6/7/26 phút correct; no source line on any chart; accuracy chart title says 'Số câu' while the y-axis is percent; the tradeoff scatter y-axis starts at 50, which visually enlarges the gap.\n\nERRORS NO ASSERTION COVERS. B invents a decision: 'Team chọn cắt theo heading' (L3, L100) - the notes record no choice. B overclaims equivalence: title 'ngang semantic chunking', L76/L88 'hai cách cho độ chính xác tương đương' - a 1-question gap on n=50 with wide CIs shows neither difference nor equivalence (A says this explicitly at L65). B L90 calls the fixed-vs-others gap 'rõ hơn' and L106 says 'vài chục câu ... đã đủ để phát hiện chênh lệch lớn', while the unpaired interval for 38 vs 31 spans -4,1..+30,9 and includes 0. B L80 'Overlap 50 token không đủ để giữ nguyên một bảng' and L105 'nguồn lỗi lớn nhất của fixed-size' are inferences presented as findings (9/19 is the only categorised error type). A's inferences are marked ('Phần này là ý kiến của mình', 'Lấy một ví dụ minh họa'); A adds limitations beyond the notes that are correctly framed as 'notes không ghi' (inter-rater agreement, blinding, machine config, temperature). A may be heavy for the 'người mới' audience: Newcombe, McNemar and paired/unpaired comparison appear with only brief glosses. Neither post names the #ask-platform channel (harmless). Both attempts left the notes file unmodified.",
+ "label_key": {
+  "with": "A",
+  "without": "B"
+ }
+}

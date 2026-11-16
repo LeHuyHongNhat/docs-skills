@@ -123,7 +123,7 @@ _shared/            single source of truth for shared files
   references/       writing-standards.md, visual-style.md, presentation-and-charts.md, research-rigor.md, reader-test.md, agent-assisted-research.md
   scripts/          lint_doc.py, render_doc.py, charts.py, stats_check.py
   assets/           doc-theme.css, reference.docx
-  tests/            110 unit tests (pytest)
+  tests/            111 unit tests (pytest)
 <skill>/            the five skills; scripts/references/assets are synced from _shared by build.sh
   evals/            test cases in `claude plugin eval` format
 _eval_tools/        evaluation tooling: automated checks, blind A/B prep, real `claude -p` routing eval
@@ -154,7 +154,7 @@ The four documentation skills were evaluated with 7 methods over two iterations 
 | Correct skill routing (`claude -p`, 72 runs, Vietnamese + English queries, 3 competing skills installed) | **100%** | – |
 | Ground-truth fidelity (flowchart edges / ERD columns / planted review issues) | 16/16 · 25/25 · 13/13 | – |
 
-**Not yet evaluated (v2.3):** the chart/presentation layer, the research-rigor layer and `community-post-writer` have unit tests (palette validation, every chart type, statistics against scipy reference values, post checker) and four eval cases (three in `community-post-writer/evals/`, one report audit in `doc-clarity-review/evals/`), but no with/without-skill benchmark, routing run or independent (human or other-model) grading yet. The rebuild comparison in `samples/rebuild-comparison/` is self-graded.
+**Evaluated on 2026-11-16 (see [`docs/eval-results-2026-11-16.md`](docs/eval-results-2026-11-16.md)):** four cases, one run per configuration, graded by AI subagents on label-shuffled outputs. On the 34 assertions that can be judged from the output files, runs with the skill passed 33 and runs without it passed 27. Two of the four cases showed no or almost no difference. A routing proxy (a model choosing a skill from the five descriptions) matched the expected skill on 45 of 45 requests after one description fix. Not done: repeated runs, human grading, the real `claude -p` routing run, and any benchmark of the chart layer by itself.
 
 **Known limitations:**
 - Output for very short inputs is still longer than ideal.

@@ -1,0 +1,91 @@
+{
+ "A": {
+  "01": {
+   "pass": true,
+   "evidence": "C2: 'Trích dẫn Lam và Pham (2025) — không xác minh được, có dấu hiệu bịa'; 'yêu cầu DOI hoặc đường dẫn. Nếu không có, xoá trích dẫn'"
+  },
+  "02": {
+   "pass": true,
+   "evidence": "A1: 'Không dòng nào trong log đạt 0,912... trung bình 5 seed là 0,881'; A4: 'Baseline chỉ có 4 seed'. Recomputed: LS mean 0.8814, baseline n=4."
+  },
+  "03": {
+   "pass": true,
+   "evidence": "A2: 'chọn lọc một seed. Hai con số này đều là seed 3... cho chênh lệch lớn nhất (+0,041)'"
+  },
+  "04": {
+   "pass": true,
+   "evidence": "Own per-seed table; A2: 'Trung bình trên 4 seed chung (0–3)... chênh +0,012'; A4: 'không đạt ý nghĩa thống kê... t ghép cặp trên 4 seed chung p = 0,30'. Recomputed paired mean +0.01225, p~0.30. No CI stated, but inconclusive verdict is explicit."
+  },
+  "05": {
+   "pass": true,
+   "evidence": "B1: 'Chọn mô hình bằng tập test (dòng 16–18)... giá trị lớn nhất trên tập test qua mọi epoch và mọi learning rate'"
+  },
+  "06": {
+   "pass": true,
+   "evidence": "B2: 'Không còn tập validation (dòng 8–9). Code gộp x_val vào dữ liệu huấn luyện'"
+  },
+  "07": {
+   "pass": true,
+   "evidence": "B3: 'Baseline chỉ chạy 1 learning rate (2e-5). Label smoothing chạy 12 giá trị'"
+  },
+  "08": {
+   "pass": true,
+   "evidence": "A3: '0,041 là 4,1 điểm phần trăm'; C1: 'Từ \"chứng minh\" không phù hợp'; C3 'khái quát quá mức'"
+  },
+  "09": {
+   "pass": true,
+   "evidence": "A4: 'Baseline chỉ có 4 seed; seed 4 không có dòng baseline'"
+  },
+  "10": {
+   "pass": false,
+   "evidence": "Originals identical to inputs (diff clean) and every finding has a quote or line reference, but findings carry no per-finding severity: only a section title 'xếp theo mức độ nghiêm trọng' and one group-level remark 'nhóm B nghiêm trọng hơn nhóm A' (which also contradicts the stated ordering). Group C has no severity at all."
+  }
+ },
+ "B": {
+  "01": {
+   "pass": true,
+   "evidence": "F09 Critical: 'không có kết quả nào khớp với bài báo hoặc tạp chí... trích dẫn không kiểm chứng được thì không được dùng'; 'Xóa câu trích dẫn... trừ khi tác giả mở được bài báo'"
+  },
+  "02": {
+   "pass": true,
+   "evidence": "F02: 'Không bản ghi nào... cho ra 0.912. Trung bình 5 seed label smoothing là 0,881'; F03: 'Baseline chỉ có 4 seed (0–3)'"
+  },
+  "03": {
+   "pass": true,
+   "evidence": "F01: 'cùng là seed 3... +0,041 là chênh lệch lớn nhất'; code 'R4 (chọn lọc kết quả)'; 'lấy 1 seed thuận lợi nhất làm kết quả chính'"
+  },
+  "04": {
+   "pass": true,
+   "evidence": "Cites stats_check.py runs command; 'Chênh lệch ghép cặp theo seed (4 cặp) +0,012; 95% CI từ −0,019 đến +0,043; p = 0,30... Chưa kết luận được (khoảng chứa 0)'. Recomputed: +0.01225, CI [-0.0186, +0.0431], p~0.30 - matches."
+  },
+  "05": {
+   "pass": true,
+   "evidence": "F04: 'Code chọn checkpoint và learning rate trên tập test' / 'R7 (chọn mô hình trên tập test)'"
+  },
+  "06": {
+   "pass": true,
+   "evidence": "F06: 'Tập validation bị gộp vào dữ liệu huấn luyện, nên không còn split nào để chọn mô hình ngoài tập test'"
+  },
+  "07": {
+   "pass": true,
+   "evidence": "F05: 'Baseline dùng 1 learning rate; label smoothing được dò 12 learning rate' / 'so sánh không công bằng'"
+  },
+  "08": {
+   "pass": true,
+   "evidence": "F07: '0,041 là 4,1 điểm phần trăm'; F08: 'Từ \"chứng minh\" cũng quá mạnh'; F10 'mọi mô hình' vượt phạm vi bằng chứng"
+  },
+  "09": {
+   "pass": true,
+   "evidence": "F03: 'seed 4 chỉ có ở nhánh label smoothing'"
+  },
+  "10": {
+   "pass": true,
+   "evidence": "Findings table F01-F10 has columns 'Vị trí', 'Trích nguyên văn', 'Mức độ' (Critical/Major/Minor) filled for every row; agent_report.md, train_snippet.py, runs.jsonl identical to inputs (diff clean)."
+  }
+ },
+ "notes": "All numbers in both audits were recomputed from inputs/runs.jsonl and are correct: baseline mean 0.867 (SD 0.017, n=4), LS mean 0.881 (SD 0.006, n=5), paired diffs +0.003/-0.001/+0.006/+0.041, paired mean +0.012, paired t p~0.30, 95% CI [-0.019,+0.043]; A's extra Welch p=0.19 and Mann-Whitney p=0.11 also check out, as do A's line numbers for train_snippet.py and B's 46% (1-0.95^12). No factual error found in either. Not captured by assertions: (1) Both also flag the unsupported mechanism claim (no calibration metric, no 'ticket mơ hồ' subset) and that epsilon=0.1 cannot be verified from the snippet. (2) Both claim to have run web searches for the citation; this cannot be verified from the files, and both correctly hedge that not finding it does not prove non-existence. (3) A's headline summary leads with the unpaired +0.014 (4 vs 5 seeds, includes unmatched seed 4) and gives no confidence interval anywhere; B leads with the paired +0.012 and CI. (4) A's section heading says findings are ordered by severity but then states group B is more severe than group A, an internal inconsistency. (5) B uses unexplained internal codes (R1, R4, R7, INC-NUM, AMB-LEX, UNSOURCED) and mentions lint_doc.py output, which a team reader will not understand; B's wide 7-column table with long cells is harder to read than A's prose. (6) B additionally supplies a full rewritten report, a 'checked and found OK' section and an open-questions table; A supplies a rewritten summary paragraph and a rerun checklist (incl. checking whether baseline seed 3 was a faulty run, which B lacks). (7) Assertion 04 for A is a lenient pass: A states non-significance via p-values rather than a CI containing 0.",
+ "label_key": {
+  "with": "B",
+  "without": "A"
+ }
+}

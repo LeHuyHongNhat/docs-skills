@@ -15,6 +15,13 @@ What it checks (severity high / medium / low / info):
 - evidence: sentences with figures (%, ×, "lần", pp) in paragraphs with no link,
   citation or test-condition wording nearby                                      (low)
 - discussion: last paragraph without a question                                  (info)
+- structure tells of machine-written prose (stronger and longer-lived than word lists):
+  "not X but Y" contrasts, staged run-ups, one-line closers, chatbot residue, inflated
+  significance → reported on one sighting; dash density, bold-label lists, staccato
+  fragments, decorated or echoed headings, overused words → "weak alone", reported as a
+  cluster only when two or more kinds co-occur                                    (medium/info)
+- headings that carry no information ("Background", "Kết quả")                    (low)
+- a number in the title/opening that never reappears in the body                  (medium)
 - --rigor (posts that compare, claim causes, summarise a study, show a backtest/benchmark):
   sample size stated, uncertainty near comparative claims, "significant" with a test,
   causal wording vs design, absolute words, limitations, sources, reproducibility, date of
@@ -320,6 +327,40 @@ def check(md: str, platform: str = "forum", title: str | None = None,
             f.append(Finding("low", "UNSOURCED", "Figure with no source, link or test conditions in this "
                              "paragraph — add where it comes from (or confirm it is cited nearby).", short(clean(t))))
 
+    # --- structural tells
+    f.extend(tell_checks(blocks, words, vi))
+
+    # --- headings that carry no information
+    generic = []
+    for k, t in blocks:
+        if k == "heading" and not t.startswith("# "):
+            h = re.sub(r"^#{1,6}\s+(\d+(?:\.\d+)*[.)]?\s*)?", "", t).strip().strip(":").lower()
+            if h in GENERIC_HEADINGS:
+                generic.append(h)
+    if generic:
+        f.append(Finding("low", "HEADING-GENERIC", "Headings that name a slot, not a point: " + ", ".join(generic) +
+                         ". Write what the section says (\"Why fixed-size chunks split tables\")."))
+
+    # --- headline numbers must come back in the body
+    paras_all = [t for k, t in blocks if k == "para"]
+    head_txt = (title or "") + "\n" + (paras_all[0] if paras_all else "")
+    first_seen = False
+    rest_parts = []
+    for k, t in blocks:
+        if k == "para" and not first_seen:
+            first_seen = True
+            continue
+        if k != "heading" or not t.startswith("# "):
+            rest_parts.append(t)
+    rest_txt = "\n".join(rest_parts)
+    rest_pcts = {m.replace(",", ".") for m in PCT_RE.findall(rest_txt)}
+    rest_nums = {m.replace(",", ".") for m in re.findall(r"(?<![\w.])-?(\d+(?:[.,]\d+)?)(?![\w%])", rest_txt)}
+    for num in dict.fromkeys(PCT_RE.findall(head_txt)):
+        n_ = num.replace(",", ".")
+        if n_ not in rest_pcts and n_ not in rest_nums:
+            f.append(Finding("medium", "HEADLINE-NUMBER", f"“{num}%” appears in the title/opening but nowhere in the "
+                             "body: show where it comes from, or remove it."))
+
     # --- discussion ending
     tail = [t for k, t in blocks if k in ("para", "list")]
     if tail and "?" not in "\n".join(tail[-2:]):
@@ -334,6 +375,107 @@ def check(md: str, platform: str = "forum", title: str | None = None,
              "avg_sentence_len": round(avg, 1), "max_sentence_len": max(lens) if lens else 0,
              "headings": sum(1 for k, t in blocks if k == "heading"), "title": title}
     return f, stats
+
+
+# ----------------------------------------------------------------- structural tells
+# Patterns of prose written "by default" rather than for one reader. Word lists age with every
+# model release; these shapes persist. Strong tells are reported on one sighting; weak ones only
+# count when several kinds appear together, because a careful human makes any one of them on purpose.
+A = r"(?:'|’)"
+STRONG_TELLS: list[tuple[str, str, re.Pattern[str]]] = [
+    ("CONTRAST", "“not X but Y” used for weight, not for a real contrast — state Y directly",
+     re.compile(rf"\bnot (?:just|only|merely|simply) [^.!?\n]{{2,70}}?,? but\b|"
+                rf"\b(?:it|this|that){A}?s not (?:about |just )?[^.!?\n]{{2,60}}[.,;—–-]+\s*(?:it|this|that){A}?s\b|"
+                rf"\bisn{A}?t (?:just |only |really )?about\b|"
+                r"không (?:chỉ|đơn thuần|chỉ đơn giản)(?: là)? [^.!?\n]{2,70}? mà (?:còn|là)|"
+                r"không phải(?: là)? [^.!?\n,]{2,60}, mà là", re.I)),
+    ("RUN-UP", "staged run-up before the point — start with the point",
+     re.compile(rf"\blet{A}?s (?:dive in|break (?:this|it) down|unpack)\b|\bhere{A}?s the thing\b|"
+                rf"\bhere{A}?s what you need to know\b|\bwithout further ado\b|\bthe thing is,|\blet{A}?s be honest\b|"
+                r"\breal talk\b|hãy cùng (?:đi sâu|bắt đầu|mổ xẻ|điểm qua)|sự thật là|nói thật (?:thì|là)|"
+                r"vấn đề (?:là )?ở chỗ|điều (?:thú vị|đáng nói) (?:ở đây )?là", re.I)),
+    ("CLOSER", "one-line closer that restates the paragraph — cut it or add a fact",
+     re.compile(rf"(?:^|(?<=[.!?…]\s))(?:that{A}?s it\.|that{A}?s all(?: you need)?\.|read that again\.|let that sink in\.|"
+                rf"full stop\.|that{A}?s the (?:real )?(?:point|win|difference|lesson)\.|and that matters\.|"
+                r"chỉ vậy thôi\.|thế thôi\.|đơn giản vậy thôi\.|hãy đọc lại câu (?:đó|này)\.|và đó (?:mới )?là điều quan trọng\.)",
+                re.I | re.M)),
+    ("CHATBOT", "chat residue — a post is not a reply to a prompt",
+     re.compile(r"\bI hope this (?:helps|was helpful)\b|\b(?:great|good) question\b|\blet me know if\b|\bfeel free to\b|"
+                r"hy vọng bài viết(?: này)? (?:hữu ích|giúp ích|mang lại)|chúc (?:các )?bạn thành công|"
+                r"đừng ngần ngại (?:để lại|liên hệ|hỏi)", re.I)),
+    ("SIGNIFICANCE", "inflated significance — say what happened and how much",
+     re.compile(r"\b(?:stands|serves) as a testament\b|\bplays? an? (?:key|crucial|pivotal|vital) role\b|\bpivotal moment\b|"
+                r"\bunderscores? (?:the|its) importance\b|\bevolving landscape\b|\bgame of\b(?= [a-z]+, not)|"
+                r"đóng vai trò (?:then chốt|cốt lõi|quan trọng|không thể thiếu)|là minh chứng(?: rõ ràng)? cho|"
+                r"bước ngoặt(?: lớn| quan trọng)?|không thể phủ nhận", re.I)),
+]
+AI_WORDS = ["delve", "crucial", "pivotal", "robust", "landscape", "leverage", "seamless", "seamlessly", "foster",
+            "showcase", "underscore", "intricate", "tapestry", "realm", "testament", "meticulous", "streamline",
+            "empower", "holistic", "vibrant", "elevate"]
+GENERIC_HEADINGS = {"background", "introduction", "intro", "overview", "results", "result", "conclusion", "conclusions",
+                    "summary", "discussion", "method", "methods", "methodology", "context", "details", "analysis",
+                    "bối cảnh", "giới thiệu", "tổng quan", "kết quả", "kết luận", "tóm tắt", "thảo luận", "phương pháp",
+                    "mở đầu", "chi tiết", "phân tích", "nội dung chính", "lời kết"}
+EMOJI_RE = re.compile("[\U0001F300-\U0001FAFF☀-➿←-⇿⬀-⯿]")
+QUOTED_RE = re.compile(r"“[^”\n]{1,200}”|\"[^\"\n]{1,200}\"")
+PCT_RE = re.compile(r"(?<![\w.,])(\d+(?:[.,]\d+)?)\s?%")
+
+
+def tell_checks(blocks: list[tuple[str, str]], words: int, vi: bool) -> list[Finding]:
+    f: list[Finding] = []
+    prose_blocks_ = [(k, t) for k, t in blocks if k in ("para", "list")]
+    text = "\n".join(clean(t) for _, t in prose_blocks_)
+    unquoted = QUOTED_RE.sub(" ", text)  # a phrase that is quoted or discussed is not a phrase that is used
+    strong_hits = 0
+    for code, advice, rx in STRONG_TELLS:
+        m = rx.search(unquoted)
+        if m:
+            strong_hits += 1
+            n = len(rx.findall(unquoted))
+            ctx = unquoted[max(0, m.start() - 30): m.end() + 40]
+            f.append(Finding("medium", f"TELL-{code}", f"{advice}" + (f" ({n} occurrences)" if n > 1 else "") + ".",
+                             short(ctx)))
+    weak: list[str] = []
+    raw = "\n".join(t for _, t in prose_blocks_)
+    dashes = len(re.findall(r"\s[—–]\s|\w—\w|\s--\s", raw))
+    if dashes >= 4 and dashes / max(words, 1) * 100 > 1.0:
+        weak.append(f"dashes as the default connector ({dashes} in {words} words)")
+    items = [ln for k, t in blocks if k == "list" for ln in t.splitlines() if re.match(r"^\s*(?:[-*+•–]|\d+[.)])\s+", ln)]
+    labelled = [ln for ln in items if re.match(r"^\s*(?:[-*+•–]|\d+[.)])\s+\*\*[^*]{2,60}\*\*\s*[:.—–-]?\s", ln)]
+    if len(labelled) >= 4 and len(labelled) / max(len(items), 1) >= 0.6:
+        weak.append(f"bold label on {len(labelled)} of {len(items)} list items")
+    sents = [s for _, t in prose_blocks_ for s in re.split(r"(?<=[.!?…])\s+", clean(t)) if s.strip()]
+    run = best = 0
+    for s_ in sents:
+        run = run + 1 if n_words(s_) <= (4 if vi else 3) and s_.rstrip().endswith((".", "!")) else 0
+        best = max(best, run)
+    if best >= 3:
+        weak.append(f"{best} clipped fragments in a row")
+    heads = [re.sub(r"^#{1,6}\s+", "", t).strip() for k, t in blocks if k == "heading"]
+    if any(EMOJI_RE.search(h) for h in heads):
+        weak.append("emoji or arrows in headings")
+    if not vi:
+        title_case = [h for h in heads[1:] if len(h.split()) >= 3 and
+                      sum(w[:1].isupper() for w in h.split() if len(w) > 3) >= 0.8 * sum(1 for w in h.split() if len(w) > 3)]
+        if len(title_case) >= 2:
+            weak.append(f"{len(title_case)} headings in Title Case")
+    for i, (k, t) in enumerate(blocks[:-1]):
+        if k == "heading" and blocks[i + 1][0] == "para":
+            hw = {w.lower() for w in re.findall(r"[\wÀ-ỹ]{3,}", re.sub(r"^#{1,6}\s+(\d+[.)]\s*)?", "", t))}
+            first = re.split(r"(?<=[.!?…])\s+", clean(blocks[i + 1][1]))[0]
+            fw = {w.lower() for w in re.findall(r"[\wÀ-ỹ]{3,}", first)}
+            if len(hw) >= 3 and len(hw & fw) / len(hw) >= 0.8 and n_words(first) <= len(hw) + 6:
+                weak.append("a heading restated by the sentence under it")
+                break
+    used = sorted({w for w in AI_WORDS if re.search(rf"\b{w}\w*\b", unquoted, re.I)})
+    if len(used) >= 3:
+        weak.append("overused words: " + ", ".join(used[:6]))
+    if len(weak) >= 2 or (weak and strong_hits):
+        f.append(Finding("medium", "TELL-CLUSTER", "Several default-choice patterns together: " + "; ".join(weak) +
+                         ". Rewrite the passages around their point instead of patching phrases."))
+    elif weak:
+        f.append(Finding("info", "TELL-WEAK", f"One weak signal on its own ({weak[0]}): fine if deliberate."))
+    return f
 
 
 # ----------------------------------------------------------------- rigor mode
@@ -361,6 +503,13 @@ ABSOLUTE_RE = re.compile(
     r"\b(proves?|proven|always|never|guarantees?|definitely|undeniabl\w+|it'?s official|everyone)\b|"
     r"chứng minh rằng|đã chứng minh|luôn luôn|chắc chắn|tất cả mọi|mọi trường hợp|không bao giờ", re.I)
 ABSOLUTE_CS_RE = re.compile(r"(?<![\w])(?:ai|Ai) cũng (?:nên|phải|cần|biết)")  # case-sensitive: "AI cũng" is not "ai cũng"
+CI_OVERLAP_RE = re.compile(
+    r"(?:khoảng tin cậy|confidence intervals?|\bCIs?\b|intervals?|vùng)[^.!?\n]{0,80}(?:chồng (?:lên|lấn)|overlap\w*)|"
+    r"(?:chồng (?:lên|lấn)|overlap\w*)[^.!?\n]{0,80}(?:khoảng tin cậy|confidence intervals?|\bCIs?\b|intervals?)", re.I)
+CI_MEANING_RE = re.compile(
+    r"95\s?%\s*(?:chance|probability|xác suất|khả năng)|"
+    r"(?:khoảng tin cậy|confidence interval|\bCI\b)[^.!?\n]{0,80}(?:nhiều khả năng nằm|most likely (?:lies|falls)|"
+    r"probably (?:lies|falls)|chắc (?:là )?nằm)", re.I)
 LIMIT_RE = re.compile(r"limitation|caveat|threats? to validity|does not show|doesn'?t show|did not test|not tested|"
                       r"giới hạn|hạn chế|chưa chứng minh|chưa test|chưa kiểm|không cho thấy|chưa đo", re.I)
 SOURCE_RE = re.compile(r"https?://|\]\(|\bdoi:|arXiv:\d|^source:\s*\S|our own (data|experiment|measurement)|"
@@ -412,6 +561,17 @@ def rigor_checks(blocks: list[tuple[str, str]], title: str | None) -> list[Findi
         if m:
             f.append(Finding("medium", "RIGOR-ABSOLUTE", f"Absolute wording “{m.group(0)}”: data supports claims within "
                              "a sample and a scope, rarely an absolute.", short(c)))
+    m = CI_OVERLAP_RE.search(text)
+    if m:
+        f.append(Finding("medium", "RIGOR-CI-OVERLAP", "Reasoning from overlapping intervals: overlap is not a test of "
+                         "the difference (two intervals can overlap while the difference is clear). Report the "
+                         "interval of the difference itself (stats_check.py diff-prop / mcnemar / paired).",
+                         short(text[max(0, m.start() - 40): m.end() + 40])))
+    m = CI_MEANING_RE.search(text)
+    if m:
+        f.append(Finding("low", "RIGOR-CI-MEANING", "A 95% confidence interval is not a 95% probability that the true "
+                         "value lies in this interval. Say 'the range of values the data does not rule out' or give "
+                         "the repeated-sampling meaning.", short(text[max(0, m.start() - 40): m.end() + 40])))
     if title and (ABSOLUTE_RE.search(title) or ABSOLUTE_CS_RE.search(title)):
         f.append(Finding("high", "RIGOR-TITLE", "Title makes an absolute/universal claim.", title))
     if not DESIGN_RE.search(text):

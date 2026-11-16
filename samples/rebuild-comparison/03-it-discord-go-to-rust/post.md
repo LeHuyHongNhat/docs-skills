@@ -4,7 +4,7 @@ Bài "Why Discord is switching from Go to Rust" (2020) hay được trích như 
 
 Bài này dành cho bạn đang cân nhắc viết lại một service và muốn biết bài của Discord cho phép kết luận đến đâu.
 
-## 1. Bối cảnh
+## 1. Read States: một cache lớn nằm trên đường xử lý nóng
 
 Read States là service ghi nhận bạn đã đọc kênh nào, tin nhắn nào. Nó được gọi mỗi khi bạn kết nối, gửi hoặc đọc tin nhắn, nên nằm trên đường xử lý nóng của hệ thống.
 
@@ -15,7 +15,7 @@ Theo bài gốc:
 
 Các con số này đều là ước lượng theo bậc độ lớn, không phải số đo chính xác.
 
-## 2. Bài gốc quan sát được gì
+## 2. Bản Go tăng vọt độ trễ mỗi 2 phút; bản Rust thì không
 
 **Với bản Go.** Độ trễ và CPU tăng vọt khoảng 2 phút một lần. Bài gốc giải thích bằng garbage collector (GC), bộ phận tự thu hồi bộ nhớ không còn dùng. Go buộc GC chạy ít nhất 2 phút một lần, và mỗi lần chạy phải quét cả cache lớn dù lượng rác rất ít.
 

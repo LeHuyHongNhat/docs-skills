@@ -63,7 +63,37 @@ Never: "proves", "always", "everyone should", "chắc chắn", "luôn luôn", "a
 
 Replace with the specific fact: not "a game-changer for RAG" but "answered 7 more of 50 questions correctly".
 
-## 7. Titles
+## 7. Structural tells of machine-written prose
+
+Word lists age with every model release. The shapes below persist, because they are what "writing for nobody in particular" looks like. `post_check.py` reports the first five on one sighting and the rest only when two or more kinds occur together — a careful writer makes any single one on purpose.
+
+| Tell | Looks like | Do instead |
+|---|---|---|
+| Contrast for weight | "Chunking is not just a step, but the foundation…" · "không chỉ là… mà còn là…" · "It's not X. It's Y." | State Y. Keep a contrast only when the reader really believed X |
+| Staged run-up | "Here's the thing", "Let's dive in" · "Sự thật là", "Hãy cùng đi sâu" | Start with the point |
+| One-line closer | "That's it." "Let that sink in." · "Chỉ vậy thôi." · a last sentence that names what the example showed | Cut it, or end on a fact |
+| Chat residue | "I hope this helps", "Great question" · "Hy vọng bài viết hữu ích", "Chúc các bạn thành công" | Delete |
+| Inflated significance | "plays a crucial role", "a pivotal moment" · "đóng vai trò then chốt", "bước ngoặt" | Say what happened and how much |
+| Dashes as the default connector | several " — " per paragraph | Period, comma, colon or parentheses |
+| Bold label on every list item | "- **Speed.** It is fast." repeated | Prose, or a table when items share fields |
+| Clipped fragments in a row | "No errors. No warnings. All green." | One full sentence |
+| Forced triads | three adjectives or three examples by reflex | The one or two that are true |
+| Decorated or echoed headings | emoji, Title Case, a heading restated by the next sentence | A heading that states the point, then the content |
+| Voice only at both ends | personal opening, impersonal middle, call-to-action ending | Keep the writer's reactions where the work was hard |
+
+**When not to act**: inside a quotation, a title, a proper name, or a passage that discusses the phrase; when the user's own writing sample does it (their voice wins over this table).
+
+**After any rewrite, re-check the facts.** Compare the rewritten text with the ledger: every number, name, date, quote and "X happened before Y" must survive unchanged. Smoothing prose is where numbers get dropped or claims get merged.
+
+## 8. Headings, paragraphs, endings
+
+- **A heading states the point of its section.** "Kết quả" names a slot; "Cắt theo heading ngang semantic chunking trên 50 câu" tells the skimmer the result. Exception: conventional end sections (Sources, Limits).
+- **Break the paragraph where the direction turns** ("but", "tuy nhiên"): the turn starts a new paragraph.
+- **Numbers over adjectives**: "p99 from 340 ms to 45 ms", not "significantly faster".
+- **End on something usable**: the question to the community, a link to code or data, the next experiment. Not a recap, not a slogan.
+- **A number promised in the title or opening must reappear in the body** with its source.
+
+## 9. Titles
 
 - Specific: names the topic and the result or promise.
 - Honest: the post delivers exactly that.

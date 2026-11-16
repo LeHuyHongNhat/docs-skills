@@ -6,6 +6,7 @@ claims:
     type: comparative
     design: panel of 97 published predictors, predictor fixed effects, observational
     test: reported
+    verified: tool-extract   # read through a text-extraction tool, not line by line
     estimate: 0.150
     ci: [-0.001, 0.301]
     unit: " pp/month"
@@ -14,6 +15,7 @@ claims:
     type: comparative
     design: same
     test: reported
+    verified: tool-extract   # read through a text-extraction tool, not line by line
     estimate: 0.337
     ci: [0.161, 0.513]
     unit: " pp/month"
@@ -21,9 +23,11 @@ claims:
     text: "32% of the in-sample return is lost because investors trade on published research"
     type: causal
     test: none
+    verified: tool-extract   # read through a text-extraction tool, not line by line
     why: "A residual (58% − 26%), not a separately identified effect; observational design. The paper tests the difference between the two declines (p = 0.024) but publication is not randomised."
   - id: C4
     text: "Any single published anomaly will lose 58% of its return"
     type: predictive
     test: none
+    verified: tool-extract   # read through a text-extraction tool, not line by line
     why: "The 58% is an average over 97 predictors; the paper reports heterogeneity (stronger in-sample predictors decay more)."

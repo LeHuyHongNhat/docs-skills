@@ -18,7 +18,7 @@ Ba cách giải thích cho ba dự đoán khác nhau:
 
 Thiết kế của paper dùng chính sự khác nhau này để tách các giả thuyết.
 
-## 2. Dữ liệu và cách đo
+## 2. Cách đo: 97 biến dự báo, ba giai đoạn, cổ phiếu Mỹ đến 2013
 
 - **Mẫu**: 97 biến dự báo lấy từ 80 nghiên cứu đăng trên tạp chí có bình duyệt. Dữ liệu cổ phiếu Mỹ lấy từ CRSP (Center for Research in Security Prices, bộ dữ liệu giá cổ phiếu chuẩn trong nghiên cứu tài chính), kéo dài đến năm 2013.
 - **Danh mục**: với mỗi biến, mua nhóm 20% cổ phiếu ở một đầu và bán khống nhóm 20% ở đầu kia (long-short), phần lớn theo trọng số bằng nhau.
@@ -27,7 +27,7 @@ Thiết kế của paper dùng chính sự khác nhau này để tách các gi�
 
 Đây là so sánh quan sát, không phải thí nghiệm: không ai phân ngẫu nhiên việc một anomaly có được công bố hay không.
 
-## 3. Kết quả, kèm độ bất định
+## 3. Sau công bố giảm 58%; ngoài mẫu giảm 26% ở mức ranh giới
 
 Lợi nhuận long-short trung bình trong mẫu là 0,582% mỗi tháng. So với mức đó:
 
@@ -91,7 +91,7 @@ Phần này là ý kiến của mình.
 
 ## Giới hạn của bài tóm tắt này
 
-- Số liệu lấy từ bản working paper trùng nội dung với bản đăng tạp chí; mình chưa đối chiếu từng bảng với bản in.
+- Số liệu lấy từ bản working paper trùng nội dung với bản đăng tạp chí, đọc qua công cụ trích văn bản; mình chưa đối chiếu từng bảng với bản in.
 - Khoảng tin cậy trong biểu đồ là phép tính xấp xỉ của mình, không phải của tác giả.
 - Dữ liệu CRSP là dữ liệu thương mại; mình không xác minh được tác giả có công bố code hay không.
 

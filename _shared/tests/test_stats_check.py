@@ -81,7 +81,10 @@ def test_sharpe_standard_error_and_deflation() -> None:
 
 def test_reported_interval() -> None:
     r = sc.reported(19, 2, 39, "%")  # METR-style: direction supported, size is not
-    assert r.verdict == "SUPPORTED" and len(r.notes) == 2
+    assert r.verdict == "SUPPORTED" and r.extra.get("borderline") and any("Borderline" in n for n in r.notes)
+    edge = sc.reported(0.150, -0.001, 0.301)  # t ≈ 1.95: same evidence as a just-significant result
+    assert edge.verdict == "INCONCLUSIVE" and edge.extra.get("borderline")
+    assert not sc.reported(0.337, 0.161, 0.513).extra.get("borderline")
     assert sc.reported(-18, -38, 9, "%").verdict == "INCONCLUSIVE"
     with pytest.raises(ValueError):
         sc.reported(5, 6, 7)
@@ -118,3 +121,20 @@ def test_cli_single_commands(capsys) -> None:
     assert sc.main(["prop", "38", "50"]) == 0
     assert json.loads(capsys.readouterr().out)["verdict"] == "DESCRIPTIVE"
     assert sc.main(["reported", "5", "6", "7"]) == 2
+
+
+def test_evidence_state_gates_strong_wording(tmp_path: Path) -> None:
+    base = {"test": "mcnemar", "b": 30, "c": 8, "n": 200, "wording": "strong"}
+    f = tmp_path / "c.json"
+    f.write_text(json.dumps({"claims": [
+        {"id": "P", **base, "verified": "primary"},
+        {"id": "S", **base, "verified": "secondary"},
+        {"id": "T", **base, "verified": "tool-extract"},
+        {"id": "N", **base},
+    ]}), encoding="utf-8")
+    rows, over = sc.run_claims(f)
+    by = {r["id"]: r for r in rows}
+    assert over == 2 and not by["P"]["overclaim"] and by["S"]["overclaim"] and by["T"]["overclaim"] and not by["N"]["overclaim"]
+    assert "| Evidence |" in sc.claims_markdown(rows) and "secondary" in sc.claims_markdown(rows)
+    f.write_text(json.dumps({"claims": [{"id": "X", **base, "verified": "trust-me"}]}), encoding="utf-8")
+    assert sc.main(["claims", str(f)]) == 2

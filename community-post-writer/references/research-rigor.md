@@ -14,13 +14,14 @@ One row per claim that will appear in the text. Fill it before drafting; run the
 |---|---|---|---|---|---|---|---|
 | C1 | Heading chunking answers more questions than fixed-size | comparative | benchmark, same 50 questions, 1 run | question, n = 50 (paired) | +14 points; per-item results needed for McNemar; unpaired 95% CI −4 to +31 | INCONCLUSIVE | "was ahead in this test; the sample is too small to tell them apart" |
 
+- **Evidence state** (`verified:` in the claims file): `primary` (you read the number in the primary source's text or table) · `own-data` (computed from the raw data) · `tool-extract` (a summariser or extraction tool read it for you) · `secondary` (a blog, news piece or abstract of another work) · `memory` · `unverified`. Search snippets, generated summaries and memory help you find a source; they do not verify a claim. Only `primary` and `own-data` can carry strong wording; everything else is attributed in the text ("as reported by …") or verified before publishing.
 - **Type**: descriptive (a value) · comparative (A vs B) · causal (X changes Y) · predictive (will happen) · generalising (holds elsewhere).
 - **Verdict** comes from `scripts/stats_check.py`, not from how large the difference looks.
 - Put all claims in a YAML file and run `stats_check.py claims claims.yaml --strict`: it applies a Holm correction across the comparisons and fails when a claim marked `wording: strong` is not SUPPORTED.
 
 ```yaml
 claims:
-  - {id: C1, text: "heading > fixed", test: diff-prop, k1: 38, n1: 50, k2: 31, n2: 50, wording: strong}
+  - {id: C1, text: "heading > fixed", test: diff-prop, k1: 38, n1: 50, k2: 31, n2: 50, wording: strong, verified: own-data}
   - {id: C2, text: "AI-allowed tasks took longer", test: reported, estimate: 19, ci: [2, 39], unit: "%"}
   - {id: C3, text: "model A > model B", test: seeds, runs: [71.2, 70.8, 72.5], baseline: [70.1, 69.9, 70.4]}
   - {id: C4, text: "strategy Sharpe", test: sharpe, sr: 1.4, n_obs: 1260, trials: 200}
@@ -61,6 +62,12 @@ Rules that go with the numbers:
 - **Denominators.** Every percentage names what it is a percentage of.
 - **Outliers and exclusions.** State what was dropped and why, and whether the result survives without the exclusion.
 - **Selection of results.** If several metrics, subsets or checkpoints were looked at, say how many and why this one is shown.
+- **Compare with the interval of the difference, never by overlap.** Two intervals can overlap while the difference between them is clear, and "the intervals overlap" proves nothing either way. Compute the difference and its interval (`diff-prop`, `mcnemar`, `paired`, `seeds --baseline`).
+- **Say what an interval is without overclaiming.** A 95% confidence interval is not "95% probability that the true value is inside". Plain wording that stays correct: "the range of values this data does not rule out" / "khoảng các giá trị mà dữ liệu này chưa loại trừ được".
+- **Borderline is a result.** p = 0.049 and p = 0.051 are the same evidence. When an interval's edge sits at the "no effect" line (`stats_check.py` marks it *borderline*), write "borderline", not "established" and not "no effect".
+- **Planned vs found.** Say whether a comparison was chosen before looking at the data (confirmatory) or noticed afterwards (exploratory, post hoc). Found-afterwards results are leads for the next test, written as such.
+- **Report what did not work.** Null, negative and failed results from the same test belong in the text; leaving them out turns a fair test into a selected one.
+- **No power calculated from the observed result.** Use `mde` / `power-prop` to plan the next test, not to excuse the current one.
 
 ## 4. Threats to validity — check the list for the domain
 
@@ -121,6 +128,8 @@ Name the ones that apply in the text, with what was done about each. "Not checke
 | **Next experiment** | What would change the conclusion, and the sample needed (`mde` / `power-prop`) |
 | **References** | Primary sources with version/date |
 
+`assets/research-post-template.md` (community-post-writer) holds these blocks as slots marked REQUIRED: fill each or write "not available: <why>".
+
 A community post may fold these into prose (a "How we measured" paragraph, a "Limits" section), but none may be missing when the post makes a comparative or causal claim.
 
 ## 7. Rigor rubric (R1–R12)
@@ -141,6 +150,8 @@ Score each 0 (absent/wrong) · 1 (partly) · 2 (done). Use it to self-check a dr
 | R10 | Voices separated | Measured results, authors' conclusions and the writer's opinion are distinguishable |
 | R11 | Title & takeaway | Headline claims exactly what the evidence supports |
 | R12 | Currency | Date of the evidence stated; follow-ups/corrections checked or declared unchecked |
+
+**Reviewer pass.** Before publishing, write the three strongest objections a specialist reviewer would raise, each as: where in the text · what is observed · which criterion it fails · why it matters · what would resolve it (narrower wording, a stated limit, or a further measurement). Resolve each in the text or list it under the limits. Ask for new measurements only when a central claim depends on them; otherwise narrow the claim.
 
 `post_check.py --rigor` checks the mechanical proxies (sample size present, uncertainty near comparisons, limitations, source links, absolute words, backtest caveats). The rubric itself needs a reader.
 

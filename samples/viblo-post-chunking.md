@@ -16,7 +16,7 @@ Hệ thống của team mình:
 - Khoảng 1.200 trang Confluence, phần lớn có heading H2/H3 rõ ràng.
 - Embedding bằng bge-m3, lưu trong pgvector, mô hình trả lời là GPT-4o-mini, mỗi câu hỏi lấy 5 đoạn gần nhất.
 
-## 2. Cách đo
+## 2. Cách đo: 50 câu hỏi thật, chấm tay, mỗi cấu hình chạy 1 lần
 
 | Thành phần | Giá trị |
 |---|---|
@@ -35,32 +35,32 @@ Ba cách cắt được so sánh:
 
 Token là đơn vị mà mô hình dùng để đếm chữ; với tiếng Việt, một từ thường tương ứng 1–3 token.
 
-## 3. Kết quả
+## 3. Trên 50 câu, chưa phân biệt được ba cách cắt về độ chính xác
+
+Số câu đúng: cắt theo heading 38/50, semantic chunking 37/50, cắt cố định 31/50. Câu hỏi cần trả lời là các chênh lệch này có đủ lớn so với độ nhiễu của một bộ 50 câu hay không.
 
 ```chart
 type: interval
-title: Trên 50 câu, khoảng tin cậy của ba cách cắt chồng lên nhau
-subtitle: Tỉ lệ câu trả lời đúng (%), ước lượng và khoảng tin cậy 95%
-categories: ["Theo heading (38/50)", "Semantic chunking (37/50)", "Cố định 500 token (31/50)"]
-values: [76, 74, 62]
-low: [62.6, 60.4, 48.2]
-high: [85.7, 84.1, 74.1]
-unit: "%"
-decimals: 0
-"null": null
-min: 0
-max: 100
-source: Thử nghiệm nội bộ team Platform, tháng 9/2026, 1 lần chạy, n = 50 câu
+title: Cả ba chênh lệch đều có khoảng tin cậy chứa 0
+subtitle: Chênh lệch tỉ lệ câu đúng giữa hai cách cắt (điểm phần trăm), ước lượng và khoảng tin cậy 95%
+categories: ["Heading trừ cố định (38 so với 31)", "Semantic trừ cố định (37 so với 31)", "Heading trừ semantic (38 so với 37)"]
+values: [14, 12, 2]
+low: [-4.1, -6.2, -14.8]
+high: [30.9, 29.2, 18.7]
+decimals: 1
+source: Thử nghiệm nội bộ team Platform, tháng 9/2026, 1 lần chạy, n = 50 câu; khoảng Newcombe cho hai tỉ lệ độc lập
 ```
 
-Khoảng tin cậy 95% là vùng giá trị mà tỉ lệ thật nhiều khả năng nằm trong. Ba vùng này chồng lên nhau, nên chưa thể xếp hạng ba cách cắt.
+Khoảng tin cậy 95% là khoảng các giá trị của chênh lệch thật mà dữ liệu này chưa loại trừ được. Chấm rỗng nghĩa là khoảng đó có chứa 0.
 
-- **Heading so với cố định**: 38/50 so với 31/50, chênh 14 điểm phần trăm, khoảng tin cậy 95% từ −4 đến +31 điểm. Khoảng này chứa 0, tức chưa phân biệt được hai cách.
-- **Heading so với semantic**: 38/50 so với 37/50, chênh 1 câu.
-- Phép so chặt hơn là so theo từng câu hỏi, vì cả ba cách chạy trên cùng 50 câu. Team mình không lưu kết quả từng câu, nên chưa làm được.
+- **Heading so với cố định**: chênh 14 điểm, khoảng tin cậy 95% từ −4 đến +31 điểm. Khoảng này chứa 0, tức chưa phân biệt được hai cách.
+- **Heading so với semantic**: chênh 1 câu.
+- Phép so chặt hơn là so theo từng câu hỏi, vì cả ba cách chạy trên cùng 50 câu. Team mình không lưu kết quả từng câu, nên chưa làm được. Các khoảng ở trên vì vậy được tính như hai mẫu độc lập và chưa hiệu chỉnh cho việc so 3 cặp cùng lúc.
 - Để phát hiện một chênh lệch cỡ 14 điểm, cần khoảng 170 câu cho mỗi cách nếu so như hai mẫu độc lập. So theo từng câu sẽ cần ít hơn.
 
-Thời gian index thì khác nhau rõ, dù cũng mới là một lần đo trong thử nghiệm này:
+## 4. Semantic chunking index lâu gần gấp 4 lần
+
+Thời gian index khác nhau nhiều, dù cũng mới là một lần đo trong thử nghiệm này:
 
 ```chart
 type: hbar
@@ -79,7 +79,7 @@ Hai quan sát khi đọc từng câu sai (đây là mô tả, chưa phải kết
 
 Semantic chunking index chậm hơn vì phải tạo embedding cho từng câu trước khi quyết định gộp.
 
-## 4. Thử nghiệm này chưa cho thấy gì
+## 5. Thử nghiệm này chưa cho thấy gì
 
 - Mỗi cấu hình mới chạy **1 lần** trên **50 câu**, nên không có ước lượng dao động giữa các lần chạy.
 - Wiki của team mình **có heading rõ ràng**. Với tài liệu không có cấu trúc (email, transcript cuộc họp), cắt theo heading có thể không dùng được.
@@ -87,7 +87,7 @@ Semantic chunking index chậm hơn vì phải tạo embedding cho từng câu t
 - Mình chưa thử late chunking, và chưa thử nhiều ngưỡng cho semantic chunking. Một cấu hình semantic được chỉnh kỹ hơn có thể cho kết quả khác.
 - Bộ câu hỏi và wiki là dữ liệu nội bộ, không công bố được. Mình có thể chia sẻ script chấm và cấu hình.
 
-## 5. Nếu bạn đang chọn cách cắt
+## 6. Nếu bạn đang chọn cách cắt
 
 Phần này là ý kiến của mình.
 

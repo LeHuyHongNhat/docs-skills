@@ -142,3 +142,54 @@ def test_sources_section_proper_names_and_org_acronyms_are_not_flagged() -> None
 
 def test_shouting_title_is_still_flagged() -> None:
     assert "TITLE-CAPS" in codes(pc.check("# Cách này SIÊU NHANH\n\nNội dung ngắn có nguồn.\n", "forum")[0])
+
+
+AI_SLOP_EN = """# Chunking Strategies
+
+Here's the thing: chunking is not just a preprocessing step, but the foundation of retrieval. Let's dive in.
+
+## Why It Matters
+
+Chunking plays a crucial role in the evolving landscape of retrieval. It is robust — it is seamless — it is pivotal — and it helps you leverage your data — every day.
+
+## Results
+
+No errors. No warnings. All green. That's it.
+
+I hope this helps!
+"""
+
+
+def test_structural_tells_strong_and_cluster() -> None:
+    c = codes(pc.check(AI_SLOP_EN, "forum")[0])
+    assert {"TELL-CONTRAST", "TELL-RUN-UP", "TELL-CLOSER", "TELL-CHATBOT", "TELL-SIGNIFICANCE", "TELL-CLUSTER",
+            "HEADING-GENERIC"} <= c
+
+
+def test_vietnamese_tells_and_quoted_phrases_are_left_alone() -> None:
+    vi = "Chunking không chỉ là bước tiền xử lý mà còn là nền tảng của tìm kiếm. Sự thật là nhiều team bỏ qua nó.\n"
+    assert {"TELL-CONTRAST", "TELL-RUN-UP"} <= codes(pc.check(vi, "forum")[0])
+    quoted = 'Bài gốc mở đầu bằng câu "Here\'s the thing" và mình giữ nguyên khi trích. Nguồn: thử nghiệm nội bộ.\n'
+    assert "TELL-RUN-UP" not in codes(pc.check(quoted, "forum")[0])
+
+
+def test_one_weak_signal_alone_is_only_info() -> None:
+    md = "\n".join(f"- **Mục {i}.** Nội dung của mục này được mô tả ngắn gọn." for i in range(5)) + "\n"
+    findings, _ = pc.check(md, "forum")
+    assert [f.severity for f in findings if f.code.startswith("TELL")] == ["info"]
+
+
+def test_headline_number_must_reappear() -> None:
+    bad = "# Nhanh hơn 40% với cache\n\nBài này kể cách team mình thêm cache.\n\n## Cách làm\n\nThêm Redis vào trước DB.\n"
+    assert "HEADLINE-NUMBER" in codes(pc.check(bad, "forum")[0])
+    good = bad + "\np95 giảm từ 500 ms xuống 300 ms, tức nhanh hơn 40% (đo trên 3 ngày).\n"
+    assert "HEADLINE-NUMBER" not in codes(pc.check(good, "forum")[0])
+    chart = bad + "\n```chart\ntype: bar\ncategories: [a]\nvalues: [40]\n```\n"
+    assert "HEADLINE-NUMBER" not in codes(pc.check(chart, "forum")[0])
+
+
+def test_ci_overlap_and_ci_meaning_are_flagged_in_rigor_mode() -> None:
+    md = ("Ba khoảng tin cậy chồng lên nhau nên chưa xếp hạng được, n = 50, năm 2026. Giới hạn: 1 lần chạy.\n\n"
+          "Khoảng tin cậy 95% là vùng mà giá trị thật nhiều khả năng nằm trong. Nguồn: thử nghiệm nội bộ, không công bố dữ liệu.\n")
+    c = codes(pc.check(md, "forum", rigor=True)[0])
+    assert {"RIGOR-CI-OVERLAP", "RIGOR-CI-MEANING"} <= c

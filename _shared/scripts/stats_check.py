@@ -16,6 +16,8 @@ Usage:
     stats_check.py mde 50 0.7                      # smallest difference n items can detect (80% power)
     stats_check.py power-prop 0.62 0.76            # items per arm needed to detect p1 vs p2
     stats_check.py claims claims.yaml [--strict]   # batch: every claim of a post, Holm-corrected, Markdown table
+                                                   # each claim may carry `verified: primary | own-data | tool-extract |
+                                                   # secondary | memory | unverified` and `wording: strong`
 
 Design notes:
 - Stdlib only (no numpy/scipy) so it runs wherever the skill runs; the t and binomial
@@ -143,6 +145,21 @@ def _verdict(r: Result, alpha: float = 0.05, null: float = 0.0) -> None:
             r.notes.append(f"n = {r.n} is small: treat as preliminary and replicate.")
     else:
         r.verdict = "INCONCLUSIVE"
+    _borderline(r, null)
+
+
+def _borderline(r: Result, null: float = 0.0) -> None:
+    """An interval whose edge sits at the 'no effect' line is neither established nor absent
+    (p = 0.049 and p = 0.051 are the same evidence). Flag it so the text says 'borderline'."""
+    if r.ci is None or r.estimate is None:
+        return
+    lo, hi = r.ci
+    d = abs(r.estimate - null)
+    edge = min(abs(lo - null), abs(hi - null))
+    if d > 0 and edge < 0.15 * d:
+        r.extra["borderline"] = True
+        r.notes.append("Borderline: one end of the interval sits at the 'no effect' line. Do not write it as "
+                       "established and do not write it as absent — give the estimate and interval and call it borderline.")
 
 
 def wording(r: Result) -> dict[str, str]:
@@ -363,8 +380,6 @@ def reported(est: float, lo: float, hi: float, unit: str = "", null: float = 0.0
     if est != null and width > 1.5 * abs(est - null):
         r.notes.append(f"The interval ({lo:g} to {hi:g}{unit}) is wide relative to the estimate: quote the "
                        "interval, not just the point value — the true effect may be several times smaller or larger.")
-    if r.verdict == "SUPPORTED" and min(abs(lo - null), abs(hi - null)) < 0.15 * abs(est - null):
-        r.notes.append("One end of the interval is close to the null: the direction is supported, the size is not.")
     return r
 
 
@@ -400,6 +415,10 @@ def holm(ps: list[float | None]) -> list[float | None]:
 
 # ----------------------------------------------------------------- claims file
 STRONG_WORDS = ("strong", "beats", "better", "significant")
+# How the number behind a claim was verified. Search snippets, summaries and memory help find a
+# source; they do not verify a claim. Only the first two states can carry strong wording.
+VERIFIED_OK = ("primary", "own-data")
+VERIFIED_STATES = VERIFIED_OK + ("tool-extract", "secondary", "memory", "unverified")
 
 
 def run_claim(c: dict[str, object]) -> Result:
@@ -449,9 +468,18 @@ def run_claims(path: Path, alpha: float = 0.05) -> tuple[list[dict[str, object]]
             r.notes.append(f"Significant alone (p = {r.p:.3f}) but not after Holm correction for {n_tests} "
                            f"comparisons (p = {pa:.3f}).")
         strong = str(c.get("wording", "")).lower() in STRONG_WORDS
-        over = strong and r.verdict != "SUPPORTED"
+        ver = str(c.get("verified", "")).lower().strip()
+        if ver and ver not in VERIFIED_STATES:
+            raise ValueError(f"claim {c.get('id', '?')}: verified must be one of {', '.join(VERIFIED_STATES)}")
+        over = strong and (r.verdict != "SUPPORTED" or (bool(ver) and ver not in VERIFIED_OK))
+        if strong and ver and ver not in VERIFIED_OK:
+            r.notes.append(f"Evidence state is '{ver}': the number was not read in the primary source or the raw "
+                           "data. Open the source and confirm it, or attribute the claim (\"as reported by …\").")
+        elif ver in ("secondary", "memory", "unverified", "tool-extract"):
+            r.notes.append(f"Evidence state '{ver}': attribute the number in the text or verify it in the primary source.")
         overclaims += over
-        row = {"id": c.get("id", ""), "text": c.get("text", ""), **r.to_dict(), "overclaim": over}
+        row = {"id": c.get("id", ""), "text": c.get("text", ""), **r.to_dict(), "overclaim": over,
+               "verified": ver or None}
         rows.append(row)
     return rows, overclaims
 
@@ -463,14 +491,14 @@ def _fmt(x: float | None, unit: str = "") -> str:
 
 
 def claims_markdown(rows: list[dict[str, object]]) -> str:
-    out = ["| ID | Claim | Estimate | 95% CI | p | p (Holm) | Verdict |", "|---|---|---|---|---|---|---|"]
+    out = ["| ID | Claim | Estimate | 95% CI | p | p (Holm) | Evidence | Verdict |", "|---|---|---|---|---|---|---|---|"]
     for r in rows:
         ci = r["ci"]
         u = str(r.get("unit", ""))
         ci_txt = f"{_fmt(ci[0], u)} to {_fmt(ci[1], u)}" if ci else "—"  # type: ignore[index]
-        v = str(r["verdict"]) + (" ⚠ OVERCLAIM" if r["overclaim"] else "")
+        v = str(r["verdict"]) + (" (borderline)" if r.get("borderline") else "") + (" ⚠ OVERCLAIM" if r["overclaim"] else "")
         out.append(f"| {r['id']} | {r['text']} | {_fmt(r['estimate'], u)} | {ci_txt} | "  # type: ignore[arg-type]
-                   f"{_fmt(r['p'])} | {_fmt(r['p_holm'])} | {v} |")  # type: ignore[arg-type]
+                   f"{_fmt(r['p'])} | {_fmt(r['p_holm'])} | {r.get('verified') or '—'} | {v} |")  # type: ignore[arg-type]
     return "\n".join(out)
 
 

@@ -23,6 +23,10 @@ Community readers differ from document readers: they skim, they did not ask for 
 | Length | Long-form forum/blog 800–1,800 words; Facebook/LinkedIn 120–300 words; Reddit 300–900 words |
 | Rigor tier | **Research-grade** whenever the post compares things with numbers, claims a cause, summarises a study, or shows a benchmark/backtest (step 2b applies). **Share** tier (opinion, how-to, question, announcement) skips 2b |
 
+**Voice.** If the user gives one or two of their past posts, read them first and match sentence length, word choice, punctuation and how they open and close; their sample overrides the style tables in `plain-language.md`. Without a sample, take the voice from the platform row above.
+
+**If the user brings their own draft**, pick the mode before touching it: *rebuild* (the draft is thin or generic → run the whole process from the facts) · *restore* (a real voice with real content → keep their argument and words; fix accuracy, clarity and tells only) · *point edit* (one line or section → change that and the minimum around it; skip the rest of the process).
+
 State in one line at the top of your reply which platform, audience and post type you assumed. Ask only when two readings lead to very different posts (e.g. a beginner tutorial vs an expert critique).
 
 ### 2. Research → evidence ledger (before any prose)
@@ -63,7 +67,7 @@ Every post has **one takeaway** you can say in one sentence. Write it down befor
 1. **Title** — specific, honest, ≤ 70 characters in English / ≤ 90 in Vietnamese. Promise only what the post delivers. Produce 3 options in different styles (result-first, question, how-to); recommend one.
 2. **Hook (first 2 lines)** — the problem, the surprising result, or the question; never a greeting or "in this post I will…". On Facebook/LinkedIn this is all that shows before "See more".
 3. **Context** — who this is for, why it matters, what you did/read (1 short paragraph).
-4. **Core** — 3–5 sections, each one idea: claim → evidence (number + source) → plain-language explanation → example. Use headings on long-form platforms.
+4. **Core** — 3–5 sections, each one idea: claim → evidence (number + source) → plain-language explanation → example. On long-form platforms each heading states the point of its section ("Semantic chunking took 26 minutes to index"), not its slot ("Results").
 5. **Limits** — what this does not show (sample, conditions, what you did not test). Short, honest; it is what makes experts trust the rest.
 6. **Takeaway + discussion** — the one-sentence takeaway, then one concrete question to the community ("Bạn đang chunk theo cách nào, và đo bằng gì?"), not "Thoughts?".
 
@@ -80,20 +84,35 @@ Follow `references/plain-language.md`. The essentials:
 
 **Visuals.** If the post compares numbers or shows a trend, add a chart (` ```chart ` block; rules in `references/presentation-and-charts.md`) or a compact table. Most platforms cannot render chart blocks: export them as images (`render_doc.py --to charts`) and reference the PNG where the image goes. Text-only platforms (Facebook, LinkedIn, X) get the image as an attachment, mentioned in your reply.
 
-### 6. Check
+### 6. Check, one pass per question
+
+One pass looks for one thing; a single "review everything" read misses most of them. Run the passes in this order, and after each fix re-check the passes before it.
+
+| Pass | Question | Tool |
+|---|---|---|
+| 1. Fidelity | Does every number, name, date and quote match the ledger? Did any rewrite drop or merge a claim? | ledger; `stats_check.py claims` |
+| 2. Rigor (research-grade) | Is each claim only as strong as its verdict and design? Limits, sources, dates present? | `post_check.py --rigor`; rubric R1–R12 and the reviewer pass in `research-rigor.md` §7 |
+| 3. Newcomer | Can someone new to the topic follow every sentence? Terms defined at first use? | `post_check.py` (sentence length, acronyms) |
+| 4. So what | Does each section tell the reader why it matters to them? Does each heading state its point? | read each section and ask "so what?" |
+| 5. Specific | Is there a number or a concrete example wherever an adjective stands? | `post_check.py` (hype, unsourced figures, headline numbers) |
+| 6. Voice | Does it read like one person wrote it for this community? | structural tells in `plain-language.md` §7; `post_check.py` TELL findings |
+| 7. Platform | Will it render and fit? | `post_check.py --platform …` |
 
 ```bash
-python <skill-dir>/scripts/post_check.py <post.md> --platform <platform> [--title "<title>"]
+python <skill-dir>/scripts/post_check.py <post.md> --platform <platform> [--rigor] [--title "<title>"]
 ```
-Add `--rigor` for research-grade posts: it flags a missing sample size, comparative claims with no uncertainty anywhere, "significant" without a test, causal wording with no controlled design, absolute words ("proves", "luôn luôn"), missing limitations/sources/dates, and backtest or eval caveats. Then score the draft against rubric R1–R12 in `references/research-rigor.md` §7; anything scoring 0 is fixed or declared in the reply.
+Fix every `high` finding. Fix each `medium` finding or keep it with a reason you can state. `TELL-*` findings are fixed by rewriting the passage around its point, not by swapping the flagged phrase.
 
-Fix every `high` finding (markdown the platform cannot render, over the length limit, banned clickbait/hype in the title). For `medium` findings (long sentences, undefined acronyms, numbers with no source nearby, filler opening), fix or keep with a reason. Then re-read as a newcomer: is any sentence understandable only if you already know the topic? Then as an expert: is any claim stronger than the ledger allows?
+### 6b. Reader test
+
+Before delivering a post that will be published, run the reader test in `references/reader-test.md`: write 5–8 reader questions (including one the text should not be able to answer), have a reader with only the post answer them, and fix what they get wrong. If a subagent or Task tool is available, the reader is a fresh agent that sees only the post — for a mixed audience, one newcomer and one critical specialist. If not, do the cold read yourself and say in the hand-off that it was a self-test.
 
 ### 7. Deliver
 
 - Save the post as `.md` (source). For text-only platforms also save the plain-text version ready to paste (`post_check.py --platform facebook --export post.txt` converts headings/bold/links to platform-safe text).
 - If there are charts, export the images with `render_doc.py <post.md> --to charts --out-dir <dir>`.
-- In the reply: the assumed brief (1 line), the 3 title options with your pick, the file(s), and anything the user must fill in or verify (e.g. [TO CONFIRM] a number you could not source). For research-grade posts also list the claims that came out WEAK / INCONCLUSIVE / UNQUANTIFIED and what data would upgrade them. Do not paste a long post into chat if the file exists; short posts (≤ 300 words) can also be shown inline for copy-paste.
+- For a research-grade post, start from `assets/research-post-template.md` when outlining: its REQUIRED slots are the blocks a reviewer looks for.
+- In the reply: the assumed brief (1 line), the 3 title options with your pick, how the reader test was run and what it changed, the file(s), and anything the user must fill in or verify (e.g. [TO CONFIRM] a number you could not source). For research-grade posts also list the claims that came out WEAK / INCONCLUSIVE / UNQUANTIFIED and what data would upgrade them. Do not paste a long post into chat if the file exists; short posts (≤ 300 words) can also be shown inline for copy-paste.
 - When asked, add a repurposing pack: a short version for Facebook/LinkedIn, an X thread, and the next 2–3 posts of a series (from the content plan).
 
 ## Short example (Vietnamese, Facebook group, from an experiment note)
@@ -116,10 +135,12 @@ Mọi người đang chunk theo cách nào, và đo kết quả bằng gì?
 
 ## Resources
 
-- `references/post-types.md` — 9 post types with structure, title patterns and pitfalls (explainer, tutorial, research summary, lessons learned, comparison/review, help request, announcement, discussion/opinion, roundup).
+- `references/post-types.md` — 10 post types with structure, title patterns and pitfalls (explainer, tutorial, research summary, lessons learned, comparison/review, help request, announcement, discussion/opinion, roundup, internal update), the reader-question order and the worth-sharing test.
 - `references/research-to-content.md` — evidence ledger, angle matrix, content plan & series format, citing sources, repurposing across platforms.
 - `references/platform-formats.md` — what each platform renders, length limits, conventions and etiquette (VI + EN communities).
-- `references/plain-language.md` — readability rules, term-definition patterns, analogy rules, hedging scale, banned hype/cliché lists (VI/EN).
+- `references/plain-language.md` — readability rules, term-definition patterns, analogy rules, hedging scale, banned hype/cliché lists (VI/EN), structural tells of machine-written prose, heading and ending rules.
 - `scripts/post_check.py` — readability & platform checker (sentence/paragraph length, undefined acronyms, hype words, unsourced numbers, markdown support, length limits, title checks); `--rigor` adds research-grade checks; `--export` writes a platform-safe plain-text version.
 - `references/research-rigor.md` + `scripts/stats_check.py` — claim ledger, design → allowed verbs, statistics minimum, threats to validity by domain (ML, data science, quant, systems), reporting other people's studies, rigor rubric R1–R12; the script computes CIs, paired tests, seed variance, Sharpe SE/deflation, Holm correction and overclaim flags.
+- `references/reader-test.md` — question-based test with a reader who has only the text; prompt for a fresh agent, cold-read fallback, how to read the results.
+- `assets/research-post-template.md` — skeleton with REQUIRED slots for research-grade posts.
 - `references/presentation-and-charts.md` + `scripts/charts.py` + `scripts/render_doc.py` — charts and comparison layouts; `--to charts` exports chart images for posts, `--to html` makes a shareable page.

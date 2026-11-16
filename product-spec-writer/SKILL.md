@@ -60,6 +60,7 @@ Rules for filling in the template:
    Fix every `high` finding. Any remaining `medium` finding must have a reason to keep it (e.g. the word "simple" is part of a feature name).
 2. Check against the inventory: every fact in the input appears in the document or is explicitly marked out of scope; every contradiction is in Open Questions.
 3. Re-read as QA: for each AC, can you write a test case with a clear pass/fail? If not — the AC is not done.
+4. When the document goes to approvers or to a team that was not in the conversation, run the reader test in `references/reader-test.md` with questions a developer and a QA engineer would ask (thresholds and their boundaries, error branches, what is out of scope). Report how it was run.
 
 ### 5. Hand-off
 
@@ -110,3 +111,4 @@ AC-007.2  Given the user has 499 available points
 - `references/visual-style.md` — rules for writing Markdown that renders well, and the visual QA process.
 - `references/presentation-and-charts.md` + `scripts/charts.py` — when to chart, chart chooser, takeaway titles, comparison layouts (KPI tiles, side-by-side, ✓ ✗ ◐ tables), validated colour palette.
 - `references/research-rigor.md` + `scripts/stats_check.py` — rules and statistics for claims made from data (CIs, paired tests, seeds, Sharpe, overclaim flags).
+- `references/reader-test.md` — optional final check for documents read by people outside the conversation: a reader with only the document answers 5–8 questions; fix what they get wrong.

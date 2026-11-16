@@ -73,6 +73,8 @@ Things you **MUST NOT guess** — if the code does not tell you, write [TO CONFI
    The linter skips code blocks; fix the `high` findings in the prose.
 4. In the hand-off reply: briefly list the [TO CONFIRM] / [CẦN XÁC NHẬN] items and what was / was not verified by running it.
 
+For a README or runbook written for developers new to the repository, finish with the reader test in `references/reader-test.md`: questions such as "what do I run first?", "which env vars are required?", "how do I know it worked?" answered from the document alone.
+
 ### Charts, comparisons & HTML artifacts
 
 Read `references/presentation-and-charts.md` when the document compares options or reports numbers. Typical uses here:
@@ -99,3 +101,4 @@ If the user says they will read on a phone/mobile → add `--page mobile` (narro
 - `scripts/render_doc.py` + `assets/` + `references/visual-style.md` — designed PDF/DOCX/XLSX export and visual QA.
 - `references/presentation-and-charts.md` + `scripts/charts.py` — when to chart, chart chooser, takeaway titles, comparison layouts (KPI tiles, side-by-side, ✓ ✗ ◐ tables), validated colour palette.
 - `references/research-rigor.md` + `scripts/stats_check.py` — rules and statistics for claims made from data (CIs, paired tests, seeds, Sharpe, overclaim flags).
+- `references/reader-test.md` — optional final check for documents read by people outside the conversation: a reader with only the document answers 5–8 questions; fix what they get wrong.

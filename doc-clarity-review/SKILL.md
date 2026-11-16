@@ -84,4 +84,5 @@ If the document is already good: say plainly that it is good and list the few fi
 - `scripts/render_doc.py` + `assets/` + `references/visual-style.md` — export the revised document to PDF/DOCX and the findings table to XLSX.
 - `references/presentation-and-charts.md` + `scripts/charts.py` — when to chart, chart chooser, takeaway titles, comparison layouts (KPI tiles, side-by-side, ✓ ✗ ◐ tables), validated colour palette.
 - `references/research-rigor.md` + `scripts/stats_check.py` — rules and statistics for claims made from data (CIs, paired tests, seeds, Sharpe, overclaim flags).
+- `references/reader-test.md` — optional final check for documents read by people outside the conversation: a reader with only the document answers 5–8 questions; fix what they get wrong.
 - `scripts/lint_doc.py` — surface linter (`--format json` for further processing; `--terms` to pass project-specific synonym groups).

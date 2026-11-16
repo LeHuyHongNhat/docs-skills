@@ -2,7 +2,11 @@
 
 Pick the type from the material and the goal. Each type lists: when to use it, the structure, title patterns, and the pitfalls readers punish.
 
-Contents: 1 Explainer · 2 Tutorial / how-to · 3 Research summary · 4 Lessons learned · 5 Comparison / review · 6 Help request · 7 Announcement / release · 8 Discussion / opinion · 9 Roundup
+Contents: 1 Explainer · 2 Tutorial / how-to · 3 Research summary · 4 Lessons learned · 5 Comparison / review · 6 Help request · 7 Announcement / release · 8 Discussion / opinion · 9 Roundup · 10 Internal update
+
+**Order sections by the reader's questions**, whatever the type: What problem is this about? → How does it actually work / what did you find? → What else was considered, and what was traded off? → What did not work? → What are the limits? → How do I use or try it? A post that answers only the first two reads like an announcement.
+
+**Worth-sharing test** (apply when choosing the angle): the post contains at least one of — a decision explained with its trade-offs · original data · a debugging story with specifics · an honest account of something that went wrong · a how-to that saves the reader real time. If none, it needs more depth or belongs in a changelog.
 
 ## 1. Explainer ("what is X and why should I care")
 **Use when** the audience does not know a concept the material relies on.
@@ -59,6 +63,12 @@ Contents: 1 Explainer · 2 Tutorial / how-to · 3 Research summary · 4 Lessons 
 **Structure**: who it is for and how items were chosen → grouped list (beginner → advanced, or by sub-topic), each item: link + 1–2 lines on why and what you get → a suggested path through the list.
 **Titles**: "<N> resources to learn <X> (ordered from zero to production)".
 **Pitfalls**: lists of links without judgment; dead or outdated links; too many items (≤ 10 per group).
+
+## 10. Internal update (team / company forum)
+**Use when** reporting to people who share the context: weekly update, project status, incident note.
+**Structure**: **Progress** (what shipped or was decided, with numbers) → **Plans** (the next period's top priorities) → **Problems** (what blocks the team and what help is needed). Readable in under a minute; one line per item; link to details instead of explaining them.
+**Titles**: "<Team> — week of <date>: <the one thing to know>".
+**Pitfalls**: activity instead of outcomes ("worked on X"); problems hidden or softened; re-explaining background the readers already have — put the decision or the ask first.
 
 ## Series
 

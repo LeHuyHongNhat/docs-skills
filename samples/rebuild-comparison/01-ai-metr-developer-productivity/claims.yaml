@@ -6,6 +6,7 @@ claims:
     type: causal            # issue-level randomisation → causal within this population
     design: randomised controlled trial, 16 developers, 246 issues
     test: reported
+    verified: tool-extract   # read through a text-extraction tool, not line by line
     estimate: 19
     ci: [2, 39]
     unit: "%"
@@ -14,6 +15,7 @@ claims:
     type: causal
     design: randomised at task level, but strong self-selection of developers and tasks
     test: reported
+    verified: tool-extract   # read through a text-extraction tool, not line by line
     estimate: -18
     ci: [-38, 9]
     unit: "%"
@@ -22,6 +24,7 @@ claims:
     type: causal
     design: same as C2
     test: reported
+    verified: tool-extract   # read through a text-extraction tool, not line by line
     estimate: -4
     ci: [-15, 9]
     unit: "%"
@@ -29,9 +32,11 @@ claims:
     text: "Developers believed AI sped them up by 20% after the study"
     type: descriptive
     test: none
+    verified: tool-extract   # read through a text-extraction tool, not line by line
     why: "Self-reported belief; the paper's section 3.1 gives the point value, no interval was extracted."
   - id: C5
     text: "AI tools slow developers down in general"
     type: generalising
     test: none
+    verified: tool-extract   # read through a text-extraction tool, not line by line
     why: "Not claimed by the authors; explicitly listed among the things the study does not show."

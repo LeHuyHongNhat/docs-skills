@@ -2,15 +2,15 @@
 
 | Phiên bản | Ngày | Owner | Trạng thái |
 |---|---|---|---|
-| 1.0 | 2026-11-16 | Claude cho Le Nhat | Tự chấm, chưa có người chấm độc lập |
+| 1.1 | 2026-11-16 | Claude cho Le Nhat | Tự chấm, chưa có người chấm độc lập |
 
-> **Tóm tắt:** Ba bài thật về AI, quant và IT được dựng lại bằng `community-post-writer` có lớp research rigor. Theo rubric 12 tiêu chí (tối đa 24 điểm), bản dựng lại đạt 23–24 điểm, bản gốc đạt 10–16 điểm. Phép so sánh này **chưa đủ để kết luận skill viết tốt hơn**: chỉ có 3 cặp bài, người chấm cũng là người viết, và rubric đo cách trình bày bằng chứng chứ không đo độ hữu ích. Giá trị chính của đợt này là 7 lỗi thật mà quy trình bắt được, kể cả lỗi trong bài mẫu của chính skill.
+> **Tóm tắt:** Ba bài thật về AI, quant và IT được dựng lại bằng `community-post-writer` có lớp research rigor. Theo rubric 12 tiêu chí (tối đa 24 điểm), bản dựng lại đạt 22–23 điểm, bản gốc đạt 10–16 điểm. Phép so sánh này **chưa đủ để kết luận skill viết tốt hơn**: chỉ có 3 cặp bài, người chấm cũng là người viết, và rubric đo cách trình bày bằng chứng chứ không đo độ hữu ích. Giá trị chính của đợt này là 8 lỗi thật mà quy trình bắt được, kể cả lỗi trong bài mẫu và trong chính các bản dựng lại.
 
 ::: {.kpis}
 - **3** cặp bài (AI, quant, IT), mỗi cặp dùng chung một nguồn sơ cấp
-- **+11 điểm** chênh lệch trung bình trên thang 24 (khoảng 7 đến 13)
+- **+10 điểm** chênh lệch trung bình trên thang 24 (từ 6 đến 12)
 - **p = 0,25** với n = 3: chưa kết luận được theo chính `stats_check.py`
-- **7** lỗi thật được phát hiện trong quá trình dựng lại
+- **8** lỗi thật được phát hiện trong quá trình dựng lại
 :::
 
 ## 1. Cách làm
@@ -33,14 +33,14 @@ Bài gốc không được sao chép vào repo. Mỗi thư mục chỉ chứa cl
 
 ```chart
 type: dumbbell
-title: Bản dựng lại đạt 23–24 trên 24 điểm; bản gốc đạt 10–16
+title: Bản dựng lại đạt 22–23 trên 24 điểm; bản gốc đạt 10–16
 subtitle: Tổng điểm rubric R1–R12 (thang 0–24), tự chấm
 categories: ["1. AI: nghiên cứu METR", "2. Quant: anomaly sau công bố", "3. IT: Discord Go sang Rust"]
 series:
   - name: Bài gốc
     values: [10, 16, 11]
   - name: Bản dựng lại
-    values: [23, 23, 24]
+    values: [22, 22, 23]
 min: 0
 max: 24
 source: Bảng điểm ở mục 2 của báo cáo này
@@ -54,7 +54,7 @@ subtitle: Điểm từng tiêu chí (0 = thiếu, 1 = một phần, 2 = đạt)
 categories: [R1 Đúng số liệu, R2 Thiết kế và mẫu, R3 Độ bất định, R4 Mức khẳng định, R5 Phạm vi, R6 Giới hạn, R7 Giải thích thay thế, R8 Truy vết nguồn, R9 Tái lập, R10 Tách đo đạc và ý kiến, R11 Tiêu đề, R12 Tính cập nhật]
 columns: [Gốc 1, Dựng lại 1, Gốc 2, Dựng lại 2, Gốc 3, Dựng lại 3]
 series:
-  - {name: R1, values: [2, 2, 2, 2, 2, 2]}
+  - {name: R1, values: [2, 1, 2, 1, 2, 1]}
   - {name: R2, values: [2, 2, 2, 2, 1, 2]}
   - {name: R3, values: [0, 2, 1, 2, 1, 2]}
   - {name: R4, values: [1, 2, 1, 2, 1, 2]}
@@ -79,15 +79,15 @@ Lý do cho các điểm thấp của bài gốc:
 | 2. CXO Advisory | Không nói về dữ liệu, code | Không có sai số chuẩn cho con số chính; "32% do giao dịch" được nêu như tác động đo được; không nêu thị trường |
 | 3. Discord | Không có code, cấu hình thử tải, phần cứng; tiêu đề rộng hơn nội dung | Số trước và sau chỉ nằm trên biểu đồ; nhiều thay đổi gộp chung; phiên bản Go đã cũ |
 
-Bản dựng lại mất điểm ở R9 của cặp 1 và 2: chưa xác minh được tác giả có công bố dữ liệu và code hay không.
+Bản dựng lại mất điểm ở hai chỗ. R1 ở cả ba cặp: số liệu được đọc qua công cụ trích văn bản, chưa đối chiếu từng dòng với nguồn sơ cấp, nên theo quy tắc "evidence state" của bản 1.1 chỉ được 1 điểm. R9 ở cặp 1 và 2: chưa xác minh được tác giả có công bố dữ liệu và code hay không.
 
 ## 3. Phép so sánh này cho phép kết luận gì
 
 Dùng chính công cụ của skill cho ba cặp điểm:
 
 ```bash
-python scripts/stats_check.py paired --a 23,23,24 --b 10,16,11
-# chênh lệch trung bình 11 điểm; p = 0,25 (hoán vị chính xác, n = 3) → INCONCLUSIVE
+python scripts/stats_check.py paired --a 22,22,23 --b 10,16,11
+# chênh lệch trung bình 10 điểm; p = 0,25 (hoán vị chính xác, n = 3) → INCONCLUSIVE
 ```
 
 Với 3 cặp, phép kiểm định hoán vị không thể cho p nhỏ hơn 0,25 dù chênh lệch lớn đến đâu. Vì vậy câu được phép viết là: "trên 3 cặp bài tự chấm, bản dựng lại có điểm rubric cao hơn ở cả 3 cặp". Câu "skill viết chặt chẽ hơn tác giả người thật" thì **chưa được phép viết**.
@@ -111,7 +111,7 @@ Các mối đe dọa đối với kết luận:
 
 Điểm rubric cao hơn không có nghĩa là bài có thêm bằng chứng. Với cặp 3, cả bốn claim đều có verdict UNQUANTIFIED ở cả hai bản.
 
-## 5. Bảy lỗi thật mà quy trình bắt được
+## 5. Tám lỗi thật mà quy trình bắt được
 
 1. **Chiều của dấu trong bài cập nhật của METR.** Bài viết "speedup −18%" mà không định nghĩa dấu. Các bài viết lại đọc theo hai hướng ngược nhau: có bài ghi "nhanh hơn 18%", có bài ghi "vẫn chậm 18%". Bản dựng lại trích nguyên văn và chỉ kết luận rằng khoảng tin cậy chứa 0.
 2. **Con số 26% của McLean & Pontiff nằm sát ngưỡng.** Hệ số 0,150 với sai số chuẩn 0,077 cho t ≈ 1,95; khoảng tin cậy 95% tự tính chạm 0. Các bản tóm tắt thường trích 26% như một con số chắc chắn.
@@ -120,6 +120,8 @@ Các mối đe dọa đối với kết luận:
 5. **Bài mẫu của chính skill nói quá.** Bài Viblo mẫu ở bản 2.3 viết "cắt theo heading thắng" dựa trên 38/50 so với 31/50. Khoảng tin cậy của chênh lệch là −4 đến +31 điểm. Bài đã được viết lại.
 6. **Checker báo nhầm.** `post_check.py` coi METR là chữ viết hoa giật tít, coi "AI cũng" là "ai cũng", coi tên riêng trong mục Nguồn là từ viết tắt chưa giải thích, và coi chữ "Evaluation" trong tên tổ chức là dấu hiệu bài về đánh giá model. Cả bốn đã được sửa và có test.
 7. **Biểu đồ không vẽ được vì YAML.** Một `subtitle` bắt đầu bằng dấu ngoặc kép làm block chart không đọc được. Renderer báo cảnh báo đúng; hướng dẫn đã bổ sung quy tắc đặt ngoặc.
+
+8. **Hai lỗi diễn giải khoảng tin cậy trong chính các bản dựng lại** (bắt được ở bản 1.1, nhờ đối chiếu với danh sách lỗi thống kê của một skill trên GitHub). Bài Viblo mẫu kết luận từ việc ba khoảng tin cậy "chồng lên nhau", trong khi phép so đúng là khoảng tin cậy của chính chênh lệch. Hai bài giải thích khoảng tin cậy là vùng mà giá trị thật "nhiều khả năng nằm trong", một cách nói sai về mặt thống kê. Cả hai đã sửa, và `post_check.py --rigor` nay báo hai lỗi này.
 
 ## 6. Lớp rigor chưa làm được gì
 

@@ -4,7 +4,7 @@ Con số "chậm hơn 19%" là kết quả đo thật, nhưng khoảng tin cậy
 
 Bài này đọc lại nghiên cứu từ bản gốc, dành cho bạn đang muốn trích con số này trong một cuộc tranh luận về công cụ AI cho lập trình.
 
-## 1. Nghiên cứu làm gì
+## 1. Thiết kế: chia ngẫu nhiên từng issue cho 16 lập trình viên
 
 METR (Model Evaluation & Threat Research) là một tổ chức nghiên cứu phi lợi nhuận. Họ chạy một thử nghiệm ngẫu nhiên có đối chứng (RCT): mỗi đầu việc được tung đồng xu để quyết định lập trình viên **được phép** hay **không được phép** dùng AI. Vì việc chia nhóm là ngẫu nhiên, khác biệt về thời gian có thể quy cho việc được dùng AI, trong phạm vi nhóm người và loại việc này.
 
@@ -20,9 +20,11 @@ METR (Model Evaluation & Threat Research) là một tổ chức nghiên cứu ph
 
 Cách ước lượng (mục 2.3 của paper): hồi quy trên log của thời gian hoàn thành, có kiểm soát theo thời gian mà lập trình viên dự đoán cho issue đó trong trường hợp không dùng AI.
 
-## 2. Kết quả, kèm độ bất định
+## 2. Chậm hơn 19%, với khoảng tin cậy từ 2% đến 39%
 
-Issue được phép dùng AI mất nhiều thời gian hơn **19%**, khoảng tin cậy 95% từ **+2% đến +39%**. Khoảng tin cậy là vùng giá trị mà tác động thật nhiều khả năng nằm trong. Ở đây vùng đó không chứa 0, nên *hướng* (chậm hơn) được dữ liệu ủng hộ. Nhưng *độ lớn* thì chưa chắc: tác động thật có thể gần như bằng 0, cũng có thể gấp đôi con số 19%.
+Issue được phép dùng AI mất nhiều thời gian hơn **19%**, khoảng tin cậy 95% từ **+2% đến +39%**. Khoảng tin cậy 95% là khoảng các giá trị của tác động thật mà dữ liệu này chưa loại trừ được.
+
+Khoảng đó không chứa 0, nên dữ liệu nghiêng về hướng "chậm hơn". Nhưng cận dưới +2% nằm sát mốc 0, nên đây là kết quả ở mức ranh giới về *độ lớn*: tác động thật có thể gần như bằng 0, cũng có thể gấp đôi con số 19%.
 
 Phát hiện thứ hai là khoảng cách giữa cảm nhận và đo đạc:
 
@@ -89,7 +91,7 @@ Phần này là ý kiến của mình.
 
 ## Giới hạn của bài tóm tắt này
 
-- Mình đọc paper qua bản PDF trên arXiv; phần từ cuối Phụ lục E trở đi mình chưa đọc được. Khoảng tin cậy +2% đến +39% lấy từ bài cập nhật năm 2026 của METR.
+- Mình đọc paper (bản PDF trên arXiv) và bài cập nhật của METR qua công cụ trích văn bản, chưa đối chiếu từng bảng; phần từ cuối Phụ lục E trở đi chưa đọc được. Khoảng tin cậy +2% đến +39% lấy từ bài cập nhật năm 2026 của METR.
 - Mình chưa xác minh được METR có công bố dữ liệu và code phân tích hay không.
 - Bài chỉ nói về hai nghiên cứu của METR, không tổng hợp các nghiên cứu khác về năng suất khi dùng AI.
 

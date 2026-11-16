@@ -70,7 +70,7 @@ source: docs/evaluation-report.md §3.2                          # required
 
 ## Community posts
 
-`community-post-writer` builds an **evidence ledger** before writing (every claim → source, strength, limits), proposes several **angles** from one body of research, writes for the platform's real rendering (Markdown forums vs plain-text Facebook/LinkedIn/X), and applies the research-rigor pass to any post that makes claims from data, and checks the draft with `post_check.py`: sentence/paragraph length (syllable-aware for Vietnamese), undefined acronyms, hype and AI-cliché words (VI + EN), figures without a nearby source, title clickbait, platform length limits and unsupported Markdown. `--export` produces a paste-ready plain-text version.
+`community-post-writer` builds an **evidence ledger** before writing (every claim → source, strength, limits), proposes several **angles** from one body of research, writes for the platform's real rendering (Markdown forums vs plain-text Facebook/LinkedIn/X), and applies the research-rigor pass to any post that makes claims from data, and checks the draft with `post_check.py`: sentence/paragraph length (syllable-aware for Vietnamese), undefined acronyms, hype and AI-cliché words (VI + EN), figures without a nearby source, title clickbait, platform length limits and unsupported Markdown. It also reports structural tells of machine-written prose (contrast-for-weight, staged run-ups, one-line closers, bold-label lists, dash density), headings that carry no information, and headline numbers that never reappear in the body. `--export` produces a paste-ready plain-text version.
 
 ## Research rigor
 
@@ -87,9 +87,11 @@ python scripts/stats_check.py claims claims.yaml --strict    # every claim of a 
 - **Design decides the verb**: only randomised/controlled designs earn causal wording; a benchmark earns "on this dataset"; a backtest earns "in simulation, gross/net of costs".
 - **Threat checklists by domain**: ML evaluation (leakage, baseline parity, seeds, judge validity), data science (selection, confounders, peeking), quant (economic hypothesis, look-ahead, survivorship, multiple testing, costs, decay), systems benchmarks (same load, percentiles, confounded rewrites).
 - **Reporting other people's studies**: tables over abstracts, intervals with estimates, the authors' own non-claims, follow-ups and versions, undefined sign conventions quoted verbatim.
-- `post_check.py --rigor` flags the mechanical gaps; the `interval` chart type draws estimates with their confidence intervals; a 12-point rubric (R1–R12) is used for self-review.
+- Each claim carries an evidence state (`verified: primary | own-data | tool-extract | secondary | …`); a snippet or a summary does not verify a claim, and only the first two can carry strong wording.
+- A reader test ([`reader-test.md`](_shared/references/reader-test.md)) puts the finished text in front of a reader who has only the text.
+- `post_check.py --rigor` flags the mechanical gaps (including reasoning from overlapping intervals and misdescribed confidence intervals); the `interval` chart type draws estimates with their confidence intervals; a 12-point rubric (R1–R12) is used for self-review.
 
-[`samples/rebuild-comparison/`](samples/rebuild-comparison/) rebuilds three real articles (METR's AI-productivity study, McLean & Pontiff on anomaly decay, Discord's Go→Rust post) and scores originals and rebuilds on the rubric — self-graded, n = 3, and reported as inconclusive by the skill's own tool.
+[`samples/rebuild-comparison/`](samples/rebuild-comparison/) rebuilds three real articles (METR's AI-productivity study, McLean & Pontiff on anomaly decay, Discord's Go→Rust post) and scores originals and rebuilds on the rubric. The comparison is self-graded with n = 3, and the skill's own tool reports it as inconclusive.
 
 ## Export & visual QA
 
@@ -117,7 +119,7 @@ python scripts/render_doc.py doc.md --to pdf --page mobile --out-dir out --qa
 ```
 .claude-plugin/     marketplace.json — install all five skills as one Claude Code plugin
 _shared/            single source of truth for shared files
-  references/       writing-standards.md, visual-style.md, presentation-and-charts.md, research-rigor.md
+  references/       writing-standards.md, visual-style.md, presentation-and-charts.md, research-rigor.md, reader-test.md
   scripts/          lint_doc.py, render_doc.py, charts.py, stats_check.py
   assets/           doc-theme.css, reference.docx
   tests/            101 unit tests (pytest)
@@ -158,6 +160,10 @@ The four documentation skills were evaluated with 7 methods over two iterations 
 - Runs take roughly 2–2.5× longer than a plain agent, because the skills verify more (they run the code, render the files, lint the text).
 - Each configuration was run once per case.
 - The judge is from the same model family as the writer; human blind review is the recommended next step.
+
+## Credits
+
+Several ideas were adapted from public skills after a review recorded in [`docs/external-skills-review.md`](docs/external-skills-review.md): structural tells of machine-written prose ([blader/humanizer](https://github.com/blader/humanizer), MIT), engineering-blog standards ([getsentry/skills](https://github.com/getsentry/skills), Apache-2.0), the reader test ([anthropics/skills](https://github.com/anthropics/skills)), evidence binding and statistical pitfalls ([K-Dense-AI/claude-scientific-skills](https://github.com/K-Dense-AI/claude-scientific-skills), MIT), editing passes ([coreyhaines31/marketingskills](https://github.com/coreyhaines31/marketingskills), MIT) and skill-authoring guidance ([obra/superpowers](https://github.com/obra/superpowers), MIT). The ideas were re-expressed in this project's own words and examples; no text was copied.
 
 ## License
 

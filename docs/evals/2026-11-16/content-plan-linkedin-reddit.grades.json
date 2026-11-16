@@ -1,0 +1,83 @@
+{
+ "A": {
+  "01": {
+   "pass": true,
+   "evidence": "content_plan.md '## Angles' table has 6 angles with columns 'Reader' and 'Takeaway (1 sentence)'; '## Recommendation': 'Start with #1. It is the only angle where every sentence rests on measured rows...'"
+  },
+  "02": {
+   "pass": true,
+   "evidence": "Measured: 1805 characters; regex counts 0 for '# ' headings, '**', [text](url), tables, code fences, backticks. Only '#OCR'-style hashtags and '•' bullets."
+  },
+  "03": {
+   "pass": true,
+   "evidence": "Line 1: 'I tested 3 open-source OCR (optical character recognition) engines on 400 Vietnamese invoices. The best got 88.7% of fields exactly right, the weakest 71.4%.' Line 2 is blank. No greeting."
+  },
+  "04": {
+   "pass": true,
+   "evidence": "'**TL;DR:**' present; method table rows Sample ('n = 400 VAT ... invoices from 3 small companies'), Metric ('Field-level exact match'), Design ('single run per engine'), Hardware ('RTX 4070 with 12 GB'); results table has all three engines; limitations section titled '## What this does not show'."
+  },
+  "05": {
+   "pass": false,
+   "evidence": "All notes figures are reproduced exactly, but both posts add numbers not in the notes. LinkedIn: '3,600 fields', 'gaps of 5.5 and 11.8 percentage points'. Reddit: 3,600, 540, six Wilson CIs, difference CIs (3.9 to 7.1; 9.9 to 13.7; 0.7 to 10.3; -7 to +23), '80% power', 'about 408 photos'. Literal wording ('no new numbers') fails. See notes for per-number check."
+  },
+  "06": {
+   "pass": true,
+   "evidence": "LinkedIn mentions neither ('I did not test any commercial API'). Reddit: 'Commercial tools: not tested, I have no access. One vendor's sales deck states \"99% accuracy...\"'; 'Fine-tuning: not tested... That is a guess.'"
+  },
+  "07": {
+   "pass": true,
+   "evidence": "LinkedIn: 'The invoices come from 3 small companies', 'The dataset is private (shared with permission)'. Reddit: 'invoices from 3 small companies', 'shared with permission and cannot be published', 'Disclosure: I built the benchmark harness'. Caveat: LinkedIn says 'private', not literally 'cannot be published'."
+  },
+  "08": {
+   "pass": true,
+   "evidence": "LinkedIn: 'OCR (optical character recognition)', 'VAT (value-added tax)'. Reddit: same two expansions, plus 'CI (confidence interval)'."
+  },
+  "09": {
+   "pass": null,
+   "evidence": "unobservable: no post_check.py output or log in A/. (content_plan.md mentions stats_check.py and claims.yaml exists, which concerns a different script.)"
+  }
+ },
+ "B": {
+  "01": {
+   "pass": true,
+   "evidence": "content_plan.md '## Angles' has 5 angles, each with '**Reader:**' and '**Point:**'; angle 1 marked '(chosen)' with '**Why it is the best:** every number is measured, the takeaway changes a decision...'. Caveat: the Points of angles 1, 2 and 4 run 2-3 sentences; only angles 3 and 5 have a strictly one-sentence Point, the others rely on the heading as the one-line takeaway."
+  },
+  "02": {
+   "pass": true,
+   "evidence": "Measured: 1798 characters; regex counts 0 for '# ' headings, '**', [text](url), tables, code fences, backticks. Uses '•', '→', '1.' plain numbering and hashtags."
+  },
+  "03": {
+   "pass": true,
+   "evidence": "Line 1: 'I benchmarked three open-source OCR engines on 400 Vietnamese VAT invoices. The gap between them nearly doubles when the invoice is a phone photo.' Line 2 is blank. No greeting."
+  },
+  "04": {
+   "pass": false,
+   "evidence": "grep for 'TL;DR'/'TLDR' in reddit_post.md returns nothing; the opening paragraph is unlabelled and gives no result figures. Method ('**Setup**': 400 invoices, exact match, 'One run per engine on the same machine (RTX 4070, 12 GB)'), results table with three engines and '**Limitations**' are present."
+  },
+  "05": {
+   "pass": false,
+   "evidence": "All notes figures are reproduced exactly, but both posts add numbers not in the notes. LinkedIn: '17 points', '30 points', 'nearly doubles'. Reddit: 340, '~75.4%', '~85.4%', '~90.4%', 'about 15 points', 17, 30, 22.5, 12.6, 9.6, 5.5, 540. Literal wording ('no new numbers') fails. See notes for per-number check."
+  },
+  "06": {
+   "pass": true,
+   "evidence": "LinkedIn mentions neither ('I tested no commercial API'). Reddit: 'I have seen a vendor deck claim 99% accuracy ... but I had no access and do not know what metric that figure uses'; 'My guess is that fine-tuning VietOCR ... I have not tested that.'"
+  },
+  "07": {
+   "pass": false,
+   "evidence": "Dataset part is met in both posts (LinkedIn: 'come from 3 SMEs ... I cannot publish them'; Reddit: '3 Vietnamese SMEs', 'I cannot publish it'). But the Reddit post never says the author built the harness: only 'Harness (MIT): github.com/...' and 'Only the harness is public'. No 'I built' / 'my harness' / disclosure sentence."
+  },
+  "08": {
+   "pass": false,
+   "evidence": "Neither post expands OCR or VAT: 'optical' and 'value-added' do not occur in linkedin_post.txt or reddit_post.md. 'SMEs' and 'CRAFT' are also unexplained."
+  },
+  "09": {
+   "pass": null,
+   "evidence": "unobservable: no post_check.py output or log in B/."
+  }
+ },
+ "notes": "Assertion 05, derived numbers (all recomputed by script).\nA LinkedIn: 3,600 fields = 400 x 9, correct, not labelled as derived. 5.5 and 11.8 points = 88.7-83.2 and 83.2-71.4, correct, not labelled.\nA Reddit: 3,600 and 540 (= 60 x 9), correct, not labelled. Six Wilson 95% CIs in the results table, all reproduce exactly from counts back-calculated from the percentages; labelled 'I computed Wilson intervals with each field as one observation', but the post does not say the counts are back-calculated (content_plan.md and claims.yaml do, and ask the author to confirm). Difference CIs 3.9-7.1 and 9.9-13.7 correct; per-invoice 0.7-10.3 correct; per-invoice photos '-7 to +23' reproduces as -7.0 to +24.0 with a Wald interval (off by one at the upper end, or a different method). '408 photos' for 80% power reproduces (407.8) only with 70.6% vs 79.1% (PaddleOCR vs VietOCR), while the text says 'a gap like 71% vs 79%', which gives about 459; labelled 'I estimate', and it is per group, which the post does not say.\nB LinkedIn: '17 points' (17.3) and '30 points' (30.2) are correct roundings, not labelled. 'Nearly doubles' in the hook overstates: the ratio is 1.75.\nB Reddit: 340 = 400-60 correct, unlabelled. Scans-only ~75.4/~85.4/~90.4 correct (75.37/85.42/90.39), labelled 'Back-calculated from the other two columns, not measured separately' and flagged in the plan for confirmation. 'About 15 points on scans' correct. 22.5/12.6/9.6/5.5 correct subtractions, unlabelled. 'Less than half the time' correct (0.6/1.4 = 0.43).\nNo derivation in either attempt is arithmetically wrong except the two small A discrepancies above. A's additions are much larger in kind (inferential statistics written in the author's voice) than B's (subtractions and one weighted back-calculation).\nNot covered by assertions.\nA: Reddit limitations assert things the notes do not say, in the author's first person: 'I have no agreement figure between annotators', 'I did not check whether all three got equal tuning effort', 'I have not run a paired per-field test yet'. Plausible but unverified statements about the author's work. A also left an extra working file (claims.yaml) in the output folder. A's Reddit title line and '---' must be stripped before pasting. A's LinkedIn does not literally say the data 'cannot be published' (says 'private'). A softens the fine-tuning guess from 'close most of the gap' to 'would help a lot'. A Reddit is about 5,000 characters, roughly 60% longer than B.\nB: 'the gap nearly doubles' hook is the weakest claim (1.75x on 60 photos, single run), though the post adds 'Treat small differences as noise'. B LinkedIn states 'Most errors come from two places' without the 'I saw' hedge the plan itself prescribes (the list is introduced by 'Three more things I saw'). 'Accuracy costs time' is only partly supported: Tesseract is slower than PaddleOCR and less accurate. B Reddit uses '**Title:**' and '**Body:**' labels that must be stripped. B's plan includes a useful pre-posting checklist (placeholder repo link, subreddit rules) that no assertion rewards.\nBoth copied ocr_benchmark_notes.md into the output folder unchanged. Assertion 01 for B is a lenient pass (multi-sentence 'Point' fields). Assertion 09 cannot be observed for either.",
+ "label_key": {
+  "with": "A",
+  "without": "B"
+ }
+}

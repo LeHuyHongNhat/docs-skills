@@ -123,7 +123,7 @@ _shared/            single source of truth for shared files
   references/       writing-standards.md, visual-style.md, presentation-and-charts.md, research-rigor.md, reader-test.md, agent-assisted-research.md
   scripts/          lint_doc.py, render_doc.py, charts.py, stats_check.py
   assets/           doc-theme.css, reference.docx
-  tests/            110 unit tests (pytest)
+  tests/            111 unit tests (pytest)
 <skill>/            the five skills; scripts/references/assets are synced from _shared by build.sh
   evals/            test cases in `claude plugin eval` format
 _eval_tools/        evaluation tooling: automated checks, blind A/B prep, real `claude -p` routing eval
@@ -154,7 +154,7 @@ The four documentation skills were evaluated with 7 methods over two iterations 
 | Correct skill routing (`claude -p`, 72 runs, Vietnamese + English queries, 3 competing skills installed) | **100%** | – |
 | Ground-truth fidelity (flowchart edges / ERD columns / planted review issues) | 16/16 · 25/25 · 13/13 | – |
 
-**Not yet evaluated (v2.3):** the chart/presentation layer, the research-rigor layer and `community-post-writer` have unit tests (palette validation, every chart type, statistics against scipy reference values, post checker) and four eval cases (three in `community-post-writer/evals/`, one report audit in `doc-clarity-review/evals/`), but no with/without-skill benchmark, routing run or independent (human or other-model) grading yet. The rebuild comparison in `samples/rebuild-comparison/` is self-graded.
+**Evaluated on 2026-11-16 (see [`docs/eval-results-2026-11-16.md`](docs/eval-results-2026-11-16.md)):** four cases, one run per configuration, graded by AI subagents on label-shuffled outputs. On the 34 assertions that can be judged from the output files, runs with the skill passed 33 and runs without it passed 27. Two of the four cases showed no or almost no difference. A routing proxy (a model choosing a skill from the five descriptions) matched the expected skill on 45 of 45 requests after one description fix. Not done: repeated runs, human grading, the real `claude -p` routing run, and any benchmark of the chart layer by itself.
 
 **Known limitations:**
 - Output for very short inputs is still longer than ideal.
@@ -164,7 +164,7 @@ The four documentation skills were evaluated with 7 methods over two iterations 
 
 ## Credits
 
-Several ideas were adapted from public skills after a review recorded in [`docs/external-skills-review.md`](docs/external-skills-review.md): structural tells of machine-written prose ([blader/humanizer](https://github.com/blader/humanizer), MIT), engineering-blog standards ([getsentry/skills](https://github.com/getsentry/skills), Apache-2.0), the reader test ([anthropics/skills](https://github.com/anthropics/skills)), evidence binding and statistical pitfalls ([K-Dense-AI/claude-scientific-skills](https://github.com/K-Dense-AI/claude-scientific-skills), MIT), editing passes ([coreyhaines31/marketingskills](https://github.com/coreyhaines31/marketingskills), MIT) and skill-authoring guidance ([obra/superpowers](https://github.com/obra/superpowers), MIT). The agent-assisted-research guide adapts the course handout "AI Vibe-Researcher" by Nguyễn Thanh Huy (AI VIET NAM, AIO2026). The ideas were re-expressed in this project's own words and examples; no text was copied.
+Several ideas were adapted from public skills after a review recorded in [`docs/external-skills-review.md`](docs/external-skills-review.md): structural tells of machine-written prose ([blader/humanizer](https://github.com/blader/humanizer), MIT), engineering-blog standards ([getsentry/skills](https://github.com/getsentry/skills), Apache-2.0), the reader test ([anthropics/skills](https://github.com/anthropics/skills)), evidence binding and statistical pitfalls ([K-Dense-AI/claude-scientific-skills](https://github.com/K-Dense-AI/claude-scientific-skills), MIT), editing passes ([coreyhaines31/marketingskills](https://github.com/coreyhaines31/marketingskills), MIT) and skill-authoring guidance ([obra/superpowers](https://github.com/obra/superpowers), MIT).
 
 ## License
 

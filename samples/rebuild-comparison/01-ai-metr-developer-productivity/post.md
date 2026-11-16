@@ -6,7 +6,7 @@ Bài này đọc lại nghiên cứu từ bản gốc, dành cho bạn đang mu�
 
 ## 1. Thiết kế: chia ngẫu nhiên từng issue cho 16 lập trình viên
 
-METR (Model Evaluation & Threat Research) là một tổ chức nghiên cứu phi lợi nhuận. Họ chạy một thử nghiệm ngẫu nhiên có đối chứng (RCT): mỗi đầu việc được tung đồng xu để quyết định lập trình viên **được phép** hay **không được phép** dùng AI. Vì việc chia nhóm là ngẫu nhiên, khác biệt về thời gian có thể quy cho việc được dùng AI, trong phạm vi nhóm người và loại việc này.
+METR (Model Evaluation & Threat Research) là một tổ chức nghiên cứu phi lợi nhuận. Họ chạy một thử nghiệm ngẫu nhiên có đối chứng (RCT): mỗi đầu việc được tung đồng xu để quyết định lập trình viên **được phép** hay **không được phép** dùng AI. Vì việc chia nhóm là ngẫu nhiên, khác biệt về thời gian có thể quy cho việc *được phép* dùng AI, trong phạm vi nhóm người và loại việc này. Chia ngẫu nhiên không loại được một điểm yếu: người tham gia biết mình thuộc nhóm nào (xem mục 3).
 
 | Thành phần | Giá trị |
 |---|---|
@@ -30,7 +30,7 @@ Phát hiện thứ hai là khoảng cách giữa cảm nhận và đo đạc:
 
 ```chart
 type: hbar
-title: Mọi dự đoán đều nói AI giúp nhanh hơn; kết quả đo cho thấy chậm hơn 19%
+title: Mọi dự đoán và tự đánh giá đều nói AI giúp nhanh hơn; kết quả đo cho thấy chậm hơn 19%
 subtitle: Thay đổi thời gian hoàn thành khi được dùng AI (%), số âm là nhanh hơn
 categories: [Chuyên gia kinh tế dự đoán, Chuyên gia ML dự đoán, Lập trình viên dự đoán trước, Lập trình viên ước lượng sau, Kết quả đo]
 values: [-39, -38, -24, -20, 19]
@@ -44,8 +44,9 @@ Sau khi làm xong, chính những người tham gia vẫn tin rằng AI đã gi�
 
 Các kiểm tra độ vững mà paper báo cáo (Phụ lục C.3 và E.2):
 - Đổi cách ước lượng (ba mô hình hồi quy khác và tỉ số trung bình) cho kết quả cùng hướng.
-- Trên phần có ghi màn hình, thời gian đo từ video cho mức chậm 25%, so với 24% từ thời gian tự ghi.
-- 75% số lập trình viên bị chậm hơn khi được dùng AI; một số ít nhanh hơn.
+- Chỉ một phần issue có ghi màn hình. Trên phần đó, thời gian đo từ video cho mức chậm 25%, so với 24% khi dùng thời gian tự ghi của cùng các issue ấy (khác con số 19% vì đây là tập con).
+- Tính sai số theo cụm từng lập trình viên cho khoảng tin cậy tương tự hoặc rộng hơn một chút. Điều này đáng lưu ý vì 246 issue chỉ đến từ 16 người.
+- 75% số lập trình viên bị chậm hơn khi được dùng AI; một số ít nhanh hơn. Mỗi người chỉ làm khoảng 15 issue, nên ước lượng theo từng người rất nhiễu.
 
 ## 3. Điều tác giả nói nghiên cứu KHÔNG cho thấy
 
@@ -86,7 +87,7 @@ Hai điều cần nói rõ:
 Phần này là ý kiến của mình.
 
 - Đừng viết "AI làm lập trình viên chậm 19%". Viết: "Trong một RCT đầu năm 2025 với 16 lập trình viên kỳ cựu trên repo của chính họ, issue được phép dùng AI mất thêm 19% thời gian (khoảng tin cậy 95%: 2% đến 39%)."
-- Phát hiện đáng mang về hơn là khoảng cách giữa cảm nhận và đo đạc. Nếu team bạn đánh giá công cụ AI bằng khảo sát cảm nhận, kết quả này là lý do để đo thời gian thật.
+- Phát hiện đáng mang về hơn là khoảng cách giữa cảm nhận và đo đạc. Nếu team bạn đánh giá công cụ AI bằng khảo sát cảm nhận, kết quả này là lý do để ghi lại thời gian làm từng việc. Lưu ý rằng chính nghiên cứu này cũng dùng thời gian do người tham gia tự ghi.
 - Muốn tự đo: chia ngẫu nhiên theo từng đầu việc, ghi thời gian từng việc, và báo cáo kèm khoảng tin cậy.
 
 ## Giới hạn của bài tóm tắt này

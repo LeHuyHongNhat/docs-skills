@@ -15,7 +15,7 @@ Theo bài gốc:
 
 Các con số này đều là ước lượng theo bậc độ lớn, không phải số đo chính xác.
 
-## 2. Bản Go tăng vọt độ trễ mỗi 2 phút; bản Rust thì không
+## 2. Bản Go tăng vọt độ trễ khoảng 2 phút một lần; biểu đồ bản Rust không còn hiện tượng đó
 
 **Với bản Go.** Độ trễ và CPU tăng vọt khoảng 2 phút một lần. Bài gốc giải thích bằng garbage collector (GC), bộ phận tự thu hồi bộ nhớ không còn dùng. Go buộc GC chạy ít nhất 2 phút một lần, và mỗi lần chạy phải quét cả cache lớn dù lượng rác rất ít.
 
@@ -23,7 +23,7 @@ Các con số này đều là ước lượng theo bậc độ lớn, không ph�
 
 **Với bản Rust.** Rust không có GC: bộ nhớ được giải phóng ngay khi một mục bị loại khỏi cache. Bản chuyển đổi đầu tiên xong vào tháng 5/2019. Khi thử tải, độ trễ ngang bản Go và không còn các đợt tăng vọt.
 
-Sau đó đội tối ưu thêm, nâng thư viện tokio lên 0.2 và tăng cache lên 8 triệu mục.
+Sau đó đội tối ưu thêm và nâng thư viện tokio lên 0.2; theo bài gốc, sau các bước này bản Rust thấp hơn bản Go ở độ trễ, CPU và bộ nhớ. Cuối cùng họ tăng cache lên 8 triệu mục. Bài gốc nêu cả "hàng chục triệu mục" lẫn "8 triệu"; mình không xác định được hai con số có cùng đơn vị đếm hay không.
 
 ## 3. Mỗi nhận định dựa trên bằng chứng gì
 
@@ -31,20 +31,20 @@ Sau đó đội tối ưu thêm, nâng thư viện tokio lên 0.2 và tăng cach
 |---|---|---|
 | Bản Go có đợt tăng vọt mỗi khoảng 2 phút | Biểu đồ production; không có số trong phần chữ | Quan sát, chưa định lượng |
 | Nguyên nhân là GC quét cache lớn | Cơ chế (GC bị ép chạy mỗi 2 phút) và các lần chỉnh tham số | Giải thích hợp lý, chưa có so sánh có kiểm soát |
-| Bản Rust hết tăng vọt; độ trễ, CPU, bộ nhớ thấp hơn | Biểu đồ trước và sau | Quan sát trên một service, chưa định lượng |
+| Bản Rust hết tăng vọt; sau tối ưu thì độ trễ, CPU, bộ nhớ thấp hơn | Biểu đồ trước và sau | Quan sát trên một service, chưa định lượng |
 | Cải thiện đến từ ngôn ngữ Rust | Không có phép đo tách riêng | Chưa tách được |
 
 Không nhận định nào đi kèm số mẫu, số lần đo lặp lại hay độ dao động. Vì vậy không tính được khoảng tin cậy cho bất kỳ so sánh nào trong bài.
 
 ## 4. Vì sao chưa kết luận được "Rust nhanh hơn Go"
 
-- **Nhiều thứ đổi cùng lúc.** Bản Rust dùng cấu trúc dữ liệu khác (BTreeMap thay cho HashMap), thư viện metrics khác, giảm sao chép bộ nhớ, và sau đó nâng phiên bản tokio. Kích thước cache cũng được tăng lên. Bài gốc không đo riêng đóng góp của từng thay đổi.
-- **Không có số trước và sau.** Độ trễ, CPU, bộ nhớ chỉ xuất hiện trên biểu đồ. Bài không nêu phần cứng hai bản có giống nhau không, tải lúc đo ra sao, đo trong bao lâu.
+- **Nhiều thứ đổi cùng lúc.** Bản Rust dùng cấu trúc dữ liệu khác (BTreeMap thay cho HashMap), thư viện metrics khác, giảm sao chép bộ nhớ, và sau đó nâng phiên bản tokio. Bài gốc không đo riêng đóng góp của từng thay đổi. Việc tăng kích thước cache diễn ra sau phép so sánh nên không tính vào đây.
+- **Không có số trước và sau.** Độ trễ, CPU, bộ nhớ chỉ xuất hiện trên biểu đồ. Bài không cho đủ thông tin để biết hai bản chạy trên phần cứng giống nhau, tải lúc đo ra sao, đo trong bao lâu.
 - **Một service, một lần triển khai.** Đây là n = 1. Chính bài gốc cũng nói họ chỉ dùng Rust ở nơi phù hợp.
 - **Phiên bản Go đã cũ.** Các bản được thử là 1.8 đến 1.10. Bài không đo bản mới hơn, nên không nói được Go hiện nay còn hiện tượng này hay không.
 - **Tiêu đề rộng hơn nội dung.** Tiêu đề gợi ý cả công ty đổi ngôn ngữ; nội dung chỉ nói về một service.
 
-Điều đứng vững hơn là cơ chế: một bộ GC phải quét toàn bộ vùng nhớ đang sống sẽ tốn thời gian theo kích thước vùng nhớ đó, kể cả khi rác ít. Một cache lớn sống lâu là đúng trường hợp này.
+Phần giải thích về cơ chế thì hợp lý, dù cũng chưa được kiểm bằng so sánh có đối chứng. Theo bài gốc, mỗi lần chạy GC phải quét cả cache lớn kể cả khi rác ít. Một cache lớn sống lâu là đúng trường hợp đó.
 
 ## 5. Một phép so sánh đạt chuẩn sẽ cần gì
 

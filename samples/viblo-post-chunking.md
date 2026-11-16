@@ -1,6 +1,6 @@
-# Cắt theo heading ngang semantic chunking, index nhanh gần 4 lần; 50 câu chưa đủ xếp hạng
+# 50 câu hỏi chưa đủ để xếp hạng ba cách chunking; semantic chunking index lâu gần gấp 4 lần
 
-Team mình thử 3 cách cắt tài liệu cho bot hỏi đáp wiki nội bộ. Cắt theo heading đạt số câu đúng ngang semantic chunking với khoảng một phần tư thời gian index. Nhưng với 50 câu hỏi, mình chưa phân biệt được cách nào chính xác hơn.
+Team mình thử 3 cách cắt tài liệu cho bot hỏi đáp wiki nội bộ. Với 50 câu hỏi, mình chưa phân biệt được cách nào chính xác hơn. Khác biệt đo được rõ nhất là thời gian index: semantic chunking mất 26 phút, cắt theo heading mất 7 phút, trong một lần đo.
 
 Bài này dành cho bạn mới làm bot hỏi đáp trên tài liệu (RAG, giải thích ở mục 1) và đang phân vân nên cắt tài liệu thế nào. Mình kể cách đo, kết quả kèm độ bất định, và những gì thử nghiệm này chưa cho thấy.
 
@@ -56,7 +56,7 @@ Khoảng tin cậy 95% là khoảng các giá trị của chênh lệch thật m
 - **Heading so với cố định**: chênh 14 điểm, khoảng tin cậy 95% từ −4 đến +31 điểm. Khoảng này chứa 0, tức chưa phân biệt được hai cách.
 - **Heading so với semantic**: chênh 1 câu.
 - Phép so chặt hơn là so theo từng câu hỏi, vì cả ba cách chạy trên cùng 50 câu. Team mình không lưu kết quả từng câu, nên chưa làm được. Các khoảng ở trên vì vậy được tính như hai mẫu độc lập và chưa hiệu chỉnh cho việc so 3 cặp cùng lúc.
-- Để phát hiện một chênh lệch cỡ 14 điểm, cần khoảng 170 câu cho mỗi cách nếu so như hai mẫu độc lập. So theo từng câu sẽ cần ít hơn.
+- Để phát hiện một chênh lệch cỡ 14 điểm (mức ý nghĩa 5%, power 80%), cần khoảng 170 câu cho mỗi cách nếu so như hai mẫu độc lập. So theo từng câu thường cần ít hơn, khi kết quả của các cách trên cùng một câu có tương quan.
 
 ## 4. Semantic chunking index lâu gần gấp 4 lần
 
@@ -77,7 +77,7 @@ Hai quan sát khi đọc từng câu sai (đây là mô tả, chưa phải kết
 - 9 trong 19 câu sai của cách cắt cố định là câu cần đọc một bảng, và bảng đó bị cắt làm đôi.
 - Semantic chunking đôi lúc gộp hai mục khác chủ đề nhưng viết cùng văn phong vào một đoạn.
 
-Semantic chunking index chậm hơn vì phải tạo embedding cho từng câu trước khi quyết định gộp.
+Một lý do hợp lý cho thời gian index dài hơn: semantic chunking phải tạo embedding cho từng câu trước khi quyết định gộp. Mình chưa đo riêng bước này.
 
 ## 5. Thử nghiệm này chưa cho thấy gì
 
@@ -91,7 +91,7 @@ Semantic chunking index chậm hơn vì phải tạo embedding cho từng câu t
 
 Phần này là ý kiến của mình.
 
-1. Nếu tài liệu có heading rõ ràng, bắt đầu bằng cắt theo heading: rẻ hơn, và trong thử nghiệm này không thấy kém hơn.
+1. Nếu tài liệu có heading rõ ràng, bắt đầu bằng cắt theo heading: index nhanh hơn trong lần đo này, và thử nghiệm chưa cho thấy nó kém hơn (cũng chưa cho thấy nó ngang bằng).
 2. Dựng bộ câu hỏi thật trước khi đổi sang cách phức tạp hơn, và **lưu kết quả từng câu** để so theo cặp. Với 50 câu, chỉ những chênh lệch rất lớn mới lộ ra.
 3. Kiểm tra riêng các câu hỏi cần đọc bảng.
 

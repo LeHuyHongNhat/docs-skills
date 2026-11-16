@@ -56,6 +56,8 @@ For a post with a mixed audience, run two readers: a newcomer ("you are new to t
 | A confident answer to the trap question | The text implies something it should not | Find the sentence that implies it and bound it |
 | Read-twice sentences, unexplained terms, disagreements | Clarity defects | Fix each |
 
+Read the specialist's list of over-strong claims even when every question was answered correctly: comprehension questions show whether the text is understood, the critique shows whether it is right. In the first run on four sample posts, both readers answered all 27 questions correctly, and the specialist readers still found the defects that mattered (a title claiming equivalence from a non-difference, "measured" used for self-reported time, a causal "because" without a measurement).
+
 Re-run only the questions that failed, once. If the same question fails again, the problem is the structure of that section, not its wording: rewrite the section around the answer.
 
 ## 4. Report

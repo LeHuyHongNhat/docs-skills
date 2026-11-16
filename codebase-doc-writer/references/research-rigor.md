@@ -57,7 +57,7 @@ Forecasts and recommendations are opinions: label them ("I think", "mình nghĩ"
 
 Rules that go with the numbers:
 - **Significance ≠ importance.** Always give the effect size in real units next to the p-value or CI. A CI that barely excludes zero supports the direction, not the size.
-- **Absence of evidence.** An interval that includes zero means "could not tell", not "no difference". Say what sample would settle it.
+- **Absence of evidence.** An interval that includes zero means "could not tell", not "no difference" — and not "equal", "on par" or "ngang nhau" either. Say what sample would settle it.
 - **Percent vs percentage points; relative vs absolute.** Give both when they could be confused.
 - **Denominators.** Every percentage names what it is a percentage of.
 - **Outliers and exclusions.** State what was dropped and why, and whether the result survives without the exclusion.

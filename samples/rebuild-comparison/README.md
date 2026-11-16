@@ -2,7 +2,7 @@
 
 | Phiên bản | Ngày | Owner | Trạng thái |
 |---|---|---|---|
-| 1.1 | 2026-11-16 | Claude cho Le Nhat | Tự chấm, chưa có người chấm độc lập |
+| 1.2 | 2026-11-16 | Claude cho Le Nhat | Tự chấm, có thêm agent chấm độc lập; chưa có người chấm |
 
 > **Tóm tắt:** Ba bài thật về AI, quant và IT được dựng lại bằng `community-post-writer` có lớp research rigor. Theo rubric 12 tiêu chí (tối đa 24 điểm), bản dựng lại đạt 22–23 điểm, bản gốc đạt 10–16 điểm. Phép so sánh này **chưa đủ để kết luận skill viết tốt hơn**: chỉ có 3 cặp bài, người chấm cũng là người viết, và rubric đo cách trình bày bằng chứng chứ không đo độ hữu ích. Giá trị chính của đợt này là 8 lỗi thật mà quy trình bắt được, kể cả lỗi trong bài mẫu và trong chính các bản dựng lại.
 
@@ -103,6 +103,43 @@ Các mối đe dọa đối với kết luận:
 | Khác thể loại và mục đích: bài Discord là bài kể chuyện kỹ thuật, không phải báo cáo đo lường | Không xử lý được; cần đọc điểm của cặp 3 với lưu ý này |
 | Rubric đo cách trình bày bằng chứng, không đo độ hữu ích, độ dễ đọc hay mức thu hút | Ngoài phạm vi; xem mục 4 |
 
+## 3b. Chấm độc lập và reader test (bản 1.2)
+
+**Chấm độc lập.** Mỗi cặp bài được hai agent mới chấm theo cùng rubric (một agent dùng model Opus, một agent dùng Sonnet). Agent không được cho biết ai viết bài nào và thứ tự A/B được đảo giữa các cặp.
+
+| Cặp | Bài gốc | Bản dựng lại | Bài nào hữu ích hơn cho người làm nghề |
+|---|---|---|---|
+| 1. AI (METR) | Không chấm được: cả hai agent không tải được trang Medium | 24 và 24 | Không so được |
+| 2. Quant | 12 và 12 | 24 và 24 | Bản dựng lại (cả hai agent) |
+| 3. IT (Discord) | 12 và 12 | 24 và 24 | Một agent chọn bản dựng lại, một agent chấm hòa |
+
+Cách đọc kết quả này:
+- Hướng chênh lệch trùng với điểm tự chấm ở 2 cặp chấm được. Số cặp có điểm độc lập chỉ là 2, ít hơn cả 3 cặp ban đầu.
+- Cả sáu lượt chấm đều cho bản dựng lại điểm tối đa 24/24, cao hơn điểm tự chấm (22–23). Điểm tối đa đồng loạt là dấu hiệu rubric quá dễ đạt với bài được viết theo chính rubric đó, hoặc người chấm dễ dãi. Không nên đọc nó là "bài hoàn hảo": cùng lúc đó, người đọc phản biện ở phần dưới tìm ra nhiều lỗi thật trong chính các bài này.
+- Hai agent chấm vẫn cùng họ model với người viết. Chúng biết bài nào nằm ở file, bài nào ở web, và hai bài khác ngôn ngữ, nên đây không phải chấm mù hoàn toàn.
+- Bài gốc được agent đọc qua công cụ trích văn bản.
+
+Lỗi mà người chấm tìm thấy:
+- Trong bản dựng lại của cặp 3: liệt kê việc tăng cache như một yếu tố gây nhiễu, dù việc đó diễn ra sau phép so sánh; và nói bài gốc không nêu gì về phần cứng, trong khi một agent ghi nhận bài gốc có nhắc việc tăng bộ nhớ máy. Cả hai đã sửa.
+- Trong bài gốc của cặp 2: ghi "12 trên 97 biến không đạt mức tin cậy 95%", trong khi ngưỡng trong paper là t > 1,5.
+
+**Reader test.** Mỗi bài trong 4 bài mẫu được hai agent mới đọc: một người mới (model Haiku) và một người phản biện chuyên môn (model Opus). Mỗi agent chỉ có bài viết, trả lời 6–7 câu hỏi, trong đó có một câu mà bài không được phép trả lời được.
+
+| Kết quả | Số liệu |
+|---|---|
+| Câu trả lời đúng với đáp án dự kiến | 54 trên 54 (27 câu, 2 người đọc) |
+| Câu bẫy được trả lời "bài không nói" | 8 trên 8 |
+| Lỗi do người phản biện nêu và đã sửa | 17 |
+
+Người đọc trả lời đúng mọi câu hỏi, nhưng phần phản biện mới là phần có giá trị. Các lỗi đáng kể nhất:
+- Tiêu đề bài Viblo viết cắt theo heading "ngang" semantic chunking. Không thấy khác biệt không có nghĩa là ngang nhau; khoảng tin cậy của chênh lệch đó là −15 đến +19 điểm.
+- Bài METR khuyên "đo thời gian thật", trong khi thước đo của chính nghiên cứu là thời gian tự ghi.
+- Bài METR đặt con số 24% cạnh 19% mà không nói 24% thuộc một tập con.
+- Bài quant viết "có giảm là chắc" và "p = 0,000".
+- Bài Discord viết "điều đứng vững hơn là cơ chế", mâu thuẫn với bảng của chính bài, và có hai con số kích thước cache không khớp nhau.
+
+Cả `post_check.py --rigor` lẫn điểm rubric đều không bắt được các lỗi này.
+
 ## 4. Bản gốc làm tốt hơn ở đâu
 
 - **Bài Medium** ngắn hơn và có hướng dẫn hành động cụ thể cho team muốn tự đo. Bản dựng lại dài khoảng 1.000 âm tiết và chỉ có 3 gạch đầu dòng về hành động.
@@ -132,6 +169,7 @@ Các mối đe dọa đối với kết luận:
 
 ## 7. Việc nên làm tiếp
 
-1. Nhờ 1–2 người làm nghiên cứu (quant, data science) chấm mù 3 cặp bài theo rubric, không biết bài nào là bản dựng lại.
+1. Nhờ 1–2 người làm nghiên cứu (quant, data science) chấm mù 3 cặp bài theo rubric. Agent chấm cho điểm tối đa đồng loạt nên chưa thay được bước này.
+1. Siết rubric: mỗi tiêu chí cần ví dụ cho mức 1 và mức 2, và thêm tiêu chí "không có khẳng định nào mạnh hơn bằng chứng" do người phản biện kiểm.
 2. Chạy eval có skill và không có skill trên cùng nguồn, chấm bằng một model khác họ. Ba eval case đã sẵn trong `community-post-writer/evals/`, gồm case backtest mới.
 3. Mở rộng lên ít nhất 10 cặp bài chọn theo quy tắc định trước, để phép so sánh có đủ mẫu.

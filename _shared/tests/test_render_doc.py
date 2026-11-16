@@ -95,3 +95,22 @@ def test_labels_follow_document_language(tmp_path: Path) -> None:
     out = rd.to_xlsx(en, tmp_path / "e.xlsx", "DD", src, rd.Report())
     assert openpyxl.load_workbook(out).sheetnames == ["Index", "orders"]
     assert rd.doc_lang(en) == "en" and rd.doc_lang("# Tài liệu đặc tả yêu cầu nghiệp vụ") == "vi"
+
+
+def test_missing_bs4_is_reported_not_silent(monkeypatch, tmp_path: Path) -> None:
+    """Thiếu beautifulsoup4 thì phải có cảnh báo, không lặng lẽ bỏ KPI tile và mobile card."""
+    import builtins
+
+    real_import = builtins.__import__
+
+    def fake_import(name: str, *args, **kwargs):
+        if name == "bs4":
+            raise ImportError("no bs4")
+        return real_import(name, *args, **kwargs)
+
+    monkeypatch.setattr(builtins, "__import__", fake_import)
+    out = tmp_path / "x.html"
+    out.write_text("<html><body><table></table></body></html>", encoding="utf-8")
+    rep = rd.Report()
+    rd._post_html(out, False, rep)
+    assert any("beautifulsoup4" in w for w in rep.warnings)

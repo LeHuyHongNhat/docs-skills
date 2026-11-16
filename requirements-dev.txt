@@ -1,0 +1,6 @@
+# What CI installs. The scripts themselves degrade with a warning when an optional package is missing.
+pytest
+pyyaml
+openpyxl
+beautifulsoup4
+python-docx

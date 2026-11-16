@@ -261,7 +261,7 @@ def to_html(md: str, src: Path, out: Path, toc: bool, title: str, rep: Report, m
     if r.returncode != 0:
         rep.warnings.append(f"pandoc HTML error: {r.stderr[-300:]}")
         return None
-    _post_html(out, mobile)
+    _post_html(out, mobile, rep)
     return out
 
 
@@ -319,11 +319,14 @@ def _comparison_helpers(soup) -> None:
                 strong["class"] = (strong.get("class") or []) + ["kpi-value"]
 
 
-def _post_html(path: Path, mobile: bool = False) -> None:
+def _post_html(path: Path, mobile: bool = False, rep: Report | None = None) -> None:
     """Mark wide tables (≥ 7 columns) so CSS shrinks them; wrap diagrams in figures."""
     try:
         from bs4 import BeautifulSoup
     except ImportError:
+        if rep is not None:
+            rep.warnings.append("beautifulsoup4 not installed: KPI tiles, comparison marks, wide-table "
+                                "handling and mobile cards are skipped (pip install beautifulsoup4).")
         return
     soup = BeautifulSoup(path.read_text(encoding="utf-8"), "html.parser")
     for t in soup.find_all("table"):
